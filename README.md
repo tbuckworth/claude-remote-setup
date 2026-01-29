@@ -196,14 +196,65 @@ echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.bashrc
 source ~/.bashrc
 ```
 
+## Plugins
+
+Custom Claude Code plugins are included in the `plugins/` directory and automatically installed during setup.
+
+### Custom Plugins
+
+| Plugin | Type | Description |
+|--------|------|-------------|
+| `assumption-debugger` | Agent | Socratic debugging -- questions assumptions before looking at code |
+| `best-practices-validator` | Agent | Validates implementation approach against official docs |
+| `commit-often` | Hook (Stop) | Blocks session exit if there are uncommitted changes |
+| `doc-cross-checker` | Agent | Cross-references code against official library documentation |
+| `refactoring-radar` | Agent | Suggests refactoring opportunities without being pedantic |
+| `review-changes` | Agent + Hook | Code review agent with automatic post-commit advisory review |
+
+### Marketplace Plugins
+
+These are installed via `claude plugin install` during setup:
+
+- **plugin-dev** -- Plugin development tools
+- **code-simplifier** -- Simplifies and refines code
+- **context7** -- Up-to-date library documentation lookup
+
+### Updating Plugins
+
+After editing plugins locally on your Mac:
+
+```bash
+# On Mac: push plugin changes
+cd ~/pyg/claude-remote-setup
+git add -A && git commit -m "update plugins" && git push
+
+# On remote: one command
+update-plugins
+```
+
+The `update-plugins` alias runs `cd ~/claude-remote-setup && git pull && ./setup-plugins.sh`.
+
+### Manual Plugin Setup
+
+To install plugins on a machine without running the full server setup:
+
+```bash
+git clone https://github.com/tbuckworth/claude-remote-setup.git
+cd claude-remote-setup
+./setup-plugins.sh
+```
+
 ## Files
 
 | File | Description |
 |------|-------------|
 | `setup-server.sh` | Main provisioning script (run manually) |
+| `setup-plugins.sh` | Deploy plugins to `~/.claude/plugins/` |
 | `start-session.sh` | Start/attach to Claude Code tmux session |
 | `backup-to-s3.sh` | Sync workspace to S3 bucket |
 | `ec2-user-data.sh` | Cloud-init script for EC2 auto-setup |
+| `plugins/` | Custom Claude Code plugins (6 plugins) |
+| `config/settings.json` | Portable Claude settings (marketplace plugins) |
 
 ## Security Notes
 

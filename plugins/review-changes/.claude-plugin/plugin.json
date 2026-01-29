@@ -1,0 +1,5 @@
+{
+  "name": "review-changes",
+  "version": "1.0.0",
+  "description": "Code review agent with pre-push hook"
+}

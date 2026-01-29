@@ -93,6 +93,15 @@ fi
 SCRIPT
 chmod +x ~/start-session.sh
 
+# Clone repo and install plugins
+if [ ! -d ~/claude-remote-setup ]; then
+    git clone https://github.com/tbuckworth/claude-remote-setup.git ~/claude-remote-setup 2>/dev/null || echo "WARN: Could not clone repo, plugins not installed"
+fi
+
+if [ -f ~/claude-remote-setup/setup-plugins.sh ]; then
+    bash ~/claude-remote-setup/setup-plugins.sh
+fi
+
 # Configure bashrc
 cat >> ~/.bashrc << 'EOF'
 
@@ -102,6 +111,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 alias cs='~/start-session.sh'
 alias ll='ls -alF'
+
+# Update plugins from repo
+alias update-plugins='cd ~/claude-remote-setup && git pull && ./setup-plugins.sh'
 EOF
 
 USERSCRIPT

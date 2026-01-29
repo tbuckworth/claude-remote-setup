@@ -1,0 +1,5 @@
+{
+  "name": "refactoring-radar",
+  "version": "1.0.0",
+  "description": "Suggests refactoring opportunities after code changes"
+}

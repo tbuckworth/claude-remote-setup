@@ -1,0 +1,5 @@
+{
+  "name": "commit-often",
+  "version": "1.0.0",
+  "description": "Reminds to commit before session end"
+}

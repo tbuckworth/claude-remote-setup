@@ -1,0 +1,5 @@
+{
+  "name": "doc-cross-checker",
+  "version": "1.0.0",
+  "description": "Compares code against official documentation"
+}

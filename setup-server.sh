@@ -141,6 +141,9 @@ alias cs='~/start-session.sh'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+# Update plugins from repo
+alias update-plugins='cd ~/claude-remote-setup && git pull && ./setup-plugins.sh'
 EOF
 
 # Copy start-session.sh to home directory if it exists in current dir
@@ -148,6 +151,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/start-session.sh" ]; then
     cp "$SCRIPT_DIR/start-session.sh" ~/start-session.sh
     chmod +x ~/start-session.sh
+fi
+
+# Install Claude Code plugins
+log_info "Setting up Claude Code plugins..."
+if [ -f "$SCRIPT_DIR/setup-plugins.sh" ]; then
+    bash "$SCRIPT_DIR/setup-plugins.sh"
+else
+    log_warn "setup-plugins.sh not found, skipping plugin setup"
 fi
 
 # Print next steps
