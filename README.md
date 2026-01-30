@@ -210,6 +210,7 @@ Custom Claude Code plugins are included in the `plugins/` directory and automati
 | `doc-cross-checker` | Agent | Cross-references code against official library documentation |
 | `refactoring-radar` | Agent | Suggests refactoring opportunities without being pedantic |
 | `review-changes` | Agent + Hook | Code review agent with automatic post-commit advisory review |
+| `branch-guard` | Hook (PreToolUse) | Blocks Edit/Write/NotebookEdit on main/master -- forces feature branches |
 
 ### Marketplace Plugins
 
@@ -253,7 +254,7 @@ cd claude-remote-setup
 | `start-session.sh` | Start/attach to Claude Code tmux session |
 | `backup-to-s3.sh` | Sync workspace to S3 bucket |
 | `ec2-user-data.sh` | Cloud-init script for EC2 auto-setup |
-| `plugins/` | Custom Claude Code plugins (6 plugins) |
+| `plugins/` | Custom Claude Code plugins (7 plugins) |
 | `config/settings.json` | Portable Claude settings (marketplace plugins) |
 
 ## Security Notes

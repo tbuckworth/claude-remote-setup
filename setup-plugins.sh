@@ -35,6 +35,7 @@ CUSTOM_PLUGINS=(
     "doc-cross-checker"
     "refactoring-radar"
     "review-changes"
+    "branch-guard"
 )
 
 for plugin in "${CUSTOM_PLUGINS[@]}"; do
