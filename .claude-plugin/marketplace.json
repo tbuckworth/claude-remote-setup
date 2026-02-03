@@ -1,0 +1,60 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "custom-plugins",
+  "description": "Custom productivity and quality plugins for Claude Code",
+  "owner": {
+    "name": "Titus",
+    "email": "titus@pyg.dev"
+  },
+  "plugins": [
+    {
+      "name": "assumption-debugger",
+      "description": "Socratic debugging agent that questions assumptions",
+      "version": "1.0.0",
+      "source": "./plugins/assumption-debugger",
+      "category": "development"
+    },
+    {
+      "name": "best-practices-validator",
+      "description": "Validates implementation approach against official docs",
+      "version": "1.0.0",
+      "source": "./plugins/best-practices-validator",
+      "category": "development"
+    },
+    {
+      "name": "branch-guard",
+      "description": "Blocks code changes on main/master -- forces feature branches",
+      "version": "1.0.0",
+      "source": "./plugins/branch-guard",
+      "category": "productivity"
+    },
+    {
+      "name": "commit-often",
+      "description": "Reminds to commit before session end",
+      "version": "1.0.0",
+      "source": "./plugins/commit-often",
+      "category": "productivity"
+    },
+    {
+      "name": "doc-cross-checker",
+      "description": "Compares code against official documentation",
+      "version": "1.0.0",
+      "source": "./plugins/doc-cross-checker",
+      "category": "development"
+    },
+    {
+      "name": "refactoring-radar",
+      "description": "Suggests refactoring opportunities after code changes",
+      "version": "1.0.0",
+      "source": "./plugins/refactoring-radar",
+      "category": "development"
+    },
+    {
+      "name": "review-changes",
+      "description": "Code review agent with pre-push hook",
+      "version": "1.0.0",
+      "source": "./plugins/review-changes",
+      "category": "productivity"
+    }
+  ]
+}
