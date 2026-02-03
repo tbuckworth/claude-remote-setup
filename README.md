@@ -212,6 +212,45 @@ Custom Claude Code plugins are included in the `plugins/` directory and automati
 | `review-changes` | Agent + Hook | Code review agent with automatic post-commit advisory review |
 | `branch-guard` | Hook (PreToolUse) | Blocks Edit/Write/NotebookEdit on main/master -- forces feature branches |
 
+### Plugin Hooks
+
+This repo includes agent-based hooks that provide automated code quality checks.
+
+#### Active Hooks
+
+| Hook | Event | Behavior |
+|------|-------|----------|
+| branch-guard | PreToolUse (Edit/Write) | Blocks code edits on main/master |
+| commit-often | Stop | Warns if uncommitted changes exist |
+| review-changes | PostToolUse (Bash) | Reviews git commits automatically |
+| refactoring-radar | PostToolUse (Edit) | Suggests refactoring after edits |
+| assumption-debugger | PostToolUseFailure | Provides debugging guidance on errors |
+| best-practices-validator | SubagentStop (Plan) | Validates plans against best practices |
+| doc-cross-checker | SubagentStop (Plan) | Checks library usage in plans |
+
+#### Hook Types
+
+Claude Code supports three hook types:
+- `command` - Shell script (used for branch-guard, commit-often)
+- `prompt` - Single-turn LLM call without tool access
+- `agent` - Multi-turn subagent WITH tool access (Read, Grep, Glob, Bash)
+
+#### Known Issues & Workarounds
+
+1. **Plugin hooks.json doesn't work** (Issue #14410)
+   - Hooks defined in plugin `hooks.json` files don't execute
+   - Workaround: Define hooks directly in `~/.claude/settings.json`
+   - The `setup-plugins.sh` script handles this automatically
+
+2. **Hook script needs absolute file path**
+   - PreToolUse hooks receive tool input as JSON on stdin
+   - For Edit/Write, the file path is at `.tool_input.file_path`
+   - Original branch-guard checked cwd (wrong) - fixed to check file's repo
+
+3. **Prompt hooks can't spawn agents**
+   - `type: "prompt"` hooks only do single-turn LLM calls
+   - Use `type: "agent"` for hooks that need tool access
+
 ### Marketplace Plugins
 
 These are installed via `claude plugin install` during setup:
