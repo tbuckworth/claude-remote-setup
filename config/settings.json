@@ -2,6 +2,47 @@
   "enabledPlugins": {
     "plugin-dev@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
-    "context7@claude-plugins-official": true
+    "context7@claude-plugins-official": true,
+    "assumption-debugger@custom-plugins": true,
+    "best-practices-validator@custom-plugins": true,
+    "branch-guard@custom-plugins": true,
+    "commit-often@custom-plugins": true,
+    "doc-cross-checker@custom-plugins": true,
+    "refactoring-radar@custom-plugins": true,
+    "review-changes@custom-plugins": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__PLUGINS_CACHE__/branch-guard/1.0.0/hooks/check-branch.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if this Bash command was a git commit (the command starts with 'git commit' or contains '&& git commit' or similar). If NOT a git commit, respond with just 'approve'. If it IS a git commit: spawn a fresh review-changes agent (using the Task tool with subagent_type 'review-changes') to review the commit just made. Tell the agent to use 'git diff HEAD~1..HEAD' to see the changes in the most recent commit. Wait for the agent to complete. This is ADVISORY MODE - always respond with 'approve' regardless of findings. Include a brief summary of any issues found so the main agent is aware, but do not block the workflow."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "__PLUGINS_CACHE__/commit-often/1.0.0/hooks/check-uncommitted.sh"
+          }
+        ]
+      }
+    ]
   }
 }
