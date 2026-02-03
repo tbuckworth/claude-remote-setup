@@ -29,12 +29,12 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "A Plan agent just completed. You are a best-practices validator.\n\nReview the plan that was created:\n1. What approach/architecture is proposed?\n2. What libraries/frameworks will be used?\n3. Are there any best-practice concerns?\n\nReturn { \"ok\": true, \"additionalContext\": \"## Best Practices Check\\n<your brief review>\" }\n\nBe concise - 2-3 bullet points max. Focus on actionable concerns, not nitpicks.",
+            "prompt": "Plan agent output: $ARGUMENTS\n\nYou are a best-practices validator. Review the plan that was created:\n1. What approach/architecture is proposed?\n2. What libraries/frameworks will be used?\n3. Are there any best-practice concerns?\n\nReturn { \"ok\": true, \"additionalContext\": \"## Best Practices Check\\n<your brief review>\" }\n\nBe concise - 2-3 bullet points max. Focus on actionable concerns, not nitpicks.",
             "timeout": 60
           },
           {
             "type": "agent",
-            "prompt": "A Plan agent just completed. You are a documentation cross-checker.\n\nReview the plan for library/API usage:\n1. What libraries/APIs does the plan use?\n2. Are there any deprecated APIs or outdated patterns?\n3. Any common pitfalls to watch for?\n\nReturn { \"ok\": true, \"additionalContext\": \"## Doc Check\\n<your brief review>\" }\n\nBe concise - 2-3 bullet points max. Only flag real concerns.",
+            "prompt": "Plan agent output: $ARGUMENTS\n\nYou are a documentation cross-checker. Review the plan for library/API usage:\n1. What libraries/APIs does the plan use?\n2. Are there any deprecated APIs or outdated patterns?\n3. Any common pitfalls to watch for?\n\nReturn { \"ok\": true, \"additionalContext\": \"## Doc Check\\n<your brief review>\" }\n\nBe concise - 2-3 bullet points max. Only flag real concerns.",
             "timeout": 60
           }
         ]
@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "Check if this Bash command was a git commit (look for 'git commit' in the command).\n\nIf NOT a git commit: return { \"ok\": true } immediately.\n\nIf IS a git commit:\n1. Run `git diff HEAD~1..HEAD` to see what changed\n2. Review for: bugs, security issues, code quality problems\n3. Return { \"ok\": true, \"additionalContext\": \"## Commit Review\\n<findings>\" }\n\nAlways return ok:true (advisory mode). Keep review concise.",
+            "prompt": "Hook input: $ARGUMENTS\n\nCheck if this Bash command was a git commit (look for 'git commit' in the command).\n\nIf NOT a git commit: return { \"ok\": true } immediately.\n\nIf IS a git commit:\n1. Run `git diff HEAD~1..HEAD` to see what changed\n2. Review for: bugs, security issues, code quality problems\n3. Return { \"ok\": true, \"additionalContext\": \"## Commit Review\\n<findings>\" }\n\nAlways return ok:true (advisory mode). Keep review concise.",
             "timeout": 120
           }
         ]
@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "You are a refactoring radar. Check the Edit tool input:\n\n1. If file is config/docs (*.json, *.md, *.yml, etc): return { \"ok\": true } immediately\n2. If code file: quickly scan for obvious issues:\n   - Long functions (>50 lines)\n   - Deep nesting (>4 levels)\n   - Duplicated code patterns\n3. Return { \"ok\": true, \"additionalContext\": \"Refactoring note: <brief note or 'looks good'>\" }\n\nBe VERY concise. Don't block.",
+            "prompt": "Hook input: $ARGUMENTS\n\nYou are a refactoring radar. Check the Edit tool input:\n\n1. If file is config/docs (*.json, *.md, *.yml, etc): return { \"ok\": true } immediately\n2. If code file: quickly scan for obvious issues:\n   - Long functions (>50 lines)\n   - Deep nesting (>4 levels)\n   - Duplicated code patterns\n3. Return { \"ok\": true, \"additionalContext\": \"Refactoring note: <brief note or 'looks good'>\" }\n\nBe VERY concise. Don't block.",
             "timeout": 30
           }
         ]
@@ -67,7 +67,7 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "A tool just failed. You are an assumption-debugging coach.\n\n1. Look at what failed and why\n2. Question the assumptions that led to this failure\n3. Suggest a systematic debugging approach\n4. Return { \"ok\": true, \"additionalContext\": \"## Debug Suggestion\\nAssumption to question: <what might be wrong>\\nNext step: <what to try>\" }\n\nKeep it brief and actionable.",
+            "prompt": "Hook input: $ARGUMENTS\n\nA tool just failed. You are an assumption-debugging coach.\n\n1. Look at what failed and why\n2. Question the assumptions that led to this failure\n3. Suggest a systematic debugging approach\n4. Return { \"ok\": true, \"additionalContext\": \"## Debug Suggestion\\nAssumption to question: <what might be wrong>\\nNext step: <what to try>\" }\n\nKeep it brief and actionable.",
             "timeout": 30
           }
         ]

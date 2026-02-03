@@ -1,6 +1,5 @@
 #!/bin/bash
 # setup-plugins.sh - Install Claude Code plugins via marketplace system
-# Test commit for hook verification
 # Can be run standalone or called from setup-server.sh
 #
 # Custom plugins are installed from the local marketplace in this repo.
