@@ -1,13 +1,15 @@
 {
-  "PostToolUse": [
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Check if this Bash command was a git commit (the command starts with 'git commit' or contains '&& git commit' or similar). If NOT a git commit, respond with just 'approve'. If it IS a git commit: spawn a fresh review-changes agent (using the Task tool with subagent_type 'review-changes') to review the commit just made. Tell the agent to use 'git diff HEAD~1..HEAD' to see the changes in the most recent commit. Wait for the agent to complete. This is ADVISORY MODE - always respond with 'approve' regardless of findings. Include a brief summary of any issues found so the main agent is aware, but do not block the workflow."
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if this Bash command was a git commit (the command starts with 'git commit' or contains '&& git commit' or similar). If NOT a git commit, respond with just 'approve'. If it IS a git commit: spawn a fresh review-changes agent (using the Task tool with subagent_type 'review-changes') to review the commit just made. Tell the agent to use 'git diff HEAD~1..HEAD' to see the changes in the most recent commit. Wait for the agent to complete. This is ADVISORY MODE - always respond with 'approve' regardless of findings. Include a brief summary of any issues found so the main agent is aware, but do not block the workflow."
+          }
+        ]
+      }
+    ]
+  }
 }
