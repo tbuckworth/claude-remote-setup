@@ -49,6 +49,7 @@ STALE_DIRS=(
     "branch-guard"
     "commit-often"
     "doc-cross-checker"
+    "pre-mortem"
     "refactoring-radar"
     "review-changes"
 )
@@ -68,6 +69,7 @@ CUSTOM_PLUGINS=(
     "branch-guard"
     "commit-often"
     "doc-cross-checker"
+    "pre-mortem"
     "refactoring-radar"
     "review-changes"
 )
@@ -113,48 +115,13 @@ else
     log_warn "No settings.json found in config/ (skipping)"
 fi
 
-# --- Step 6: Inject hooks into settings.json (workaround for plugin hooks bug) ---
-# Plugin-defined hooks in hooks.json don't execute (claude-code issue #14410).
-# Work around this by writing them directly into ~/.claude/settings.json.
+# --- Step 6: Ensure hook scripts are executable ---
 PLUGINS_CACHE="$HOME/.claude/plugins/cache/custom-plugins"
 
-log_info "Injecting hook definitions into settings.json (plugin hooks bug workaround)..."
-
-if [ -f "$SETTINGS_SRC" ]; then
-    # Resolve __PLUGINS_CACHE__ placeholder to actual path
-    RESOLVED=$(sed "s|__PLUGINS_CACHE__|$PLUGINS_CACHE|g" "$SETTINGS_SRC")
-
-    if command -v jq &> /dev/null; then
-        # jq available: deep-merge resolved template into existing settings
-        # This preserves any user-added keys in settings.json
-        echo "$RESOLVED" | jq -s '.[0] * .[1]' "$SETTINGS_DEST" - > /tmp/claude-settings-merged.json \
-            && mv /tmp/claude-settings-merged.json "$SETTINGS_DEST"
-        log_info "Hooks merged into $SETTINGS_DEST (via jq)"
-    elif command -v python3 &> /dev/null; then
-        # Fallback: python3 deep merge
-        python3 -c "
-import json, sys
-with open('$SETTINGS_DEST') as f:
-    existing = json.load(f)
-incoming = json.loads(sys.stdin.read())
-existing.update(incoming)
-with open('$SETTINGS_DEST', 'w') as f:
-    json.dump(existing, f, indent=2)
-    f.write('\n')
-" <<< "$RESOLVED"
-        log_info "Hooks merged into $SETTINGS_DEST (via python3)"
-    else
-        # Last resort: overwrite with resolved template
-        log_warn "Neither jq nor python3 found; overwriting settings.json with resolved template"
-        echo "$RESOLVED" > "$SETTINGS_DEST"
-    fi
-else
-    log_warn "Cannot inject hooks: $SETTINGS_SRC not found"
-fi
-
-# Ensure hook scripts are executable
+log_info "Setting hook script permissions..."
 chmod +x "$PLUGINS_CACHE/branch-guard/1.0.0/hooks/check-branch.sh" 2>/dev/null || true
 chmod +x "$PLUGINS_CACHE/commit-often/1.0.0/hooks/check-uncommitted.sh" 2>/dev/null || true
+chmod +x "$PLUGINS_CACHE/review-changes/1.0.0/hooks/review-commit.sh" 2>/dev/null || true
 
 # --- Done ---
 echo ""

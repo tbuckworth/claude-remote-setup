@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "prompt",
+            "model": "claude-opus-4-6",
+            "prompt": "A Plan agent completed. Check for potential library/API misuse: deprecated methods, incorrect usage patterns. Respond: {\"ok\": true} if fine, or {\"ok\": false, \"reason\": \"brief concern\"} if issues found. $ARGUMENTS",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "prompt",
+            "model": "claude-opus-4-6",
+            "prompt": "A Plan agent completed. Quick review: any anti-patterns, security concerns, or missing error handling? Respond: {\"ok\": true} if fine, or {\"ok\": false, \"reason\": \"brief concern\"} if issues found. $ARGUMENTS",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

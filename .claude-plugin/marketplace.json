@@ -55,6 +55,13 @@
       "version": "1.0.0",
       "source": "./plugins/review-changes",
       "category": "productivity"
+    },
+    {
+      "name": "pre-mortem",
+      "description": "Pre-mortem risk analysis agent for plans and proposals",
+      "version": "1.0.0",
+      "source": "./plugins/pre-mortem",
+      "category": "development"
     }
   ]
 }

@@ -200,56 +200,21 @@ source ~/.bashrc
 
 Custom Claude Code plugins are included in the `plugins/` directory and automatically installed during setup.
 
-### Custom Plugins
+### Custom Plugins (8)
 
-| Plugin | Type | Description |
-|--------|------|-------------|
-| `assumption-debugger` | Agent | Socratic debugging -- questions assumptions before looking at code |
-| `best-practices-validator` | Agent | Validates implementation approach against official docs |
-| `commit-often` | Hook (Stop) | Blocks session exit if there are uncommitted changes |
-| `doc-cross-checker` | Agent | Cross-references code against official library documentation |
-| `refactoring-radar` | Agent | Suggests refactoring opportunities without being pedantic |
-| `review-changes` | Agent + Hook | Code review agent with automatic post-commit advisory review |
-| `branch-guard` | Hook (PreToolUse) | Blocks Edit/Write/NotebookEdit on main/master -- forces feature branches |
+| Plugin | Agent | Hook Event | Hook Type | Description |
+|--------|:-----:|------------|-----------|-------------|
+| `assumption-debugger` | Y | SubagentStop:Plan | prompt | Socratic debugging -- questions assumptions |
+| `best-practices-validator` | Y | SubagentStop:Plan | prompt | Validates approach against official docs |
+| `branch-guard` | - | PreToolUse:Edit/Write | command | Blocks edits on main/master |
+| `commit-often` | - | Stop | command | Warns about uncommitted changes |
+| `doc-cross-checker` | Y | SubagentStop:Plan | prompt | Cross-references library documentation |
+| `pre-mortem` | Y | SubagentStop:Plan | prompt | Pre-mortem risk analysis for plans |
+| `refactoring-radar` | Y | - | - | Suggests refactoring opportunities |
+| `review-changes` | Y | PostToolUse:Bash | command | Automatic post-commit review |
 
-### Plugin Hooks
-
-This repo includes agent-based hooks that provide automated code quality checks.
-
-#### Active Hooks
-
-| Hook | Event | Behavior |
-|------|-------|----------|
-| branch-guard | PreToolUse (Edit/Write) | Blocks code edits on main/master |
-| commit-often | Stop | Warns if uncommitted changes exist |
-| review-changes | PostToolUse (Bash) | Reviews git commits automatically |
-| refactoring-radar | PostToolUse (Edit) | Suggests refactoring after edits |
-| assumption-debugger | PostToolUseFailure | Provides debugging guidance on errors |
-| best-practices-validator | SubagentStop (Plan) | Validates plans against best practices |
-| doc-cross-checker | SubagentStop (Plan) | Checks library usage in plans |
-
-#### Hook Types
-
-Claude Code supports three hook types:
-- `command` - Shell script (used for branch-guard, commit-often)
-- `prompt` - Single-turn LLM call without tool access
-- `agent` - Multi-turn subagent WITH tool access (Read, Grep, Glob, Bash)
-
-#### Known Issues & Workarounds
-
-1. **Plugin hooks.json doesn't work** (Issue #14410)
-   - Hooks defined in plugin `hooks.json` files don't execute
-   - Workaround: Define hooks directly in `~/.claude/settings.json`
-   - The `setup-plugins.sh` script handles this automatically
-
-2. **Hook script needs absolute file path**
-   - PreToolUse hooks receive tool input as JSON on stdin
-   - For Edit/Write, the file path is at `.tool_input.file_path`
-   - Original branch-guard checked cwd (wrong) - fixed to check file's repo
-
-3. **Prompt hooks can't spawn agents**
-   - `type: "prompt"` hooks only do single-turn LLM calls
-   - Use `type: "agent"` for hooks that need tool access
+4 plugins fire as parallel SubagentStop:Plan validators whenever a Plan agent completes.
+See [`docs/hook-flow.md`](docs/hook-flow.md) for the full flow diagram.
 
 ### Marketplace Plugins
 
@@ -293,7 +258,8 @@ cd claude-remote-setup
 | `start-session.sh` | Start/attach to Claude Code tmux session |
 | `backup-to-s3.sh` | Sync workspace to S3 bucket |
 | `ec2-user-data.sh` | Cloud-init script for EC2 auto-setup |
-| `plugins/` | Custom Claude Code plugins (7 plugins) |
+| `plugins/` | Custom Claude Code plugins (8 plugins) |
+| `docs/hook-flow.md` | Plugin hook flow diagram |
 | `config/settings.json` | Portable Claude settings (marketplace plugins) |
 
 ## Security Notes

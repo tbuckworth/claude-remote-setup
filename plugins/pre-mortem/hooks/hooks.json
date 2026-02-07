@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "prompt",
+            "model": "claude-opus-4-6",
+            "prompt": "A Plan agent completed. Identify the single most likely failure mode if this plan is implemented as-is. Think about unstated assumptions, missing error handling, integration risks, and edge cases. If the plan looks solid, respond: {\"ok\": true}. If you find a significant risk, respond: {\"ok\": false, \"reason\": \"Risk: <specific failure scenario>. Mitigation: <concrete action>\"}. $ARGUMENTS",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
