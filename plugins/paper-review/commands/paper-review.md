@@ -125,6 +125,19 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 
 **Goal**: Test comprehension at progressively higher cognitive levels. 6 questions, no adaptive difficulty.
 
+0. **Paper context header** (IMPORTANT: display this before any quiz questions):
+   - Resolve the current paper via `resolve_citation.py` (using its arXiv ID or title from review-state.json) to get citation count, year, and author affiliations. If resolution takes >10s, skip citation count and proceed.
+   - Read `database.json` to cross-reference authors
+   - Present:
+     ```
+     **<Full Paper Title>**
+     Lead authors: <first 2-3 authors> (<affiliation>) | Senior: <last 1-2 authors> (<affiliation>)
+     <year> | <venue or "arXiv preprint"> | <citation_count> citations
+     Database connections: <authors who appear as lead/senior author on other reviewed papers>
+     ```
+   - For author cross-referencing: only highlight connections where the shared author is first, second, or last author on both papers. If an author appears in >4 database papers, their presence is expected — don't highlight.
+   - If the paper has notable endorsers visible in the PDF text, mention them.
+
 1. Load question stems from `${CLAUDE_PLUGIN_ROOT}/skills/learning-science/references/blooms-taxonomy.md`
 
 2. Use the PDF text extracted in the foreground step. If `papers/<slug>/stage1-notes.json` exists (i.e., Stage 1 ran first for URL sources), use identified themes and gaps to inform question selection.
@@ -180,23 +193,34 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
    uv run --python 3.12 --with PyMuPDF ${CLAUDE_PLUGIN_ROOT}/scripts/extract_citations.py <pdf-path>
    ```
 3. Parse the citation JSON output
-4. Cross-reference with highlights — resolve **top 3-5** citations from highlighted text
-5. For each prioritized citation, resolve metadata:
+4. Cross-reference with highlights — identify **top 3-5** citations from highlighted text
+5. For each prioritized citation, resolve metadata **sequentially** (not in parallel — wait for each to complete before starting the next):
    ```
    uv run --python 3.12 --with httpx ${CLAUDE_PLUGIN_ROOT}/scripts/resolve_citation.py --doi <doi>
    ```
    or `--arxiv <id>` or `--title "<title>"`
-6. Present resolved citations and ask in a **single prompt** which to add to reading list
+6. Read `database.json` and build an author index: map each author name → list of papers they appear in (as lead/senior author only — first, second, or last position in the authors array)
+7. For each resolved citation, cross-reference its authors against the author index. Only note overlaps where the shared author is a lead/senior author on both papers and appears in fewer than 4 database papers.
+8. Assess thematic relevance: compare each citation's title/abstract against the tags and topics of reviewed papers in the database.
+9. Present enriched citations sorted by relevance:
+   ```
+   N. <First Author> et al. (<year>) — "<title>" (<citation_count> citations)
+      Authors: <author1> (<affiliation>), <author2> (<affiliation>)
+      [if database connection]: Also lead author on: <paper title>
+      Relevance: <1-2 sentence assessment of thematic fit>
+   ```
+10. Recommend which are most impactful based on: citation count, thematic overlap, and author connections.
+11. Ask in a **single prompt** which to add to reading list.
 
 ### Add papers to reMarkable
-7. For selected papers with available PDFs (arXiv papers):
-   - Download: `curl -L -o /Users/titus/pyg/paper-review/papers/<new-slug>.pdf "https://arxiv.org/pdf/<arxiv_id>"`
-   - Upload: `rmapi put /Users/titus/pyg/paper-review/papers/<new-slug>.pdf "To Quiz/"`
-8. Add all selected papers to database.json with `status: "to_read"` and `source_paper_id` pointing to current paper
+12. For selected papers with available PDFs (arXiv papers):
+    - Download: `curl -L -o /Users/titus/pyg/paper-review/papers/<new-slug>.pdf "https://arxiv.org/pdf/<arxiv_id>"`
+    - Upload: `rmapi put /Users/titus/pyg/paper-review/papers/<new-slug>.pdf "To Quiz/"`
+13. Add all selected papers to database.json with `status: "to_read"` and `source_paper_id` pointing to current paper
 
 ### Action items
-9. Ask the user if they have any action items from this paper via `AskUserQuestion`
-10. For each action item, create a GitHub issue with intelligent labels:
+14. Ask the user if they have any action items from this paper via `AskUserQuestion`
+15. For each action item, create a GitHub issue with intelligent labels:
 
     **Always**: `source:claude`, `section:work`
     **Action** (infer from content):
@@ -219,7 +243,7 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
     ```
 
 ### Write review summary
-11. Write `/Users/titus/pyg/paper-review/reviews/YYYY-MM-DD-<slug>.md`:
+16. Write `/Users/titus/pyg/paper-review/reviews/YYYY-MM-DD-<slug>.md`:
     ```markdown
     # <Paper Title>
 
@@ -249,11 +273,11 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
     ```
 
 ### Update database with SM-2
-12. Read `/Users/titus/pyg/paper-review/database.json`
-13. Compute quiz percentage: `pct = total_correct / total_asked * 100`
-14. Map to SM-2 quality:
+17. Read `/Users/titus/pyg/paper-review/database.json`
+18. Compute quiz percentage: `pct = total_correct / total_asked * 100`
+19. Map to SM-2 quality:
     - 90-100% -> q=5, 70-89% -> q=4, 50-69% -> q=3, 30-49% -> q=2, 10-29% -> q=1, 0-9% -> q=0
-15. Update SM-2 state:
+20. Update SM-2 state:
     ```
     EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02))
     EF  = max(EF', 1.3)
@@ -269,21 +293,21 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 
     next_review = today + interval days
     ```
-16. Write updated paper entry with: `easiness_factor`, `interval_days`, `repetition_number`, `quality_history` (append q), `next_review`, quiz results, review date
-17. Write updated database.json
+21. Write updated paper entry with: `easiness_factor`, `interval_days`, `repetition_number`, `quality_history` (append q), `next_review`, quiz results, review date
+22. Write updated database.json
 
 ### Archive on reMarkable
-18. Archive the paper from whichever folder it came from (check `remarkable_folder` in review-state.json):
+23. Archive the paper from whichever folder it came from (check `remarkable_folder` in review-state.json):
     ```
     rmapi mv "<remarkable_folder>/<name>" "Archive/"
     ```
     If Archive doesn't exist, create it: `rmapi mkdir Archive`
 
 ### Cleanup
-19. Remove intermediate files: `review-state.json`, `stage1-notes.json`, `stage2-quiz.json` from `papers/<slug>/`
+24. Remove intermediate files: `review-state.json`, `stage1-notes.json`, `stage2-quiz.json` from `papers/<slug>/`
 
 ### Git commit
-20. Stage and commit review files:
+25. Stage and commit review files:
     ```
     cd /Users/titus/pyg/paper-review && git add reviews/ database.json && git commit -m "Review: <paper-title>"
     ```
@@ -299,17 +323,30 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 2. Parse the JSON output — this is the priority queue of papers where `next_review <= today`
 3. If empty: "No papers due for review today." -> skip to Stage 5
 4. For each paper in priority order:
-   a. Show brief context: title, last score, days since review, weak Bloom's levels
-   b. Read the paper's review markdown file to refresh context on key insights and weak areas
-   c. Ask **3-5 targeted questions** focused on:
+   a. Show paper metadata header:
+      ```
+      **<Full Paper Title>**
+      <Lead authors (first 2-3)> (<org>) | <year>
+      Also by these authors: <other database papers by the same lead/senior authors, if any>
+      Last score: X/Y | Days since review: N | Weak: [levels]
+      ```
+      Build this from `database.json` only (no API calls). Match authors by last name + first initial to handle format variations.
+   b. Read the paper's review markdown file to refresh context on key insights and weak areas. If no review file exists, use `summary` and `key_insights` from `database.json`.
+   c. **Metadata warm-up (1 MCQ)**: Before content questions, ask **1 metadata MCQ** via `AskUserQuestion`. Pick one at random:
+      - "What year was this paper published?" — 4 year choices (correct + 3 plausible nearby years from other database papers)
+      - "Which organization led this paper?" — 4 org choices (correct + 3 orgs from other database papers)
+      - "Who is a lead author of this paper?" — 4 author choices (correct + 3 lead authors from other database papers)
+      Present as standard MCQ with 4 options.
+      **Scoring**: Track metadata MCQ result separately — do NOT blend into the SM-2 percentage. Record as `metadata_correct: true/false` in the quiz results, but compute pct and quality score from content questions only. Mention the result in the mini-summary but it does not affect scheduling.
+   d. Ask **3-5 targeted questions** focused on:
       - Weak Bloom's levels from previous quiz (e.g., if analyze was 0%, ask analyze-level questions)
       - Key insights from the review file
       - Connections to other reviewed papers
-   d. Each question via `AskUserQuestion` — include "Done for today" as an option. If selected, save progress immediately and jump to Stage 5
-   e. **Carry forward**: For each question after the first, include previous feedback at the top of the `AskUserQuestion` text: `Previous: [correct/incorrect] — [feedback]\n\nQuestion N of M:`
-   f. After each paper: compute score, map to SM-2 quality, update SM-2 state (same algorithm as Stage 3 step 15-16)
-   g. Save to database.json **immediately** (not batched) — append review date, update quality_history, EF, interval, next_review
-   h. Mini-summary: `"Paper X: 3/4 (75%) -> quality 4, next review in 6 days"`
+   e. Each question via `AskUserQuestion` — include "Done for today" as an option. If selected, save progress immediately and jump to Stage 5
+   f. **Carry forward**: For each question after the first, include previous feedback at the top of the `AskUserQuestion` text: `Previous: [correct/incorrect] — [feedback]\n\nQuestion N of M:`
+   g. After each paper: compute score from content questions only (exclude metadata MCQ), map to SM-2 quality, update SM-2 state (same algorithm as Stage 3 step 20-21)
+   h. Save to database.json **immediately** (not batched) — append review date, update quality_history, EF, interval, next_review
+   i. Mini-summary: `"Paper X: 3/4 (75%) -> quality 4, next review in 6 days | Metadata: ✓/✗"`
 5. After all papers reviewed, show session summary:
    ```
    SR Session Complete:

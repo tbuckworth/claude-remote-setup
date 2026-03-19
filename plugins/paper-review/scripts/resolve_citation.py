@@ -18,7 +18,7 @@ import time
 import httpx
 
 S2_BASE = "https://api.semanticscholar.org/graph/v1/paper"
-S2_FIELDS = "title,authors,year,abstract,url,externalIds,citationCount"
+S2_FIELDS = "title,authors.name,authors.affiliations,year,abstract,url,externalIds,citationCount"
 CROSSREF_BASE = "https://api.crossref.org/works"
 
 
@@ -32,7 +32,13 @@ def query_semantic_scholar(paper_id: str) -> dict | None:
         if resp.status_code == 200:
             data = resp.json()
             external = data.get("externalIds", {}) or {}
-            authors = [a.get("name", "") for a in (data.get("authors") or [])]
+            authors = []
+            for a in (data.get("authors") or []):
+                entry = {"name": a.get("name", "")}
+                affiliations = a.get("affiliations") or []
+                if affiliations:
+                    entry["affiliations"] = affiliations
+                authors.append(entry)
             return {
                 "title": data.get("title", ""),
                 "authors": authors,
@@ -128,7 +134,13 @@ def resolve(doi: str = None, arxiv: str = None, title: str = None) -> dict:
                 if data:
                     paper = data[0]
                     external = paper.get("externalIds", {}) or {}
-                    authors = [a.get("name", "") for a in (paper.get("authors") or [])]
+                    authors = []
+                    for a in (paper.get("authors") or []):
+                        entry = {"name": a.get("name", "")}
+                        affiliations = a.get("affiliations") or []
+                        if affiliations:
+                            entry["affiliations"] = affiliations
+                        authors.append(entry)
                     result = {
                         "title": paper.get("title", ""),
                         "authors": authors,

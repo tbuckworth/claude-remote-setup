@@ -1,7 +1,7 @@
 {
   "name": "paper-review",
   "description": "Interactive paper review workflow with reMarkable annotation extraction, Bloom's taxonomy quizzing, spaced repetition tracking, and GitHub Issues integration.",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": {
     "name": "Titus"
   }
