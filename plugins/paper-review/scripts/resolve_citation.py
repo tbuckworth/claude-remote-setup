@@ -18,7 +18,7 @@ import time
 import httpx
 
 S2_BASE = "https://api.semanticscholar.org/graph/v1/paper"
-S2_FIELDS = "title,authors,authors.affiliations,year,abstract,url,externalIds,citationCount"
+S2_FIELDS = "title,authors.name,authors.affiliations,year,abstract,url,externalIds,citationCount"
 CROSSREF_BASE = "https://api.crossref.org/works"
 
 
