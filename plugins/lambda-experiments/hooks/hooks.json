@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "model": "claude-haiku-4-5-20251001",
+            "prompt": "Check if there is an active Lambda GPU experiment that might be abandoned. Read the file at ${CLAUDE_PLUGIN_ROOT}/state/active.md. If the file does not exist or current_phase is 'done', respond {\"ok\": true}. If current_phase is anything else (acquire, setup, execute, monitor, collect, terminate), the user is about to leave a running Lambda instance unattended. Respond {\"ok\": false, \"reason\": \"Active Lambda instance detected (phase: <phase>, IP: <ip>, cost so far: ~$<cost>). Run /lambda status or /lambda terminate before ending this session.\"}.",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

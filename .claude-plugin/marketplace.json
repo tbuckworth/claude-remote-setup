@@ -76,6 +76,13 @@
       "version": "2.1.0",
       "source": "./plugins/paper-review",
       "category": "productivity"
+    },
+    {
+      "name": "lambda-experiments",
+      "description": "Orchestrate Control Arena experiments on Lambda GPU instances — polling, setup, execution, monitoring, collection, and safe termination",
+      "version": "0.1.0",
+      "source": "./plugins/lambda-experiments",
+      "category": "development"
     }
   ]
 }

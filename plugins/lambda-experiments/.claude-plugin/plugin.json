@@ -1,0 +1,8 @@
+{
+  "name": "lambda-experiments",
+  "description": "Orchestrate Control Arena experiments on Lambda GPU instances. Handles capacity polling, instance setup, experiment execution, monitoring, result collection, and safe termination. Encodes knowledge of Lambda gotchas and failure patterns from 10+ experiment runs.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Titus"
+  }
+}
