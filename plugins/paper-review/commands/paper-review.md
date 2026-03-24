@@ -299,8 +299,9 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 ### Archive on reMarkable
 23. Archive the paper from whichever folder it came from (check `remarkable_folder` in review-state.json):
     ```
-    rmapi mv "<remarkable_folder>/<name>" "Archive/"
+    rmapi-mv "<remarkable_folder>/<name>" "Archive"
     ```
+    Note: `rmapi mv` is broken (sync:fox protocol issue). `rmapi-mv` at `~/bin/rmapi-mv` is a workaround that does get+put+rm. This loses annotations but that's fine for already-reviewed papers.
     If Archive doesn't exist, create it: `rmapi mkdir Archive`
 
 ### Cleanup
