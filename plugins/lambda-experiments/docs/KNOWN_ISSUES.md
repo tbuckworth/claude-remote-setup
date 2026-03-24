@@ -233,11 +233,29 @@ Each issue has:
 ### Runaway Experiment (No Time Limit Enforced)
 - **Pattern**: Experiment running >2x expected duration, OR `'time_limit': None` in eval params despite `num_hours` being set
 - **Diagnosis**: PTB CLI (`ptb_eval_cli.py`) defaults `--time-limit` to `None`. The setting's `num_hours` generates `time_limit_seconds` which gets logged ("Using setting's time_limit_seconds: Xs") but is NOT passed to Inspect AI's `eval()` as the `time_limit` parameter. Result: no wall-clock cutoff — experiments run indefinitely.
-- **Fix**: Explicitly pass `--time-limit $((NUM_HOURS * 3600))` in the launch script's `build_eval_cmd()`.
-- **Severity**: critical (cost: $63 wasted on a 4h experiment that ran 17h)
-- **Auto-fixable**: partially (monitor can detect by comparing elapsed time to expected duration; fix requires script edit)
-- **Monitor rule**: If an experiment has been running for >2x its `num_hours` budget, investigate immediately. Check if the process is stuck, producing output, or has genuinely stalled. If stuck with no progress for >30 min beyond the expected end time, terminate the experiment (not the instance) and report.
-- **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run
+- **Fix (react scaffold)**: Explicitly pass `--time-limit $((NUM_HOURS * 3600))` in the launch script's `build_eval_cmd()`.
+- **Fix (Claude Code scaffold)**: `--time-limit` alone is **NOT sufficient**. Three timeout mechanisms exist, none work reliably on first run:
+  1. **Inspect AI task-level `time_limit`**: Uses anyio cancellation but cannot cleanly interrupt the Claude Code external subprocess
+  2. **Control solver `asyncio.timeout`** (`_control_solver.py:273`): Only activates on retries — first run has `remaining_s = None` → no-op
+  3. **Claude Code `timeout_hours`** (`claude_code_policy.py:332`): Defaults to 6h, controls per-operation timeouts only, never connected to `num_hours`
+  Until upstream fixes land, **the monitor must enforce time limits for Claude Code scaffold experiments** by killing experiments that exceed their budget.
+- **Severity**: critical (cost: $63 wasted on run 1 at 17h, another $20 on run 2 at 5h — total $83 for zero completed experiments)
+- **Auto-fixable**: partially (monitor can detect and kill; root cause requires upstream code fix)
+- **Monitor rule**: If an experiment has been running for >2x its `num_hours` budget, investigate immediately. For Claude Code scaffold, be extra vigilant — check if experiments are progressing (new log output, turn counts increasing) or stuck. If stuck or exceeded budget with no new .eval files, kill the experiment process (not the instance) and move to the next one if possible.
+- **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run. GitHub issue: https://github.com/re-sabotage/control-arena/issues/238
+
+### Zombie Pollers (Multiple Instances Launched Accidentally)
+- **Pattern**: Multiple `lambda_poll_and_launch.sh` processes running simultaneously, each launching separate instances
+- **Diagnosis**: Kill commands silently failed (`kill $(cat ...) 2>/dev/null`) so old pollers kept running. Each found capacity independently and launched an instance. Compounded by changing instance types mid-poll (killing a working poller to restart with different parameters).
+- **Fix**: Prevention rules (must be followed strictly):
+  1. **NEVER change instance types mid-poll.** Stick to what was agreed with the user. Polling can take a very long time — be patient.
+  2. **Only ONE poller may run at a time.** Before starting a new one, use `TaskStop` on the old task ID and verify it's dead.
+  3. **After stopping a poller, ALWAYS verify:** (a) `ps aux | grep lambda_poll` to confirm process is gone, (b) check Lambda API for any instances the poller may have launched before dying.
+  4. **When user says "cancel/stop", ALWAYS check Lambda API** for running instances. Terminate only ours (match by name).
+  5. **Never suppress kill errors with `2>/dev/null`** — always check exit codes.
+- **Severity**: critical (cost: $11-23 wasted on 3 accidental instances)
+- **Auto-fixable**: no (requires discipline in poller management)
+- **Discovered**: 2026-03-24, bfcl-r128 experiment (issue #240)
 
 ---
 
