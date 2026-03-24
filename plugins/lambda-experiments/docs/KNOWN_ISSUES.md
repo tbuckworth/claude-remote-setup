@@ -229,3 +229,24 @@ Each issue has:
 - **Fix**: Cannot auto-fix. Alert user. Consider whether to terminate instance (save GPU cost) or wait for credit top-up.
 - **Severity**: critical
 - **Auto-fixable**: no (requires payment)
+
+### Runaway Experiment (No Time Limit Enforced)
+- **Pattern**: Experiment running >2x expected duration, OR `'time_limit': None` in eval params despite `num_hours` being set
+- **Diagnosis**: PTB CLI (`ptb_eval_cli.py`) defaults `--time-limit` to `None`. The setting's `num_hours` generates `time_limit_seconds` which gets logged ("Using setting's time_limit_seconds: Xs") but is NOT passed to Inspect AI's `eval()` as the `time_limit` parameter. Result: no wall-clock cutoff — experiments run indefinitely.
+- **Fix**: Explicitly pass `--time-limit $((NUM_HOURS * 3600))` in the launch script's `build_eval_cmd()`.
+- **Severity**: critical (cost: $63 wasted on a 4h experiment that ran 17h)
+- **Auto-fixable**: partially (monitor can detect by comparing elapsed time to expected duration; fix requires script edit)
+- **Monitor rule**: If an experiment has been running for >2x its `num_hours` budget, investigate immediately. Check if the process is stuck, producing output, or has genuinely stalled. If stuck with no progress for >30 min beyond the expected end time, terminate the experiment (not the instance) and report.
+- **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run
+
+---
+
+## Experiment Configuration
+
+### Trusted Model API Key Missing
+- **Pattern**: `Missing key inputs argument.*To use the Google AI API, provide (api_key)|GOOGLE_API_KEY`
+- **Diagnosis**: Trusted model set to `google/gemini-2.5-flash` which uses the Google AI SDK directly, requiring `GOOGLE_API_KEY`. If this key isn't in `.env`, monitoring fails silently (experiments still run but no suspicion scores collected).
+- **Fix**: Use `openrouter/google/gemini-2.5-flash` instead to route through OpenRouter (which has a key in `.env`).
+- **Severity**: warning (non-fatal but loses all monitoring data)
+- **Auto-fixable**: yes (rewrite model string in launch command)
+- **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run
