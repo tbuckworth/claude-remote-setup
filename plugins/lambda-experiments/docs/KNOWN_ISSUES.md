@@ -261,6 +261,26 @@ Each issue has:
 
 ## Experiment Configuration
 
+### Wrong Branch on Lambda (Critical — Verify Before Every Run)
+- **Pattern**: Features missing on Lambda that work locally, on-the-fly SSH patches, `KeyError`, `ImportError`, or mysterious behaviour differences between local and remote
+- **Diagnosis**: Lambda experiment scripts often hardcode a branch (e.g., `BRANCH="post-train-bench"` in `run_lambda_8gpu_claude_code.sh` line 61). If your fixes are on a different branch, the Lambda instance checks out stale code. Patching on-the-fly via SSH creates an inconsistent environment that can break things in subtle ways (e.g., Inspect AI's time_limit cancellation failing because of a half-applied fix).
+- **Fix**: **Before every experiment launch, triple-check the branch on Lambda:**
+  1. Verify which branch the launch script will checkout: `grep -n BRANCH run_lambda_8gpu*.sh`
+  2. Ensure all needed fixes are merged into that branch, OR override the branch in the launch command
+  3. After setup, verify on the instance: `ssh ubuntu@IP 'cd ~/control-arena && git log --oneline -3 && git diff --stat HEAD'` — there should be NO local modifications
+  4. If you had to patch anything on-the-fly via SSH, stop and commit those changes to a proper branch first. On-the-fly patching is a last resort that has caused $83+ in wasted GPU time.
+- **Severity**: critical ($83 wasted across two runs due to branch mismatch)
+- **Auto-fixable**: no (requires human verification of branch state)
+- **Discovered**: 2026-03-24. Script used `post-train-bench` branch but fixes were on `run-4h-exps`. Multiple missing features (Llama model mappings, scaffold prompt key, PTB CLI scaffold support, inspect-swe dep) had to be patched on-the-fly, leaving environment inconsistent.
+
+### Missing Prompt Key (`scaffold_default`)
+- **Pattern**: `KeyError: 'scaffold_default'`
+- **Diagnosis**: `scaffold_trusted_monitoring.py` references `monitor_prompts["scaffold_default"]` but no `scaffold_default.txt` prompt file exists in `control_arena/monitor/prompts/`.
+- **Fix**: Change to `monitor_prompts["default"]`. Fixed in commit `cab2066b`.
+- **Severity**: critical (blocks experiment launch)
+- **Auto-fixable**: yes (sed replacement on Lambda if needed)
+- **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run
+
 ### Trusted Model API Key Missing
 - **Pattern**: `Missing key inputs argument.*To use the Google AI API, provide (api_key)|GOOGLE_API_KEY`
 - **Diagnosis**: Trusted model set to `google/gemini-2.5-flash` which uses the Google AI SDK directly, requiring `GOOGLE_API_KEY`. If this key isn't in `.env`, monitoring fails silently (experiments still run but no suspicion scores collected).
