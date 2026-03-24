@@ -313,6 +313,13 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
     cd /Users/titus/pyg/paper-review && git add reviews/ database.json && git commit -m "Review: <paper-title>"
     ```
 
+### Git push
+26. Merge to main and push:
+    ```
+    cd /Users/titus/pyg/paper-review && git checkout main && git merge - && git push && git checkout -
+    ```
+    If already on main, just push. If merge conflicts occur, ask the user.
+
 ## Stage 4: Spaced Repetition (5-15 min, user-controlled)
 
 **Goal**: Active review of previously studied papers using SM-2 priority queue.
@@ -358,6 +365,11 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
    ```
    cd /Users/titus/pyg/paper-review && git add database.json && git commit -m "SR session: <N> papers reviewed"
    ```
+7. Merge to main and push:
+   ```
+   cd /Users/titus/pyg/paper-review && git checkout main && git merge - && git push && git checkout -
+   ```
+   If already on main, just push. If merge conflicts occur, ask the user.
 
 ## Stage 5: Plan Tomorrow (~1 min)
 
