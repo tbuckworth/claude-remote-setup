@@ -1,7 +1,7 @@
 ---
 description: Orchestrate Control Arena experiments on Lambda GPU instances
 argument-hint: <natural language description of what you want to do>
-allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion, CronCreate, CronDelete, CronList]
+allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, Task, AskUserQuestion, CronCreate, CronDelete, CronList, mcp__gmail__send_email, mcp__claude_ai_Gmail__gmail_get_profile]
 model: claude-opus-4-6
 ---
 
@@ -200,6 +200,34 @@ If ALL pass → terminate. If ANY fail → do NOT terminate, write warning, send
 Terminate: `curl -s -u "$LAMBDA_API_KEY:" -X POST https://cloud.lambdalabs.com/api/v1/instance-operations/terminate -H 'Content-Type: application/json' -d '{"instance_ids":["INSTANCE_ID"]}'`
 
 Delete cron job. Update state: `current_phase: "done"`.
+
+Then proceed to Phase 5b (email summary).
+
+---
+
+## Phase 5b: Email Summary
+
+After Phase 5 completes (or if termination was declined), send a summary email.
+
+1. Get recipient email via `mcp__claude_ai_Gmail__gmail_get_profile`
+2. Read state file for experiment metadata
+3. If `local_results_path` is set, extract results:
+   ```bash
+   python3 ${CLAUDE_PLUGIN_ROOT}/scripts/extract-eval-results.py "LOCAL_RESULTS_PATH"
+   ```
+4. Read any incident/findings files:
+   - `~/.claude/lambda-experiments/incident_report.md`
+   - `~/.claude/lambda-experiments/new_findings.md`
+5. Read the email template from `${CLAUDE_PLUGIN_ROOT}/commands/lambda-email.md` and follow its HTML template to construct the email
+6. Send via `mcp__gmail__send_email` with `mimeType: "multipart/alternative"`, including both `body` (plain text) and `htmlBody` (HTML)
+
+**Always send the email, even if:**
+- Termination was declined → include prominent red warning banner about running instance + cost
+- Experiments failed → include failure details
+- Results are incomplete → note what's missing
+- Instance errored → include error context
+
+If email sending fails, write draft to `~/.claude/lambda-experiments/email-draft.html`.
 
 ---
 
