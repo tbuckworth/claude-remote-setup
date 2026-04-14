@@ -2,7 +2,7 @@
 """Send an HTML email with inline embedded images via Gmail API.
 
 Usage:
-    python3 send_report_email.py --to EMAIL --subject SUBJECT --html FILE [--image CID:PATH ...]
+    python3 send_report_email.py --to EMAIL --subject SUBJECT --html FILE [--image CID:PATH ...] [--label NAME]
 
 Example:
     python3 send_report_email.py \
@@ -10,7 +10,8 @@ Example:
         --subject "Experiment Results" \
         --html /tmp/report.html \
         --image chart1:/tmp/chart1.png \
-        --image chart2:/tmp/chart2.png
+        --image chart2:/tmp/chart2.png \
+        --label Experiments
 
 The HTML file should reference images with <img src="cid:chart1" />.
 Images are embedded inline using MIME Content-ID headers, so they render
@@ -18,7 +19,7 @@ directly in the email body (not as attachments).
 
 Requires:
     - google-api-python-client, google-auth (pip install)
-    - OAuth token at ~/.config/google-docs-mcp/token.json with gmail.send scope
+    - OAuth token at ~/.config/google-docs-mcp/token.json with gmail.send + gmail.modify scopes
     - Gmail API enabled in the Google Cloud project
 """
 
@@ -84,10 +85,33 @@ def build_message(to, subject, html_path, images):
     return msg
 
 
-def send(service, message):
-    """Send the MIME message via Gmail API."""
+def resolve_label_id(service, label_name):
+    """Find a Gmail label ID by name. Returns None if not found."""
+    labels = service.users().labels().list(userId="me").execute()
+    for label in labels.get("labels", []):
+        if label["name"] == label_name:
+            return label["id"]
+    return None
+
+
+def send(service, message, label_name=None):
+    """Send the MIME message via Gmail API, optionally applying a label."""
     raw = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
     result = service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    msg_id = result["id"]
+
+    if label_name:
+        label_id = resolve_label_id(service, label_name)
+        if label_id:
+            service.users().messages().modify(
+                userId="me",
+                id=msg_id,
+                body={"addLabelIds": [label_id]},
+            ).execute()
+            print(f"Labeled: {label_name}", file=sys.stderr)
+        else:
+            print(f"WARNING: Label '{label_name}' not found in Gmail — skipping", file=sys.stderr)
+
     return result
 
 
@@ -103,6 +127,12 @@ def main():
         metavar="CID:PATH",
         help="Inline image as CID:PATH (e.g., chart:/tmp/chart.png). "
         "Reference in HTML as <img src=\"cid:chart\" />. Can be repeated.",
+    )
+    parser.add_argument(
+        "--label",
+        default=None,
+        help="Gmail label name to apply after sending (e.g., Experiments). "
+        "Requires gmail.modify scope.",
     )
     args = parser.parse_args()
 
@@ -132,7 +162,7 @@ def main():
     # Send
     service = get_gmail_service()
     message = build_message(args.to, args.subject, args.html, images)
-    result = send(service, message)
+    result = send(service, message, label_name=args.label)
     print(f"Sent: {result['id']}")
 
 

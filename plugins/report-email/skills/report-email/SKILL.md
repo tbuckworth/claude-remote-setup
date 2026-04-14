@@ -62,8 +62,11 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/send_report_email.py \
   --to titusbuckworth@gmail.com \
   --subject "Report Title" \
   --html /tmp/report.html \
-  --image my_chart:/tmp/my_chart.png
+  --image my_chart:/tmp/my_chart.png \
+  --label Experiments
 ```
+
+The `--label` flag applies a Gmail label after sending (requires `gmail.modify` scope). Use `Experiments` for experiment reports. Omit for general emails.
 
 ## Prerequisites
 

@@ -107,7 +107,8 @@ python3 "$SEND_SCRIPT" \
   --subject "[Lambda] EXPERIMENT — $COST — STATUS (N experiments)" \
   --html /tmp/lambda_report.html \
   --image training_curve:/tmp/lambda_report_training_curve.png \
-  --image scores:/tmp/lambda_report_scores.png
+  --image scores:/tmp/lambda_report_scores.png \
+  --label Experiments
 ```
 
 Only include `--image` args for charts that were actually generated.

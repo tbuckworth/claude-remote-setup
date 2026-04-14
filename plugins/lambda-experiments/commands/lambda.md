@@ -270,7 +270,8 @@ python3 REPORT_EMAIL_SCRIPT \
   --to titusbuckworth@gmail.com \
   --subject "SUBJECT" \
   --html /tmp/lambda_report.html \
-  --image chart1:/tmp/lambda_report_chart1.png
+  --image chart1:/tmp/lambda_report_chart1.png \
+  --label Experiments
 ```
 
 Find the send script:
