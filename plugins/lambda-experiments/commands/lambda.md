@@ -205,29 +205,91 @@ Then proceed to Phase 5b (email summary).
 
 ---
 
-## Phase 5b: Email Summary
+## Phase 5b: Email Summary Report
 
-After Phase 5 completes (or if termination was declined), send a summary email.
+After Phase 5 completes (or if termination was declined), send a rich HTML report email with inline charts.
 
-1. Get recipient email via `mcp__claude_ai_Gmail__gmail_get_profile`
-2. Read state file for experiment metadata
-3. If `local_results_path` is set, extract results:
+### Data gathering
+
+1. Read state file (`~/.claude/lambda-experiments/active.md`) for experiment metadata
+2. Extract results from .eval files:
    ```bash
    python3 ${CLAUDE_PLUGIN_ROOT}/scripts/extract-eval-results.py "LOCAL_RESULTS_PATH"
    ```
+   This gives JSON with per-experiment scores, status, timing, tokens.
+3. For checkpoint data, read `reductions.json` from each .eval ZIP to get the `posttrain_checkpoint_scorer` entries (checkpoint accuracy over time).
 4. Read any incident/findings files:
    - `~/.claude/lambda-experiments/incident_report.md`
    - `~/.claude/lambda-experiments/new_findings.md`
-5. Read the email template from `${CLAUDE_PLUGIN_ROOT}/commands/lambda-email.md` and follow its HTML template to construct the email
-6. Send via `mcp__gmail__send_email` with `mimeType: "multipart/alternative"`, including both `body` (plain text) and `htmlBody` (HTML)
 
-**Always send the email, even if:**
-- Termination was declined → include prominent red warning banner about running instance + cost
-- Experiments failed → include failure details
+### Determine report type
+
+- **Single experiment** (1 .eval file): Deep-dive report with training curve, agent behavior analysis, what went wrong, checkpoint scores detail, side task breakdown.
+- **Multiple experiments** (2+ .eval files): Summary report with aggregated charts, score tables, error highlights. Group by task/mode where useful. No per-agent behavior analysis.
+
+### Generate matplotlib charts
+
+Save all charts to `/tmp/lambda_report_*.png` at `dpi=150`, white background.
+
+**Single experiment charts:**
+- **Training curve**: Checkpoint accuracy over time. Include annotations for training run phases, best checkpoint, catastrophic drops, reference lines for comparison.
+
+**Multi-experiment charts:**
+- **Score overview bar chart**: One bar per experiment, grouped by task. Color by mode (honest=blue, attack=red). Show main_task_score.
+- **Aggregated training curves** (if checkpoints exist): If multiple experiments share a task (e.g., 5x honest gsm8k), plot mean accuracy with shaded std error band (alpha=0.2). One subplot per task.
+- **Side task heatmap** (if many experiments): Tasks on x-axis, experiments on y-axis, color intensity = score.
+
+Use your judgment on which charts are useful given the data. Don't generate empty or meaningless charts.
+
+### Write HTML email
+
+Write to `/tmp/lambda_report.html`. Reference charts with `<img src="cid:CHART_NAME" />`.
+
+**All styles must be inline** (Gmail strips `<style>` blocks).
+
+The email should include (adapt based on single vs multi):
+- Header with experiment name, date, status badge
+- Warning banner if instance NOT terminated (red, impossible to miss)
+- Summary metrics (cost, duration, experiments completed/failed)
+- Charts (inline via CID)
+- Results table (scores per experiment with inline color bars)
+- Side task scores (if available)
+- Checkpoint scores detail (single) or summary (multi)
+- Issues encountered (from incident_report.md / new_findings.md)
+- For single experiment: agent behavior timeline (what the agent did, training runs, key decisions)
+- For single experiment: "Why it went wrong" analysis if score is disappointing
+- Cost breakdown
+- Links (Lambda dashboard, local results path)
+
+**Error highlighting**: For any experiment with status "error" or all-zero scores, add a red-highlighted row with the error details. For multi-experiment runs, add an "Errors" section at the top if any experiments failed.
+
+### Send email
+
+```bash
+python3 REPORT_EMAIL_SCRIPT \
+  --to titusbuckworth@gmail.com \
+  --subject "SUBJECT" \
+  --html /tmp/lambda_report.html \
+  --image chart1:/tmp/lambda_report_chart1.png
+```
+
+Find the send script:
+```bash
+find ~/.claude/plugins -name send_report_email.py -path "*/report-email/*" 2>/dev/null | head -1
+```
+
+**Subject line format:**
+```
+[Lambda] <experiment_name> — $<cost> — <status> (<N> experiments)
+```
+
+### Always send the email, even if:
+- Termination was declined → include prominent red warning banner
+- Experiments failed → include failure details and error messages
 - Results are incomplete → note what's missing
 - Instance errored → include error context
 
-If email sending fails, write draft to `~/.claude/lambda-experiments/email-draft.html`.
+If email sending fails (e.g., no gmail.send scope), write the HTML to `~/.claude/lambda-experiments/email-draft.html` as fallback and tell the user.
 
 ---
 
