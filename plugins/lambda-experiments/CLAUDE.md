@@ -4,7 +4,7 @@
 
 - **Hub-and-spoke**: `/lambda` command is the sole orchestrator. It handles all user dialogue (AskUserQuestion) and agent dispatch (Task).
 - **Agents are leaf workers**: They read files, do focused work, write files. They never talk to the user and never spawn other agents.
-- **State survives context loss**: `~/.claude/lambda-experiments/active.md` tracks everything. On context recovery, re-read it and resume from `current_phase`.
+- **State survives context loss**: `${CLAUDE_PLUGIN_ROOT}/state/active.md` tracks everything. On context recovery, re-read it and resume from `current_phase`.
 
 ## Remote Execution Pattern
 
@@ -80,14 +80,6 @@ Reference scripts in `control_arena/settings/post_train_bench/scripts/`:
 - `docs/EXPERIMENT_TYPES.md` -- experiment configuration reference
 - `docs/COST_REFERENCE.md` -- GPU pricing
 
-State files (active.md, new_findings.md, incident_report.md) live in `~/.claude/lambda-experiments/` — NOT in the plugin directory.
+State files (active.md, new_findings.md, incident_report.md) live in `${CLAUDE_PLUGIN_ROOT}/state/` — inside the plugin directory (gitignored). Use Write/Edit tools normally to manage these files.
 
-**CRITICAL: Always use Bash tool to write state files, never Write/Edit tool.** The state directory is outside the project, so Write/Edit will prompt for permission. Use:
-```bash
-mkdir -p ~/.claude/lambda-experiments
-cat > ~/.claude/lambda-experiments/active.md << 'STATEEOF'
-...content...
-STATEEOF
-```
-
-New findings from runs are queued in `~/.claude/lambda-experiments/new_findings.md` and merged into KNOWN_ISSUES.md on next startup.
+New findings from runs are queued in `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md` and merged into KNOWN_ISSUES.md on next startup.

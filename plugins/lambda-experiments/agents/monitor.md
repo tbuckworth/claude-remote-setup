@@ -25,7 +25,7 @@ You will be given the state file path and knowledge base path. Read them first.
 
 ## Process
 
-1. **Read state**: Parse `~/.claude/lambda-experiments/active.md` for instance IP, log directory, total experiments, launch time, hourly rate
+1. **Read state**: Parse `${CLAUDE_PLUGIN_ROOT}/state/active.md` for instance IP, log directory, total experiments, launch time, hourly rate
 2. **SSH checks** (run all in quick succession):
    ```bash
    # GPU utilization
@@ -71,7 +71,7 @@ You will be given the state file path and knowledge base path. Read them first.
      "'
      ```
 
-7. **Update state file**: Use the **Bash tool** (not Write) to update `~/.claude/lambda-experiments/active.md` — this avoids permission prompts. Write updated values for experiments_completed, experiments_failed, hours_elapsed, estimated_cost_usd, last_check, last_check_summary
+7. **Update state file**: Update `${CLAUDE_PLUGIN_ROOT}/state/active.md` with experiments_completed, experiments_failed, hours_elapsed, estimated_cost_usd, last_check, last_check_summary
 
 ## Output
 

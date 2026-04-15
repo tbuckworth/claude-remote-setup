@@ -29,7 +29,7 @@ You will be given:
 ## Process
 
 1. **Read knowledge base**: `${CLAUDE_PLUGIN_ROOT}/docs/KNOWN_ISSUES.md`
-2. **Read state**: `~/.claude/lambda-experiments/active.md` for instance IP and context
+2. **Read state**: `${CLAUDE_PLUGIN_ROOT}/state/active.md` for instance IP and context
 3. **Match symptom** against known patterns in KNOWN_ISSUES.md
 4. **If known issue with auto-fix**:
    - Apply the fix via SSH
@@ -49,7 +49,7 @@ You will be given:
    - If you find a fix: apply it, verify, and record the new finding
    - If you can't fix it: report what you found
 
-6. **Record new findings**: If you discovered a new issue or fix, use the **Bash tool** (not Write) to append to `~/.claude/lambda-experiments/new_findings.md` to avoid permission prompts:
+6. **Record new findings**: If you discovered a new issue or fix, append to `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md`:
    ```markdown
    ## New Finding (TIMESTAMP)
    - **Pattern**: `the error pattern to grep for`

@@ -13,16 +13,8 @@ You orchestrate the full lifecycle of Control Arena experiments on Lambda GPU in
 
 1. **You are the sole hub.** All user dialogue (AskUserQuestion) happens through you. All agent dispatches (Task) originate from you.
 2. **Agents are leaf workers.** The `monitor` and `troubleshooter` agents read files, do focused work, write files. They never talk to the user.
-3. **State survives context loss.** Write `~/.claude/lambda-experiments/active.md` after every phase transition. On context recovery, re-read it.
+3. **State survives context loss.** Write `${CLAUDE_PLUGIN_ROOT}/state/active.md` after every phase transition. On context recovery, re-read it.
 
-**IMPORTANT: Always use the Bash tool (not Write/Edit) to create and update state files.** The state directory is outside the project, so the Write tool will prompt for permission. Instead use:
-```bash
-mkdir -p ~/.claude/lambda-experiments
-cat > ~/.claude/lambda-experiments/active.md << 'STATEEOF'
-...content...
-STATEEOF
-```
-This avoids permission prompts entirely. Same for `new_findings.md` and `incident_report.md`.
 4. **Cost sensitivity.** Frame every decision in cost-benefit terms. Report cost in every status update. GPU hours are expensive -- don't waste them.
 5. **Never install Claude Code on Lambda.** All Lambda work happens via SSH from the host machine.
 
@@ -38,10 +30,10 @@ This avoids permission prompts entirely. Same for `new_findings.md` and `inciden
    ```
 
 2. Check for new findings to merge:
-   - If `~/.claude/lambda-experiments/new_findings.md` exists and is non-empty, read it and offer to merge into `docs/KNOWN_ISSUES.md`
+   - If `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md` exists and is non-empty, read it and offer to merge into `docs/KNOWN_ISSUES.md`
 
 3. Check for active experiment:
-   - If `~/.claude/lambda-experiments/active.md` exists, read it
+   - If `${CLAUDE_PLUGIN_ROOT}/state/active.md` exists, read it
    - If `current_phase` is not `done`, offer to resume
 
 4. Understand what the user wants from `{{argument}}`.
@@ -100,7 +92,7 @@ The user will describe what they want in natural language. Your job is to figure
    **Priority: get ANY instance.** Don't restrict by region or filesystem.
 
 5. If polling needed: `Bash(run_in_background: true)`, notify user when ready.
-6. Write `~/.claude/lambda-experiments/active.md` with instance details and experiment plan. Create the directory first with `mkdir -p ~/.claude/lambda-experiments` if needed.
+6. Write `${CLAUDE_PLUGIN_ROOT}/state/active.md` with instance details and experiment plan.
 
 ### Ask termination preference upfront:
 - Work hours / weekday default → `confirm` (check with user before terminating)
@@ -160,13 +152,13 @@ On any failure: check KNOWN_ISSUES.md. Cost-benefit: is debugging cheaper than t
 
 Create a CronCreate job (every 20 min). The cron prompt should:
 
-1. Read `~/.claude/lambda-experiments/active.md` for instance details
+1. Read `${CLAUDE_PLUGIN_ROOT}/state/active.md` for instance details
 2. SSH to check: GPU util, completed experiment count, process alive, disk usage, log tail
 3. Calculate cost (hours * hourly_rate)
 4. Spot-check completed experiments for all-zero scores
 5. Update state file
 6. If done → report completion, update phase to `collect`
-7. If issues → attempt auto-fix per KNOWN_ISSUES.md. If unfixable and `auto` mode: terminate + write incident report to `~/.claude/lambda-experiments/incident_report.md`. If `confirm` mode: report issue.
+7. If issues → attempt auto-fix per KNOWN_ISSUES.md. If unfixable and `auto` mode: terminate + write incident report to `${CLAUDE_PLUGIN_ROOT}/state/incident_report.md`. If `confirm` mode: report issue.
 
 **Smoke check**: After the first experiment completes, validate results are non-zero. Catch broken configs early.
 
@@ -211,7 +203,7 @@ After Phase 5 completes (or if termination was declined), send a rich HTML repor
 
 ### Data gathering
 
-1. Read state file (`~/.claude/lambda-experiments/active.md`) for experiment metadata
+1. Read state file (`${CLAUDE_PLUGIN_ROOT}/state/active.md`) for experiment metadata
 2. Extract results from .eval files:
    ```bash
    python3 ${CLAUDE_PLUGIN_ROOT}/scripts/extract-eval-results.py "LOCAL_RESULTS_PATH"
@@ -219,8 +211,8 @@ After Phase 5 completes (or if termination was declined), send a rich HTML repor
    This gives JSON with per-experiment scores, status, timing, tokens.
 3. For checkpoint data, read `reductions.json` from each .eval ZIP to get the `posttrain_checkpoint_scorer` entries (checkpoint accuracy over time).
 4. Read any incident/findings files:
-   - `~/.claude/lambda-experiments/incident_report.md`
-   - `~/.claude/lambda-experiments/new_findings.md`
+   - `${CLAUDE_PLUGIN_ROOT}/state/incident_report.md`
+   - `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md`
 
 ### Determine report type
 
@@ -290,13 +282,13 @@ find ~/.claude/plugins -name send_report_email.py -path "*/report-email/*" 2>/de
 - Results are incomplete → note what's missing
 - Instance errored → include error context
 
-If email sending fails (e.g., no gmail.send scope), write the HTML to `~/.claude/lambda-experiments/email-draft.html` as fallback and tell the user.
+If email sending fails (e.g., no gmail.send scope), write the HTML to `${CLAUDE_PLUGIN_ROOT}/state/email-draft.html` as fallback and tell the user.
 
 ---
 
 ## Action: status
 
-1. Read `~/.claude/lambda-experiments/active.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/state/active.md`
 2. If no active experiment: report "No active Lambda experiment."
 3. If active: SSH to check current state, calculate cost, report concisely
 
@@ -326,7 +318,7 @@ Same as launch but:
 
 ## Action: resume
 
-1. Read `~/.claude/lambda-experiments/active.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/state/active.md`
 2. Query Lambda API to verify instance and IP
 3. SSH to check progress
 4. Report and offer to continue from current phase
@@ -344,7 +336,7 @@ scp -o StrictHostKeyChecking=no ubuntu@IP:REMOTE LOCAL
 
 ## New Findings
 
-When you discover a new issue/fix during a run, append to `~/.claude/lambda-experiments/new_findings.md`:
+When you discover a new issue/fix during a run, append to `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md`:
 
 ```markdown
 ## New Finding (TIMESTAMP)

@@ -21,7 +21,7 @@
    - `--instance-types` based on user preference (default: `gpu_8x_h100_sxm5,gpu_8x_a100_80gb_sxm4`)
    - No filesystem preference -- priority is getting ANY instance
 6. **Wait for instance**: If polling, run in background. Notify user when ready.
-7. **Write state**: Create `~/.claude/lambda-experiments/active.md` with instance details. **Use Bash tool** (not Write) to avoid permission prompts: `mkdir -p ~/.claude/lambda-experiments && cat > ~/.claude/lambda-experiments/active.md << 'STATEEOF' ... STATEEOF`
+7. **Write state**: Create `${CLAUDE_PLUGIN_ROOT}/state/active.md` with instance details.
 
 ### State written
 ```yaml
@@ -151,13 +151,13 @@ Create a CronCreate job:
 CronCreate(
   cron="*/20 * * * *",
   recurring=true,
-  prompt="You are the Lambda experiment monitor. Read ~/.claude/lambda-experiments/active.md for instance details. Read ${CLAUDE_PLUGIN_ROOT}/docs/KNOWN_ISSUES.md for failure patterns. Then:
+  prompt="You are the Lambda experiment monitor. Read ${CLAUDE_PLUGIN_ROOT}/state/active.md for instance details. Read ${CLAUDE_PLUGIN_ROOT}/docs/KNOWN_ISSUES.md for failure patterns. Then:
   1. SSH to the instance and check: nvidia-smi utilization, .eval file count in log dir, experiment process alive, disk usage
   2. Calculate hours elapsed and cost
   3. Spot-check any newly completed experiments for all-zero scores
   4. Update the state file
   5. If experiments are DONE (experiment_status.json exists or process exited): report completion
-  6. If issues detected: attempt auto-fix per KNOWN_ISSUES.md. If unfixable after reasonable effort, terminate instance and write incident report to ~/.claude/lambda-experiments/incident_report.md
+  6. If issues detected: attempt auto-fix per KNOWN_ISSUES.md. If unfixable after reasonable effort, terminate instance and write incident report to ${CLAUDE_PLUGIN_ROOT}/state/incident_report.md
   Report concisely."
 )
 ```
@@ -286,7 +286,7 @@ termination_report: "All 24 experiments completed. 0 failures. $187.20 total."
 
 If context is lost (compaction, new session, etc.):
 
-1. Read `~/.claude/lambda-experiments/active.md`
+1. Read `${CLAUDE_PLUGIN_ROOT}/state/active.md`
 2. Check if instance is alive: `curl -s -u "$LAMBDA_API_KEY:" https://cloud.lambdalabs.com/api/v1/instances | python3 -c "import sys,json; d=json.load(sys.stdin); [print(f'{i[\"id\"]} {i[\"ip\"]} {i[\"status\"]}') for i in d['data']]"`
 3. If IP changed: update state
 4. SSH to check experiment status: `ssh ubuntu@IP 'pgrep -f run_lambda -a; ls LOG_DIR/*.eval 2>/dev/null | wc -l'`

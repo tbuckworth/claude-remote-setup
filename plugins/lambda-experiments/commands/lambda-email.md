@@ -1,6 +1,6 @@
 ---
 description: Send HTML email summary of a Lambda experiment run with inline charts
-argument-hint: [optional path to state file, defaults to ~/.claude/lambda-experiments/active.md]
+argument-hint: [optional path to state file, defaults to ${CLAUDE_PLUGIN_ROOT}/state/active.md]
 allowed-tools: [Read, Glob, Bash, Grep]
 model: claude-opus-4-6
 ---
@@ -11,15 +11,15 @@ Compose and send a rich HTML email with inline matplotlib charts summarizing a L
 
 ## Data Sources
 
-1. **State file**: `{{argument}}` (default: `~/.claude/lambda-experiments/active.md`)
+1. **State file**: `{{argument}}` (default: `${CLAUDE_PLUGIN_ROOT}/state/active.md`)
 2. **Results**: Extract from .eval files:
    ```bash
    python3 ${CLAUDE_PLUGIN_ROOT}/scripts/extract-eval-results.py "$LOCAL_RESULTS_PATH"
    ```
 3. **Checkpoint data**: Read `reductions.json` from each .eval ZIP for `posttrain_checkpoint_scorer`
 4. **Agent transcript**: For single experiments, read `samples/*.json` from the .eval ZIP to extract the agent's actions
-5. **Incident report**: `~/.claude/lambda-experiments/incident_report.md`
-6. **New findings**: `~/.claude/lambda-experiments/new_findings.md`
+5. **Incident report**: `${CLAUDE_PLUGIN_ROOT}/state/incident_report.md`
+6. **New findings**: `${CLAUDE_PLUGIN_ROOT}/state/new_findings.md`
 
 ## Report Types
 
@@ -113,7 +113,7 @@ python3 "$SEND_SCRIPT" \
 
 Only include `--image` args for charts that were actually generated.
 
-If sending fails, save to `~/.claude/lambda-experiments/email-draft.html`.
+If sending fails, save to `${CLAUDE_PLUGIN_ROOT}/state/email-draft.html`.
 
 ## Footer
 

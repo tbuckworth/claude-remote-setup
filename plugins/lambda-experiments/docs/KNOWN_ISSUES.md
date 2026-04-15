@@ -36,6 +36,14 @@ Each issue has:
 - **Severity**: critical (blocks all SSH)
 - **Auto-fixable**: yes
 
+### SSH Key Mismatch (Desktop vs MacBook)
+- **Pattern**: `Permission denied (publickey)` after ssh-add succeeds
+- **Diagnosis**: Lambda SSH keys are registered per-machine. MacBook key is `tbuckworth-key`, desktop key is `tbuckworth-desktop`. The poller script defaults to `--ssh-key tbuckworth-key` which fails on the desktop.
+- **Fix**: Pass `--ssh-key tbuckworth-desktop` when running from the desktop.
+- **Severity**: critical (blocks all SSH, ~$0.50 wasted on idle instance)
+- **Auto-fixable**: partially (detect hostname and select key)
+- **Discovered**: 2026-04-14
+
 ---
 
 ## Python & Dependencies
@@ -60,6 +68,14 @@ Each issue has:
 - **Fix**: `pip install 'huggingface_hub<1.0'` after installing inspect_evals
 - **Severity**: critical
 - **Auto-fixable**: yes
+
+### Missing Modal Package (Scorer Crash)
+- **Pattern**: `ImportError("The 'modal' package is required for Modal sandbox support")`
+- **Diagnosis**: PTB scorers (`scorers.py`) unconditionally call `ModalSandboxManager.get_instance()` regardless of `execution_mode`. The `modal` package is an optional extra, not installed by `--extra scaffold`. Scorers crash after the agent completes, losing the entire transcript.
+- **Fix**: Always include `--extra modal` alongside `--extra scaffold` when running PTB: `uv sync --dev --extra scaffold --extra modal`
+- **Severity**: critical (agent work is lost, scoring fails silently)
+- **Auto-fixable**: yes (add `--extra modal` to uv commands)
+- **Discovered**: 2026-03-25
 
 ---
 
@@ -182,6 +198,27 @@ Each issue has:
 - **Fix**: Check tmux sessions: `ssh ubuntu@IP 'tmux list-sessions'`. If orchestrator session dead but training alive, manually manage remaining phases.
 - **Severity**: critical
 - **Auto-fixable**: partially (can detect, recovery needs judgment)
+
+### Container Replacement on Retry Destroys Results
+- **Pattern**: Trained model, checkpoints, and logs missing after agent retry
+- **Diagnosis**: Claude Code agent crashes (e.g., after 8h of training), and the retry mechanism replaces the Docker container entirely. This destroys: the final trained model, all checkpoint daemon captures, training logs, and evaluation results that existed in the original container.
+- **Fix**: Ensure container volumes persist across retries. Mount results to a host directory outside the container. Verify `final_model/` and checkpoint data survive before allowing retry.
+- **Severity**: critical (hours of GPU time wasted — $45+ in one incident)
+- **Auto-fixable**: no (requires architecture change to container management)
+- **Discovered**: 2026-04-14, exp5-gsm8k-10h-claude-code
+
+---
+
+## Lambda Filesystem
+
+### NFS Persistent Filesystem Serves Stale Code
+- **Pattern**: `Stale file handle` in experiment log, experiments using wrong branch/code despite verified checkout
+- **Diagnosis**: Lambda auto-creates a symlink `~/control-arena -> /lambda/nfs/control-arena` when a persistent filesystem named `control-arena` is attached. NFS has stale file handle issues and may cache old state. Even after `git checkout`, NFS may serve stale files to some experiment processes. All 6 experiments failed on first attempt in one incident.
+- **Fix**: Remove the symlink (`rm ~/control-arena`), clone fresh to local disk. Pin Python version with `.python-version` file.
+- **Severity**: critical (silent wrong-code execution)
+- **Auto-fixable**: yes (check `readlink ~/control-arena` before runs; remove if symlink)
+- **Prevention**: Before every Lambda run, check `readlink ~/control-arena`. If it's a symlink to NFS, remove it and clone fresh. NFS is useful for storing results/checkpoints but NOT for running experiments.
+- **Discovered**: 2026-03-25
 
 ---
 

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'STATE=\"$HOME/.claude/lambda-experiments/active.md\"; if [ ! -f \"$STATE\" ]; then echo \"{\\\"ok\\\": true}\"; exit 0; fi; PHASE=$(grep \"^current_phase:\" \"$STATE\" | head -1 | sed \"s/current_phase: *//;s/\\\"//g\"); if [ -z \"$PHASE\" ] || [ \"$PHASE\" = \"done\" ]; then echo \"{\\\"ok\\\": true}\"; else IP=$(grep \"^ip:\" \"$STATE\" | head -1 | sed \"s/ip: *//;s/\\\"//g\"); COST=$(grep \"^estimated_cost_usd:\" \"$STATE\" | head -1 | sed \"s/estimated_cost_usd: *//\"); echo \"{\\\"ok\\\": false, \\\"reason\\\": \\\"Active Lambda instance (phase: $PHASE, IP: $IP, cost: ~\\$$COST). Run /lambda status or /lambda terminate before ending.\\\"}\"; fi'",
+            "command": "bash -c 'STATE=\"$CLAUDE_PLUGIN_ROOT/state/active.md\"; if [ ! -f \"$STATE\" ]; then echo \"{\\\"ok\\\": true}\"; exit 0; fi; PHASE=$(grep \"^current_phase:\" \"$STATE\" | head -1 | sed \"s/current_phase: *//;s/\\\"//g\"); if [ -z \"$PHASE\" ] || [ \"$PHASE\" = \"done\" ]; then echo \"{\\\"ok\\\": true}\"; else IP=$(grep \"^ip:\" \"$STATE\" | head -1 | sed \"s/ip: *//;s/\\\"//g\"); COST=$(grep \"^estimated_cost_usd:\" \"$STATE\" | head -1 | sed \"s/estimated_cost_usd: *//\"); echo \"{\\\"ok\\\": false, \\\"reason\\\": \\\"Active Lambda instance (phase: $PHASE, IP: $IP, cost: ~\\$$COST). Run /lambda status or /lambda terminate before ending.\\\"}\"; fi'",
             "timeout": 5
           }
         ]
