@@ -23,3 +23,6 @@ plugins/**/node_modules/
 
 # Researcher plugin lives in its own repo (tbuckworth/ai-safety-researcher)
 plugins/researcher
+
+# Sell-stuff plugin lives in its own repo
+plugins/sell-stuff
