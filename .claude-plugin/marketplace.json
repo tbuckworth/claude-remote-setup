@@ -65,7 +65,7 @@
     },
     {
       "name": "researcher",
-      "description": "AI Safety R&D Agent — 10-step interactive research workflow using Steinhardt fail-fast methodology",
+      "description": "AI Safety R&D Agent \u2014 10-step interactive research workflow using Steinhardt fail-fast methodology",
       "version": "0.2.0",
       "source": "./plugins/researcher",
       "category": "development"
@@ -79,10 +79,17 @@
     },
     {
       "name": "lambda-experiments",
-      "description": "Orchestrate Control Arena experiments on Lambda GPU instances — polling, setup, execution, monitoring, collection, and safe termination",
+      "description": "Orchestrate Control Arena experiments on Lambda GPU instances \u2014 polling, setup, execution, monitoring, collection, and safe termination",
       "version": "0.1.0",
       "source": "./plugins/lambda-experiments",
       "category": "development"
+    },
+    {
+      "name": "sell-stuff",
+      "description": "Sell items on eBay with minimal effort \u2014 price research, listing generation, and browser automation",
+      "version": "0.1.0",
+      "source": "./plugins/sell-stuff",
+      "category": "productivity"
     }
   ]
 }
