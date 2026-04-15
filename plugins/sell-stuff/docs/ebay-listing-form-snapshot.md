@@ -1,0 +1,726 @@
+- generic [active] [ref=e1]:
+  - img
+  - img
+  - generic [ref=e2]:
+    - banner [ref=e8]:
+      - link "Skip to main content" [ref=e10] [cursor=pointer]:
+        - /url: "#mainContent"
+      - link "eBay Home" [ref=e13] [cursor=pointer]:
+        - /url: https://www.ebay.co.uk
+        - img "eBay Home" [ref=e14]
+    - main [ref=e21]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic:
+            - button "Help" [ref=e25] [cursor=pointer]:
+              - img
+            - button "More options" [ref=e27] [cursor=pointer]:
+              - img
+          - generic [ref=e28]:
+            - heading "Complete your listing" [level=1] [ref=e30]
+            - generic [ref=e31]:
+              - generic [ref=e33]:
+                - heading "Photos & Video" [level=2] [ref=e35]
+                - button "See photo options" [ref=e40] [cursor=pointer]:
+                  - generic [ref=e41]: See photo options
+                  - generic [ref=e42]:
+                    - img
+              - generic [ref=e43]:
+                - generic [ref=e45]:
+                  - generic [ref=e46]: You can add up to 40 photos and a 1-minute video. Buyers want to see all details and angles.
+                  - generic "Learn about the photo tips to attract more buyers" [ref=e50]:
+                    - button "Tips for taking pro photos" [ref=e52] [cursor=pointer]
+                - generic [ref=e54]:
+                  - paragraph [ref=e56]:
+                    - text: 0/25
+                    - generic [ref=e57]: 0 out of 25 photos or videos uploaded
+                  - generic [ref=e61]:
+                    - generic [ref=e62]:
+                      - img
+                    - generic [ref=e63]: Drag and drop files
+                    - button "Upload from computer" [ref=e65] [cursor=pointer]
+            - generic [ref=e67]:
+              - generic [ref=e69]:
+                - heading "Title" [level=2] [ref=e71]
+                - button "See title options" [ref=e76] [cursor=pointer]:
+                  - generic [ref=e77]: See title options
+                  - generic [ref=e78]:
+                    - img
+              - generic [ref=e80]:
+                - generic [ref=e84]: Item title
+                - generic [ref=e85]:
+                  - textbox "Item title" [ref=e88]: Microsoft Surface Book 3 13.5" Touchscreen i7-1065G7 16GB RAM 256GB SSD GTX 1650
+                  - generic [ref=e91]:
+                    - text: 80/80
+                    - generic [ref=e92]: Your input has reached the maximum character limit.
+            - generic [ref=e94]:
+              - generic [ref=e96]:
+                - heading "Item category" [level=2] [ref=e98]
+                - button "Edit Item category" [ref=e99] [cursor=pointer]:
+                  - img
+                  - text: Edit
+              - generic [ref=e102]:
+                - button "PC Laptops & Netbooks Item category First category" [ref=e103] [cursor=pointer]: PC Laptops & Netbooks
+                - generic [ref=e104]: in Computers/Tablets & Networking > Laptops & Netbooks
+            - generic [ref=e107]:
+              - heading "Variations" [level=2] [ref=e110]
+              - region "information" [ref=e112]:
+                - generic [ref=e113]:
+                  - img "information"
+                - paragraph [ref=e115]:
+                  - text: Variations are for selling an item in multiple different sizes, colours, etc. Only available for Buy It Now pricing.
+                  - button "Go to pricing format" [ref=e116] [cursor=pointer]
+            - generic [ref=e118]:
+              - generic [ref=e125]:
+                - heading "Item specifics" [level=2] [ref=e127]
+                - region "Review item specifics" [ref=e128]:
+                  - generic [ref=e131]:
+                    - generic [ref=e132]:
+                      - generic [ref=e133]: Review item specifics
+                      - text: Make sure these item specifics copied from another listing apply to your item
+                    - button "Dismiss tourtip" [ref=e134] [cursor=pointer]:
+                      - img
+              - generic [ref=e135]:
+                - group "Required" [ref=e136]:
+                  - heading "Required" [level=3] [ref=e138]
+                  - generic [ref=e139]: Buyers need these details to find your item.
+                  - generic [ref=e140]:
+                    - button "Brand" [ref=e145] [cursor=pointer]
+                    - button "Microsoft" [ref=e150] [cursor=pointer]:
+                      - generic [ref=e151]:
+                        - generic [ref=e153]: Microsoft
+                        - img
+                  - generic [ref=e154]:
+                    - button "Screen Size" [ref=e159] [cursor=pointer]
+                    - button "13.5 in" [ref=e164] [cursor=pointer]:
+                      - generic [ref=e165]:
+                        - generic [ref=e167]: 13.5 in
+                        - img
+                  - generic [ref=e168]:
+                    - button "Processor" [ref=e173] [cursor=pointer]
+                    - button "Intel® Core™ i7-1065G7" [ref=e178] [cursor=pointer]:
+                      - generic [ref=e179]:
+                        - generic [ref=e181]: Intel® Core™ i7-1065G7
+                        - img
+                - group "Additional (optional)" [ref=e182]:
+                  - heading "Additional (optional)" [level=3] [ref=e184]
+                  - generic [ref=e185]: Buyers also search for these details.
+                  - generic [ref=e188]:
+                    - generic [ref=e192]: EAN
+                    - textbox "EAN" [ref=e196]:
+                      - /placeholder: Enter number
+                      - text: N/A
+                  - generic [ref=e197]:
+                    - generic [ref=e198]:
+                      - button "Model" [ref=e202] [cursor=pointer]
+                      - button "~ 238.4k searches" [ref=e206] [cursor=pointer]
+                    - button "Microsoft Surface Book" [ref=e211] [cursor=pointer]:
+                      - generic [ref=e212]:
+                        - generic [ref=e214]: Microsoft Surface Book
+                        - img
+                  - generic [ref=e215]:
+                    - generic [ref=e216]:
+                      - button "Operating System" [ref=e220] [cursor=pointer]
+                      - button "~ 79.5k searches" [ref=e224] [cursor=pointer]
+                    - button "Windows 11 Pro" [ref=e229] [cursor=pointer]:
+                      - generic [ref=e230]:
+                        - generic [ref=e232]: Windows 11 Pro
+                        - img
+                  - generic [ref=e233]:
+                    - generic [ref=e234]:
+                      - button "Storage Type" [ref=e238] [cursor=pointer]
+                      - button "~ 42.7k searches" [ref=e242] [cursor=pointer]
+                    - button "SSD (Solid State Drive)" [ref=e247] [cursor=pointer]:
+                      - generic [ref=e248]:
+                        - generic [ref=e250]: SSD (Solid State Drive)
+                        - img
+                  - generic [ref=e251]:
+                    - generic [ref=e252]:
+                      - button "Features" [ref=e256] [cursor=pointer]
+                      - button "~ 35.3k searches" [ref=e260] [cursor=pointer]
+                    - button "Bluetooth (+7)" [ref=e265] [cursor=pointer]:
+                      - generic [ref=e266]:
+                        - generic [ref=e267]:
+                          - generic [ref=e268]: Bluetooth
+                          - generic [ref=e269]: (+7)
+                        - img
+                  - generic [ref=e270]:
+                    - generic [ref=e271]:
+                      - button "SSD Capacity" [ref=e275] [cursor=pointer]
+                      - button "~ 33.4k searches" [ref=e279] [cursor=pointer]
+                    - button "256 GB" [ref=e284] [cursor=pointer]:
+                      - generic [ref=e285]:
+                        - generic [ref=e287]: 256 GB
+                        - img
+                  - generic [ref=e288]:
+                    - generic [ref=e289]:
+                      - button "Type" [ref=e293] [cursor=pointer]
+                      - button "~ 23.4k searches" [ref=e297] [cursor=pointer]
+                    - button "Notebook/Laptop" [ref=e302] [cursor=pointer]:
+                      - generic [ref=e303]:
+                        - generic [ref=e305]: Notebook/Laptop
+                        - img
+                  - generic [ref=e306]:
+                    - generic [ref=e307]:
+                      - button "Hard Drive Capacity" [ref=e311] [cursor=pointer]
+                      - button "~ 21.5k searches" [ref=e315] [cursor=pointer]
+                    - button "256 GB" [ref=e320] [cursor=pointer]:
+                      - generic [ref=e321]:
+                        - generic [ref=e323]: 256 GB
+                        - img
+                  - generic [ref=e324]:
+                    - generic [ref=e325]:
+                      - button "GPU" [ref=e329] [cursor=pointer]
+                      - button "~ 20.9k searches" [ref=e333] [cursor=pointer]
+                    - button "NVIDIA GeForce GTX 1650 Max-Q" [ref=e338] [cursor=pointer]:
+                      - generic [ref=e339]:
+                        - generic [ref=e341]: NVIDIA GeForce GTX 1650 Max-Q
+                        - img
+                  - generic [ref=e342]:
+                    - generic [ref=e343]:
+                      - button "Release Year" [ref=e347] [cursor=pointer]
+                      - button "~ 13.9k searches" [ref=e351] [cursor=pointer]
+                    - button "N/A" [ref=e356] [cursor=pointer]:
+                      - generic [ref=e357]:
+                        - generic [ref=e359]: N/A
+                        - img
+                  - generic [ref=e360]:
+                    - generic [ref=e361]:
+                      - button "Colour" [ref=e365] [cursor=pointer]
+                      - button "Trending" [ref=e369] [cursor=pointer]
+                    - button "Silver" [ref=e374] [cursor=pointer]:
+                      - generic [ref=e375]:
+                        - generic [ref=e377]: Silver
+                        - img
+                  - generic [ref=e378]:
+                    - generic [ref=e379]:
+                      - button "Maximum Resolution" [ref=e383] [cursor=pointer]
+                      - button "Trending" [ref=e387] [cursor=pointer]
+                    - button "3000 x 2000" [ref=e392] [cursor=pointer]:
+                      - generic [ref=e393]:
+                        - generic [ref=e395]: 3000 x 2000
+                        - img
+                  - generic [ref=e396]:
+                    - generic [ref=e397]:
+                      - button "Processor Speed" [ref=e401] [cursor=pointer]
+                      - button "Trending" [ref=e405] [cursor=pointer]
+                    - button "3.90 GHz" [ref=e410] [cursor=pointer]:
+                      - generic [ref=e411]:
+                        - generic [ref=e413]: 3.90 GHz
+                        - img
+                  - generic [ref=e414]:
+                    - button "MPN" [ref=e419] [cursor=pointer]
+                    - button "Surface Book 3" [ref=e424] [cursor=pointer]:
+                      - generic [ref=e425]:
+                        - generic [ref=e427]: Surface Book 3
+                        - img
+                  - generic [ref=e428]:
+                    - button "Unit Quantity" [ref=e433] [cursor=pointer]
+                    - textbox "Unit Quantity" [ref=e439]:
+                      - /placeholder: Enter your own
+                      - text: "1"
+                  - generic [ref=e440]:
+                    - button "Unit Type" [ref=e445] [cursor=pointer]
+                    - button "Unit" [ref=e450] [cursor=pointer]:
+                      - generic [ref=e451]:
+                        - generic [ref=e453]: Unit
+                        - img
+                  - generic [ref=e454]:
+                    - generic [ref=e455]:
+                      - button "Series" [ref=e459] [cursor=pointer]
+                      - button "~ 518.3k searches" [ref=e463] [cursor=pointer]
+                    - button "Surface" [ref=e468] [cursor=pointer]:
+                      - generic [ref=e469]:
+                        - generic [ref=e471]: Surface
+                        - img
+                  - generic [ref=e472]:
+                    - generic [ref=e473]:
+                      - button "RAM Size" [ref=e477] [cursor=pointer]
+                      - button "~ 211.3k searches" [ref=e481] [cursor=pointer]
+                    - button "256 GB" [ref=e486] [cursor=pointer]:
+                      - generic [ref=e487]:
+                        - generic [ref=e489]: 256 GB
+                        - img
+                  - generic [ref=e490]:
+                    - generic [ref=e491]:
+                      - button "Most Suitable For" [ref=e495] [cursor=pointer]
+                      - button "~ 149.2k searches" [ref=e499] [cursor=pointer]
+                    - button "Casual Computing (+1)" [ref=e504] [cursor=pointer]:
+                      - generic [ref=e505]:
+                        - generic [ref=e506]:
+                          - generic [ref=e507]: Casual Computing
+                          - generic [ref=e508]: (+1)
+                        - img
+                  - generic [ref=e509]:
+                    - generic [ref=e510]:
+                      - button "Graphics Processing Type" [ref=e514] [cursor=pointer]
+                      - button "~ 10.7k searches" [ref=e518] [cursor=pointer]
+                    - button "Dedicated Graphics" [ref=e523] [cursor=pointer]:
+                      - generic [ref=e524]:
+                        - generic [ref=e526]: Dedicated Graphics
+                        - img
+                  - generic [ref=e527]:
+                    - generic [ref=e528]:
+                      - button "Connectivity" [ref=e532] [cursor=pointer]
+                      - button "~ 2.3k searches" [ref=e536] [cursor=pointer]
+                    - button "USB-C (+3)" [ref=e541] [cursor=pointer]:
+                      - generic [ref=e542]:
+                        - generic [ref=e543]:
+                          - generic [ref=e544]: USB-C
+                          - generic [ref=e545]: (+3)
+                        - img
+                  - generic [ref=e546]:
+                    - generic [ref=e547]:
+                      - button "Manufacturer Warranty" [ref=e551] [cursor=pointer]
+                      - button "~ 440 searches" [ref=e555] [cursor=pointer]
+                    - button "None" [ref=e560] [cursor=pointer]:
+                      - generic [ref=e561]:
+                        - generic [ref=e563]: None
+                        - img
+                  - generic [ref=e564]:
+                    - generic [ref=e565]:
+                      - button "Country of Origin" [ref=e569] [cursor=pointer]
+                      - button "~ 133 searches" [ref=e573] [cursor=pointer]
+                    - button "China" [ref=e578] [cursor=pointer]:
+                      - generic [ref=e579]:
+                        - generic [ref=e581]: China
+                        - img
+                  - generic [ref=e582]:
+                    - button "Item Width" [ref=e587] [cursor=pointer]
+                    - textbox "Item Width" [ref=e593]:
+                      - /placeholder: Enter your own
+                  - generic [ref=e594]:
+                    - button "Item Height" [ref=e599] [cursor=pointer]
+                    - textbox "Item Height" [ref=e605]:
+                      - /placeholder: Enter your own
+                  - generic [ref=e606]:
+                    - button "Item Length" [ref=e611] [cursor=pointer]
+                    - textbox "Item Length" [ref=e617]:
+                      - /placeholder: Enter your own
+                  - generic [ref=e618]:
+                    - button "Item Weight" [ref=e623] [cursor=pointer]
+                    - textbox "Item Weight" [ref=e629]:
+                      - /placeholder: Enter your own
+                  - generic [ref=e630]:
+                    - generic [ref=e632]: Materials sourced from
+                    - generic [ref=e633]:
+                      - textbox "Materials sourced from" [ref=e638]:
+                        - /placeholder: Enter your own
+                        - text: China
+                      - button "Remove Materials sourced from attribute" [ref=e639] [cursor=pointer]:
+                        - img
+                - button "Show more" [ref=e640] [cursor=pointer]:
+                  - generic [ref=e641]: Show more
+                  - img
+            - generic [ref=e643]:
+              - heading "Condition" [level=2] [ref=e647]
+              - generic [ref=e648]:
+                - heading "Item condition" [level=3] [ref=e650]
+                - button "Used Item condition" [ref=e651] [cursor=pointer]: Used
+              - generic [ref=e653]:
+                - generic [ref=e656]:
+                  - generic [ref=e657]: Condition description
+                  - button "Help tip for Condition description field" [ref=e662] [cursor=pointer]:
+                    - img
+                - generic [ref=e663]:
+                  - textbox "Condition description" [ref=e665]
+                  - generic [ref=e668]: 0/1000
+            - generic [ref=e670]:
+              - heading "Description" [level=2] [ref=e674]
+              - generic [ref=e675]:
+                - generic [ref=e678]:
+                  - list [ref=e679]:
+                    - listitem [ref=e680]:
+                      - button "Bold" [ref=e681] [cursor=pointer]: B
+                    - listitem [ref=e682]:
+                      - button "Unordered list" [ref=e683] [cursor=pointer]:
+                        - img [ref=e684]
+                    - listitem:
+                      - button "Custom template" [ref=e686] [cursor=pointer]:
+                        - generic [ref=e687]: Custom template
+                        - img
+                    - listitem:
+                      - button "Show all options" [ref=e688] [cursor=pointer]
+                  - iframe [ref=e691]:
+                    - textbox "Description" [ref=f7e2]: Write a detailed description of your item, or save time and let AI draft it for you
+                - button "Use AI description" [ref=e694] [cursor=pointer]
+            - generic [ref=e696]:
+              - generic [ref=e698]:
+                - heading "Pricing" [level=2] [ref=e700]
+                - button "See pricing options" [ref=e705] [cursor=pointer]:
+                  - generic [ref=e706]: See pricing options
+                  - generic [ref=e707]:
+                    - img
+              - generic [ref=e708]:
+                - generic [ref=e709]:
+                  - generic [ref=e710]:
+                    - generic [ref=e712]:
+                      - generic [ref=e716]: Format
+                      - button "Format Auction" [ref=e719] [cursor=pointer]:
+                        - generic [ref=e720]:
+                          - generic [ref=e721]: Auction
+                          - img
+                    - generic [ref=e723]:
+                      - generic [ref=e727]: Auction duration
+                      - button "Auction duration 10 days" [ref=e730] [cursor=pointer]:
+                        - generic [ref=e731]:
+                          - generic [ref=e732]: 10 days
+                          - img
+                    - generic [ref=e733]:
+                      - generic [ref=e736]:
+                        - generic [ref=e740]: Starting bid
+                        - generic [ref=e741]:
+                          - generic [ref=e742]:
+                            - generic [ref=e743]: £
+                            - textbox "Starting bid" [ref=e745]: "103.70"
+                          - generic [ref=e747]: + £4.85 Buyer Protection fee
+                      - generic [ref=e749]:
+                        - generic [ref=e753]: Buyer will pay
+                        - generic [ref=e755]:
+                          - generic [ref=e756]: £
+                          - textbox "Buyer will pay" [ref=e758]: "108.55"
+                    - region "information" [ref=e760]:
+                      - generic [ref=e761]:
+                        - img "information"
+                      - generic [ref=e763]:
+                        - text: UK buyers will pay £108.55, which includes the
+                        - button "Buyer Protection fee" [ref=e764] [cursor=pointer]
+                        - text: .
+                    - generic [ref=e765]:
+                      - generic [ref=e768]:
+                        - generic [ref=e771]:
+                          - generic [ref=e772]: Buy It Now
+                          - text: (optional)
+                        - generic [ref=e773]:
+                          - generic [ref=e774]:
+                            - generic [ref=e775]: £
+                            - textbox "Buy It Now" [ref=e777]: "339.61"
+                          - generic [ref=e779]: + £13.49 Buyer Protection fee
+                      - generic [ref=e781]:
+                        - generic [ref=e785]: Buyer will pay
+                        - generic [ref=e787]:
+                          - generic [ref=e788]: £
+                          - textbox "Buyer will pay" [ref=e790]: "353.10"
+                    - region "information" [ref=e792]:
+                      - generic [ref=e793]:
+                        - img "information"
+                      - generic [ref=e795]:
+                        - text: UK buyers will pay £353.10, which includes the
+                        - button "Buyer Protection fee" [ref=e796] [cursor=pointer]
+                        - text: .
+                    - generic [ref=e798]:
+                      - generic [ref=e799]:
+                        - checkbox "Require immediate payment when buyer uses Buy it now" [ref=e800]
+                        - generic [ref=e801]:
+                          - img
+                      - generic [ref=e804]: Require immediate payment when buyer uses Buy it now
+                    - generic [ref=e808]:
+                      - generic [ref=e811]:
+                        - generic [ref=e812]: Reserve price
+                        - text: (optional) — fees apply
+                        - button "Help tip for Reserve price field" [ref=e817] [cursor=pointer]:
+                          - img
+                      - generic [ref=e819]:
+                        - generic [ref=e820]: £
+                        - textbox "Reserve price(optional) — fees apply" [ref=e822]
+                    - generic [ref=e824]:
+                      - generic [ref=e828]: Quantity
+                      - textbox "Quantity" [disabled] [ref=e832]: "1"
+                  - generic [ref=e835] [cursor=pointer]:
+                    - generic [ref=e836]:
+                      - generic [ref=e837]: Sold listings in the last 90 days
+                      - 'button "Information tip: Sold listings in the last 90 days" [ref=e841]':
+                        - img
+                    - generic [ref=e842]:
+                      - generic [ref=e843]:
+                        - generic [ref=e844]: Recommended starting bid
+                        - generic [ref=e845]: £103.70
+                      - generic [ref=e846]:
+                        - generic [ref=e847]: Recommended price
+                        - generic [ref=e848]: £339.61
+                      - generic [ref=e849]:
+                        - generic [ref=e850]: Free postage
+                        - generic [ref=e851]: 25%
+                    - button "See similar listings" [ref=e854]
+                - generic [ref=e857]:
+                  - generic [ref=e859]:
+                    - generic [ref=e861]: Schedule your listing
+                    - generic [ref=e862]: Your listing goes live immediately, unless you select a time and date you want it to start.
+                  - switch "Schedule your listing" [ref=e865]
+                - generic [ref=e869]:
+                  - generic [ref=e870]:
+                    - checkbox "Auto-relist" [checked] [ref=e871]
+                    - generic [ref=e872]:
+                      - img
+                  - generic [ref=e874]:
+                    - generic [ref=e875]: Auto-relist
+                    - button "Help tip for Auto-relist field" [ref=e880] [cursor=pointer]:
+                      - img
+            - generic [ref=e882]:
+              - generic [ref=e884]:
+                - heading "Delivery details" [level=2] [ref=e886]
+                - button "See postage options" [ref=e891] [cursor=pointer]:
+                  - generic [ref=e892]: See postage options
+                  - generic [ref=e893]:
+                    - img
+              - generic [ref=e894]:
+                - list "Delivery method" [ref=e897]:
+                  - listitem [ref=e898]:
+                    - button "Postage or collection in person Let buyers choose how they get their items." [pressed] [ref=e899] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic:
+                        - generic: Postage or collection in person
+                        - generic: Let buyers choose how they get their items.
+                  - listitem [ref=e900]:
+                    - button "Postage only Post items directly to buyers." [ref=e901] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic:
+                        - generic: Postage only
+                        - generic: Post items directly to buyers.
+                  - listitem [ref=e902]:
+                    - button "Collection only Arrange collection in person without any postage costs." [ref=e903] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic:
+                        - generic: Collection only
+                        - generic: Arrange collection in person without any postage costs.
+                - generic [ref=e904]:
+                  - heading "Package size" [level=3] [ref=e1138]
+                  - button "Medium parcel Up to 10 kg, 61 x 46 x 46 cm" [ref=e1140] [cursor=pointer]:
+                    - generic [ref=e1141]:
+                      - generic [ref=e1142]:
+                        - generic [ref=e1143]: Medium parcel
+                        - generic [ref=e1144]: Up to 10 kg, 61 x 46 x 46 cm
+                      - generic [ref=e1145]:
+                        - img
+                - generic [ref=e1146]:
+                  - heading "Domestic postage" [level=3] [ref=e1148]
+                  - generic [ref=e1156]:
+                    - generic [ref=e1157]:
+                      - generic [ref=e1158]: Simple Delivery
+                      - generic [ref=e1159]: Prepaid Royal Mail, Evri or InPost label provided
+                      - generic [ref=e1160]: Full protection and tracking
+                      - generic [ref=e1161]: 1–3 working days
+                    - button "How it works" [ref=e1162] [cursor=pointer]
+                    - link "Choose couriers" [ref=e1163] [cursor=pointer]:
+                      - /url: /ship/prf/simpledelivery?returnUrl=https%3A%2F%2Fwww.ebay.co.uk%2Flstng%3FdraftId%3D5211144942211%26mode%3DSellLikeItem
+                - generic [ref=e914]:
+                  - heading "Who pays?" [level=4] [ref=e1165]
+                  - generic [ref=e1166]:
+                    - list [ref=e1169]:
+                      - listitem [ref=e1170]:
+                        - button "Buyer pays" [ref=e1171] [cursor=pointer]
+                      - listitem [ref=e1172]:
+                        - button "Seller pays" [ref=e1173] [cursor=pointer]
+                    - generic [ref=e1174]: "The buyer will pay rates starting from:"
+                    - generic [ref=e1175]: £5.88
+                    - generic [ref=e1176]: Based on the service they select
+                - generic [ref=e918]:
+                  - heading "International postage" [level=3] [ref=e919]
+                  - generic [ref=e921]:
+                    - generic [ref=e923]:
+                      - generic [ref=e925]: Send with the Global Shipping Programme
+                      - generic [ref=e926]:
+                        - text: Send your item to the UK Global Shipping Centre and customs forms, postage, and tracking will be taken care of for you.
+                        - link "Learn more Global Shipping Programme - opens in new window or tab" [ref=e927] [cursor=pointer]:
+                          - /url: https://www.ebay.co.uk/help/global-shipping-program/default/global-shipping-program?id=4646
+                          - text: Learn more
+                          - generic [ref=e928]: Global Shipping Programme - opens in new window or tab
+                    - switch "Send with the Global Shipping Programme" [ref=e931]
+                  - generic [ref=e934]:
+                    - generic [ref=e936]:
+                      - generic [ref=e938]: Add other postage services
+                      - generic [ref=e939]: When you choose another international postage service, we’ll use it instead of Global Shipping Programme, wherever applicable.
+                    - switch "Add other postage services" [ref=e942]
+                - generic [ref=e944]:
+                  - generic [ref=e945]:
+                    - heading "Collection in person" [level=3] [ref=e946]
+                    - generic [ref=e947]: Reach local buyers and post fewer packages.
+                  - generic [ref=e948]:
+                    - generic [ref=e949]:
+                      - generic [ref=e950]:
+                        - generic [ref=e954]: Postcode
+                        - textbox "Postcode" [ref=e958]: N1 1DJ
+                      - generic [ref=e959]:
+                        - generic [ref=e963]: City, area
+                        - textbox "City, area" [ref=e967]: London
+                    - generic [ref=e968]: Postcode will not be visible on the listing.
+                - generic [ref=e969]:
+                  - heading "Item origin" [level=3] [ref=e970]
+                  - generic [ref=e971]:
+                    - generic [ref=e972]:
+                      - generic [ref=e973]: Country of Origin
+                      - button "Help tip for Country of Origin field" [ref=e977] [cursor=pointer]:
+                        - img
+                    - generic [ref=e979]:
+                      - button "China" [ref=e981] [cursor=pointer]:
+                        - generic [ref=e982]:
+                          - generic [ref=e984]: China
+                          - img
+                      - generic [ref=e986]:
+                        - text: This information may be needed for your listing to be visible to international buyers.
+                        - link "How to determine country of origin" [ref=e987] [cursor=pointer]:
+                          - /url: https://www.ebay.co.uk/sellercentre/global-sales/customs-requirements
+                - generic [ref=e988]:
+                  - heading "Preferences" [level=3] [ref=e989]
+                  - generic [ref=e990]:
+                    - heading "Your settings" [level=4] [ref=e991]
+                    - generic [ref=e992]: 2 working days handling
+                    - generic [ref=e993]:
+                      - generic [ref=e994]: Item location N1 1DJ (London, United Kingdom)
+                      - generic [ref=e995]: Postcode not visible on listing
+                    - generic [ref=e996]:
+                      - generic [ref=e997]: No returns accepted
+                      - generic [ref=e998]: Unless item is not as described
+                    - button "Your settings - edit" [ref=e999] [cursor=pointer]:
+                      - img
+                  - generic [ref=e1000]:
+                    - generic [ref=e1003]:
+                      - generic [ref=e1004]: Excluded locations
+                      - text: (optional)
+                    - button "Excluded locations" [ref=e1006] [cursor=pointer]:
+                      - generic [ref=e1007]:
+                        - generic [ref=e1008]: None
+                        - img
+            - generic [ref=e1010]:
+              - heading "Item disclosures" [level=2] [ref=e1014]
+              - generic [ref=e1015]: Provide more details about your item’s safety and quality standards if you post to buyers in the EU/UK.
+              - generic [ref=e1017]:
+                - generic [ref=e1019]:
+                  - generic [ref=e1021]: Product documents
+                  - generic [ref=e1022]:
+                    - text: Upload user guides, certificates, documents and accessibility information that are included with the item.
+                    - link "Learn more – opens in a new window or tab" [ref=e1023] [cursor=pointer]:
+                      - /url: https://www.ebay.co.uk/help/selling/selling/hazardous-materials-labeling?id=5407
+                      - text: Learn more
+                      - generic [ref=e1024]: – opens in a new window or tab
+                - switch "Product documents" [ref=e1027]
+            - generic [ref=e1030]:
+              - heading "PROMOTE YOUR LISTING" [level=2] [ref=e1034]
+              - generic [ref=e1035]:
+                - generic [ref=e1036]:
+                  - paragraph [ref=e1037]: Competitive category
+                  - paragraph [ref=e1038]: 42% of items in PC Laptops & Netbooks are promoted right now.
+                - generic [ref=e1040]:
+                  - img "listing image" [ref=e1042]
+                  - generic [ref=e1048]: Sponsored
+              - generic [ref=e1050]:
+                - generic [ref=e1051]:
+                  - heading "General" [level=4] [ref=e1052]
+                  - switch "Toggle General" [ref=e1054]
+                - generic [ref=e1056]:
+                  - generic [ref=e1057]:
+                    - generic [ref=e1058]:
+                      - img
+                      - generic [ref=e1059]: 90%
+                    - generic [ref=e1061]:
+                      - text: more visibility, on
+                      - generic [ref=e1062]:
+                        - text: average.
+                        - button "More visibility explanation" [ref=e1066] [cursor=pointer]:
+                          - img
+                  - list [ref=e1067]:
+                    - listitem [ref=e1068]:
+                      - img
+                      - generic [ref=e1069]: Show in more visible places across eBay
+                    - listitem [ref=e1070]:
+                      - img
+                      - generic [ref=e1071]:
+                        - text: Auctions saw 30% more bidders and 40% more bids, on average*
+                        - button "Comparing promoted to non-promoted auctions. Results may vary. Internal eBay data (Jul 2024 – Aug 2024)." [ref=e1075] [cursor=pointer]:
+                          - img
+                    - listitem [ref=e1076]:
+                      - img
+                      - generic [ref=e1077]: Only pay when your item sells
+              - button "Learn more" [ref=e1079] [cursor=pointer]:
+                - img
+                - text: Learn more
+            - generic [ref=e1081]:
+              - generic [ref=e1083]:
+                - heading "Charity" [level=2] [ref=e1085]
+                - button "Edit Charity" [ref=e1086] [cursor=pointer]:
+                  - img
+                  - text: Edit
+              - region "information" [ref=e1087]:
+                - generic [ref=e1088]:
+                  - img "information"
+                - paragraph [ref=e1090]:
+                  - text: Donate a portion of this sale to the charity of your choice.
+                  - link "Learn more Opens in a new window or tab" [ref=e1091] [cursor=pointer]:
+                    - /url: http://www.ebay.co.uk/help/donating-ebay-charity/default/buying-selling-ebay-benefit-nonprofit-organizations?id=4668
+                    - text: Learn more
+                    - generic [ref=e1092]: Opens in a new window or tab
+            - generic [ref=e1094]:
+              - generic [ref=e1095]:
+                - heading "Listing fee" [level=2] [ref=e1096]
+                - generic [ref=e1097]: £0.00
+              - generic [ref=e1098]:
+                - generic [ref=e1099]:
+                  - text: "No"
+                  - link "transaction fees" [ref=e1100] [cursor=pointer]:
+                    - /url: http://www.ebay.co.uk/help/selling/fees-credits-invoices/selling-fees?id=4822
+                  - text: will be applied. You accept that the duration of your listing may vary due to delayed appearance in search.
+                  - link "Learn more" [ref=e1101] [cursor=pointer]:
+                    - /url: https://www.ebay.co.uk/help/selling/listings/listings-overview?id=4072
+                - generic [ref=e1102]:
+                  - text: By selecting List it for free, you agree to pay the above fees, accept the
+                  - link "eBay User Agreement - opens in new window or tab" [ref=e1103] [cursor=pointer]:
+                    - /url: https://www.ebay.co.uk/help/policies/member-behaviour-policies/user-agreement?id=4259
+                    - text: eBay User Agreement
+                    - generic [ref=e1104]: "- opens in new window or tab"
+                  - text: ","
+                  - link "Payments Terms of Use - opens in new window or tab" [ref=e1105] [cursor=pointer]:
+                    - /url: https://pages.ebay.co.uk/payment/2.0/terms.html
+                    - text: Payments Terms of Use
+                    - generic [ref=e1106]: "- opens in new window or tab"
+                  - text: and
+                  - link "Marketing Program Terms - opens in new window or tab" [ref=e1107] [cursor=pointer]:
+                    - /url: https://pages.ebay.co.uk/promote-your-listings/terms/B2C/
+                    - text: Marketing Program Terms
+                    - generic [ref=e1108]: "- opens in new window or tab"
+                  - text: ", acknowledge reading the"
+                  - link "User Privacy Notice - opens in new window or tab" [ref=e1109] [cursor=pointer]:
+                    - /url: https://www.ebay.co.uk/help/policies/member-behaviour-policies/user-privacy-notice-privacy-policy?id=4260
+                    - text: User Privacy Notice
+                    - generic [ref=e1110]: "- opens in new window or tab"
+                  - text: ", agree to offer products and services that comply with all applicable laws, and assume full responsibility for the item offered and the content of your listing."
+                - generic [ref=e1111]:
+                  - text: By using Simple Delivery, you agree to the
+                  - link "eBay delivery Terms and Conditions" [ref=e1112] [cursor=pointer]:
+                    - /url: https://pages.ebay.co.uk/shipping/delivery/seller-tnc.html
+                  - text: .
+            - generic [ref=e1113]:
+              - button "List it for free" [ref=e1114] [cursor=pointer]
+              - button "Save for later" [ref=e1115] [cursor=pointer]
+              - button "Preview" [ref=e1116] [cursor=pointer]
+        - generic [ref=e1117]:
+          - paragraph [ref=e1118]: To improve your chances of selling, we may send you offers from buyers that you can choose to accept or decline.
+          - paragraph [ref=e1119]: Auctions will be automatically relisted up to 8 times for free and do not count towards your monthly listings balance. Auctions with a 1- or 3-day duration will be relisted with a 7-day duration.
+          - paragraph [ref=e1120]:
+            - text: Funds from your sales may be unavailable and show as pending for a period of time.
+            - link "Learn more - opens in new window or tab" [ref=e1121] [cursor=pointer]:
+              - /url: http://www.ebay.co.uk/help/selling/selling-getting-paid/pending-payments?id=4155
+              - text: Learn more
+              - generic [ref=e1122]: "- opens in new window or tab"
+    - contentinfo [ref=e1128]:
+      - generic [ref=e1129]:
+        - text: Copyright © 1995-2026 eBay Inc. All Rights Reserved.
+        - link "User Agreement" [ref=e1130] [cursor=pointer]:
+          - /url: https://www.ebay.co.uk/help/policies/member-behaviour-policies/user-agreement?id=4259
+        - text: ","
+        - link "Privacy" [ref=e1131] [cursor=pointer]:
+          - /url: https://www.ebay.co.uk/help/policies/member-behaviour-policies/user-privacy-notice-privacy-policy?id=4260
+        - text: ","
+        - link "Payments Terms of Use" [ref=e1132] [cursor=pointer]:
+          - /url: https://pages.ebay.co.uk/payment/2.0/terms.html
+        - text: ","
+        - link "Cookies" [ref=e1133] [cursor=pointer]:
+          - /url: https://www.ebay.co.uk/help/policies/member-behaviour-policies/ebay-cookie-notice?id=4267
+        - text: and
+        - link "AdChoice" [ref=e1134] [cursor=pointer]:
+          - /url: https://www.ebay.co.uk/adchoice
+          - text: AdChoice
+          - img
+  - img [ref=e1136]
