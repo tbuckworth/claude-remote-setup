@@ -1,0 +1,6 @@
+.claude/
+browser-data/
+.playwright-mcp/
+items/*/photos/
+.DS_Store
+items/*/listing-preview.*

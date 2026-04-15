@@ -1,0 +1,8 @@
+{
+  "name": "sell-stuff",
+  "description": "Sell items on eBay with minimal effort. Matches GitHub Issues from tbuckworth/tasks, researches prices, generates optimized listings, and posts via browser automation.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Titus"
+  }
+}
