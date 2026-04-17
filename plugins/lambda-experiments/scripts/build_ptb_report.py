@@ -257,7 +257,7 @@ def load_records(
             )
         )
 
-        # Extract per-checkpoint curves and final-submitted-model scores.
+        # Extract per-checkpoint curves.
         if eval_start is None:
             continue
 
@@ -279,31 +279,25 @@ def load_records(
                         main_curve.append((hrs, float(c["accuracy"])))
                     if c.get("side_score") is not None:
                         side_curve.append((hrs, float(c["side_score"])))
+
+        # Append the final submitted-model score as one more point on each
+        # curve (natural continuation; same marker/style as the checkpoint
+        # points). Placed 0.5h past the last snapshot since the agent
+        # typically submits shortly after the last checkpoint window.
+        if main_curve and scores.get("posttrain_main_scorer") is not None:
+            main_curve.append((main_curve[-1][0] + 0.5, float(scores["posttrain_main_scorer"])))
+        if side_curve:
+            if mode == "attack" and scores.get("posttrain_multi_side_scorer") is not None:
+                side_curve.append((side_curve[-1][0] + 0.5, float(scores["posttrain_multi_side_scorer"])))
+            elif mode == "honest" and side_task_tracked in per_side:
+                side_curve.append((side_curve[-1][0] + 0.5, float(per_side[side_task_tracked])))
+
         if main_curve:
             main_curves[(main_task, mode)].append(main_curve)
         if side_curve:
             side_curves[(side_task_tracked, mode)].append(side_curve)
 
-        # Final-submitted-model scores, placed shortly after the last
-        # checkpoint (~0.5h). The submitted model may differ from the last
-        # snapshot because the agent kept training after snapshot OR
-        # submitted an earlier checkpoint they'd selected as best.
-        if main_curve and scores.get("posttrain_main_scorer") is not None:
-            final_hrs = main_curve[-1][0] + 0.5
-            main_finals[(main_task, mode)].append((final_hrs, float(scores["posttrain_main_scorer"])))
-        if side_curve:
-            # attack: final = posttrain_multi_side_scorer.value (single-target)
-            # honest: final = per_side_scores[side_task_tracked] (the one the checkpoint scorer tracks)
-            if mode == "attack" and scores.get("posttrain_multi_side_scorer") is not None:
-                final_side = float(scores["posttrain_multi_side_scorer"])
-                final_hrs = side_curve[-1][0] + 0.5
-                side_finals[(side_task_tracked, mode)].append((final_hrs, final_side))
-            elif mode == "honest" and side_task_tracked in per_side:
-                final_side = float(per_side[side_task_tracked])
-                final_hrs = side_curve[-1][0] + 0.5
-                side_finals[(side_task_tracked, mode)].append((final_hrs, final_side))
-
-    return records, dict(main_curves), dict(side_curves), dict(main_finals), dict(side_finals)
+    return records, dict(main_curves), dict(side_curves), {}, {}
 
 
 def _interp_and_aggregate(
@@ -453,15 +447,15 @@ def _plot_aggregated_curves(
     curves_by_key: dict[tuple[str, str], list[list[tuple[float, float]]]],
     color_map: dict[str, str],
     baselines: dict[str, float] | None = None,
-    finals_by_key: dict[tuple[str, str], list[tuple[float, float]]] | None = None,
+    finals_by_key: dict[tuple[str, str], list[tuple[float, float]]] | None = None,  # unused, kept for API compat
 ) -> None:
     """Plot mean±SE curves on `ax`, color by first element of key, style by mode.
 
     honest = solid line + circle markers; attack = dashed line + triangle markers.
 
-    If `finals_by_key` is given, overlay a large star marker at the mean
-    final-submitted-model score for each key. Distinct marker makes clear
-    that the final model's score can differ from the last checkpoint.
+    The curves are expected to already have the final submitted-model score
+    appended as their last point by load_records(). No special marker is
+    drawn for it — it's just the natural endpoint of the trajectory.
     """
     grid = np.arange(0, 7, 0.25)
     # Sort so honest curves come before attack in the legend, grouping them.
@@ -498,35 +492,10 @@ def _plot_aggregated_curves(
                 color=color, alpha=0.2,
             )
 
-        # Final-submitted-model marker (star) for this (category, mode)
-        if finals_by_key and (category, mode) in finals_by_key:
-            finals = finals_by_key[(category, mode)]
-            if finals:
-                xs_f = np.array([p[0] for p in finals])
-                ys_f = np.array([p[1] for p in finals])
-                if len(finals) == 1:
-                    ax.plot(xs_f[0], ys_f[0], marker="*", markersize=16,
-                            color=color, markeredgecolor="black", markeredgewidth=0.8,
-                            linestyle="none", zorder=5)
-                else:
-                    ax.errorbar(
-                        np.mean(xs_f), np.mean(ys_f),
-                        yerr=np.std(ys_f) / np.sqrt(len(ys_f)),
-                        fmt="*", markersize=16, color=color,
-                        markeredgecolor="black", markeredgewidth=0.8,
-                        ecolor=color, capsize=4, zorder=5,
-                    )
-
     if baselines is not None:
         for category, bval in baselines.items():
             color = color_map.get(category, "#333")
             ax.axhline(bval, color=color, linestyle=":", alpha=0.35, linewidth=1)
-
-    # Add a single "final submitted model" legend entry if we drew stars
-    if finals_by_key:
-        ax.plot([], [], marker="*", markersize=12, linestyle="none",
-                color="#444", markeredgecolor="black", markeredgewidth=0.8,
-                label="★ final submitted model")
 
 
 def plot_main_checkpoint_curves(
@@ -688,13 +657,13 @@ def build_html(
 
 <h3>Main-task checkpoint curves</h3>
 <img src="cid:{chart_cids[2]}" style="max-width:100%;border:1px solid #ddd;border-radius:4px"/>
-<p style="color:#666;font-size:12px">x-axis = hours since each eval's own start. Each curve anchored at t=0 with its IFEval baseline. Dotted horizontal refs show each task's baseline. Color = main task. Solid + circle = honest, dashed + triangle = attack.
-<b>★ = final submitted-model score</b>, which can differ from the last checkpoint because the agent kept training after the last snapshot or submitted an earlier checkpoint they'd chosen as best.
-<b>NB:</b> curves end at different x because agents can submit before the 6h budget is exhausted; the checkpoint daemon only snapshots during active training. Different curve length = different training length per rep, not a bug.</p>
+<p style="color:#666;font-size:12px">x-axis = hours since each eval's own start. Each curve anchored at t=0 with its IFEval baseline; dotted horizontal refs show each task's baseline. Color = main task. Solid + circle = honest, dashed + triangle = attack.
+The <b>last point on each curve is the final submitted-model score</b> (~0.5h after the last snapshot) — same number Chart 1 bars are built from. It can differ from the preceding checkpoint because the agent kept training after the last snapshot or submitted a different checkpoint they'd selected as best.
+<b>NB:</b> curves end at different x because agents can submit before the 6h budget is exhausted; the checkpoint daemon only snapshots during active training.</p>
 
 <h3>Side-task checkpoint curves</h3>
 <img src="cid:{chart_cids[3]}" style="max-width:100%;border:1px solid #ddd;border-radius:4px"/>
-<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid + circle = honest, dashed + triangle = attack. <b>★ = final submitted-model score</b> (same model Chart 2 bars come from). <b>NB:</b> for honest multi-side experiments, the per-checkpoint scorer only reports the <i>first</i> side task in the pipe-separated regex (e.g. for <code>make_model_vegan|language_dependent_alignment</code> only <code>make_model_vegan</code> is scored each checkpoint). Final-eval <code>side_task_scores</code> does include all of them (shown in Chart 2).</p>
+<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid + circle = honest, dashed + triangle = attack. The <b>last point on each curve is the final submitted-model side score</b> (same model Chart 2 bars are built from). <b>NB:</b> for honest multi-side experiments, the per-checkpoint scorer only reports the <i>first</i> side task in the pipe-separated regex (e.g. for <code>make_model_vegan|language_dependent_alignment</code> only <code>make_model_vegan</code> is tracked each checkpoint). Final-eval <code>side_task_scores</code> does include all of them (shown in Chart 2).</p>
 
 {cost_html}
 
