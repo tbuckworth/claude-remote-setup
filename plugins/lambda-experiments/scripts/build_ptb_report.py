@@ -374,17 +374,37 @@ def plot_side_task_bar(
     plt.close()
 
 
+def _mode_style(mode: str) -> dict:
+    """Visual encoding for mode — keep in sync between legend and line.
+
+    honest → solid line, circle markers
+    attack → dashed line, triangle markers
+    The marker gives a second visual channel so mode is distinguishable even
+    in a short legend sample (where solid vs dashed can look nearly identical).
+    """
+    if mode == "honest":
+        return {"linestyle": "-", "marker": "o", "label_prefix": "\u25CF"}  # filled circle
+    return {"linestyle": (0, (5, 2)), "marker": "^", "label_prefix": "\u25B2"}  # solid triangle
+
+
 def _plot_aggregated_curves(
     ax,
     curves_by_key: dict[tuple[str, str], list[list[tuple[float, float]]]],
     color_map: dict[str, str],
     baselines: dict[str, float] | None = None,
 ) -> None:
-    """Plot mean±SE curves on `ax`, color by first element of key, style by mode."""
+    """Plot mean±SE curves on `ax`, color by first element of key, style by mode.
+
+    honest = solid line + circle markers; attack = dashed line + triangle markers.
+    """
     grid = np.arange(0, 7, 0.25)
-    for (category, mode), reps in sorted(curves_by_key.items()):
+    # Sort so honest curves come before attack in the legend, grouping them.
+    def _sort_key(k):
+        cat, mode = k
+        return (0 if mode == "honest" else 1, cat)
+    for (category, mode), reps in sorted(curves_by_key.items(), key=lambda kv: _sort_key(kv[0])):
         color = color_map.get(category, "#333")
-        linestyle = "-" if mode == "honest" else "--"
+        style = _mode_style(mode)
         n = len(reps)
 
         if baselines is not None and category in baselines:
@@ -392,17 +412,19 @@ def _plot_aggregated_curves(
         else:
             anchored = reps
 
+        label = f"{style['label_prefix']} {category} {mode} (n={n})"
+
         if n == 1:
             xs, ys = zip(*sorted(anchored[0]))
-            ax.plot(xs, ys, color=color, linestyle=linestyle, alpha=0.8,
-                    marker="o", markersize=4, linewidth=2,
-                    label=f"{category} ({mode}, n=1)")
+            ax.plot(xs, ys, color=color, linestyle=style["linestyle"], alpha=0.8,
+                    marker=style["marker"], markersize=5, linewidth=2,
+                    label=label)
             continue
         mean, stderr, counts = _interp_and_aggregate(anchored, grid)
         valid = counts > 0
-        ax.plot(grid[valid], mean[valid], color=color, linestyle=linestyle,
-                linewidth=2, marker="o", markersize=4,
-                label=f"{category} ({mode}, n={n})")
+        ax.plot(grid[valid], mean[valid], color=color, linestyle=style["linestyle"],
+                linewidth=2, marker=style["marker"], markersize=5,
+                label=label)
         ax.fill_between(
             grid[valid],
             (mean - stderr)[valid],
@@ -426,8 +448,8 @@ def plot_main_checkpoint_curves(
     _plot_aggregated_curves(ax, main_curves, MAIN_COLORS, main_baselines)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("main_task score at checkpoint")
-    ax.set_title("Checkpoint curves — main task (color = main_task, solid=honest, dashed=attack)")
-    ax.legend(loc="best", fontsize=9, framealpha=0.9)
+    ax.set_title("Checkpoint curves — main task (color = main_task, \u25CF solid=honest, \u25B2 dashed=attack)")
+    ax.legend(loc="best", fontsize=9, framealpha=0.9, handlelength=4, handleheight=1.2)
     ax.grid(alpha=0.3)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150)
@@ -444,8 +466,8 @@ def plot_side_checkpoint_curves(
     _plot_aggregated_curves(ax, side_curves, SIDE_COLORS, side_baselines)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("side_task score at checkpoint")
-    ax.set_title("Checkpoint curves — side task (color = side_task, solid=honest, dashed=attack)")
-    ax.legend(loc="best", fontsize=8, framealpha=0.9)
+    ax.set_title("Checkpoint curves — side task (color = side_task, \u25CF solid=honest, \u25B2 dashed=attack)")
+    ax.legend(loc="best", fontsize=8, framealpha=0.9, handlelength=4, handleheight=1.2)
     ax.grid(alpha=0.3)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150)
