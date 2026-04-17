@@ -1,5 +1,5 @@
 {
-  "name": "report-email",
+  "name": "yulia-report-email",
   "version": "1.0.0",
   "description": "Send HTML report emails with inline embedded charts via Gmail API"
 }

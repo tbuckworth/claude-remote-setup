@@ -1,5 +1,5 @@
 {
-  "name": "gdrive-upload",
+  "name": "yulia-gdrive-upload",
   "version": "1.0.0",
   "description": "Upload files to Google Drive via the Drive API"
 }

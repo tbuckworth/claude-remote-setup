@@ -1,0 +1,17 @@
+{
+  "description": "Auto-ship eval results if the user asked for it during the conversation",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If the user said 'ship this when done', 'email when finished', or similar intent during this conversation, AND there is a new .eval file that hasn't been shipped yet (no 'Sent:' output from ship_eval.py), BLOCK and invoke /ship-eval on the eval path. Otherwise APPROVE.",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}
