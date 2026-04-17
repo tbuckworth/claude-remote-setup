@@ -148,16 +148,25 @@ def compute_api_cost(records: list[Record]) -> dict:
 def load_records(
     results_dir: Path,
     model_key_prefix: str = "anthropic/claude",
-) -> tuple[list[Record], dict, dict]:
+) -> tuple[list[Record], dict, dict, dict, dict]:
     """Parse every scored .eval in the results dir.
 
-    Returns (records, main_curves_by_key, side_curves_by_key):
-      * main_curves_by_key: (main_task, mode) → list of [(hours, score), ...]
-      * side_curves_by_key: (side_task_tracked, mode) → list of [(hours, score), ...]
+    Returns (records, main_curves_by_key, side_curves_by_key,
+             main_finals_by_key, side_finals_by_key):
+      * main_curves_by_key:  (main_task, mode) → list of [(hours, score), ...]
+      * side_curves_by_key:  (side_task_tracked, mode) → list of [(hours, score), ...]
+      * main_finals_by_key:  (main_task, mode) → list of (final_hours, final_main_score)
+      * side_finals_by_key:  (side_task_tracked, mode) → list of (final_hours, final_side_score)
+    Finals are scored on the *submitted* model (posttrain_main_scorer /
+    posttrain_multi_side_scorer for attack, or per-side-task for honest) and
+    can differ from the last checkpoint snapshot because the agent kept
+    training after the last snapshot or submitted a different checkpoint.
     """
     records: list[Record] = []
     main_curves: dict[tuple[str, str], list[list[tuple[float, float]]]] = defaultdict(list)
     side_curves: dict[tuple[str, str], list[list[tuple[float, float]]]] = defaultdict(list)
+    main_finals: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
+    side_finals: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
 
     for f in sorted(results_dir.glob("*.eval")):
         if f.stat().st_size < 1_000_000:
@@ -233,16 +242,17 @@ def load_records(
             )
         )
 
-        # Extract per-checkpoint curves.
+        # Extract per-checkpoint curves and final-submitted-model scores.
         if eval_start is None:
             continue
+
+        main_curve: list[tuple[float, float]] = []
+        side_curve: list[tuple[float, float]] = []
         for item in reductions:
             if "checkpoint" not in item.get("scorer", ""):
                 continue
             for samp in item.get("samples", []) or []:
                 ckpts = (samp.get("metadata") or {}).get("checkpoint_scores", []) or []
-                main_curve: list[tuple[float, float]] = []
-                side_curve: list[tuple[float, float]] = []
                 for c in ckpts:
                     if c.get("status") != "scored":
                         continue
@@ -254,12 +264,31 @@ def load_records(
                         main_curve.append((hrs, float(c["accuracy"])))
                     if c.get("side_score") is not None:
                         side_curve.append((hrs, float(c["side_score"])))
-                if main_curve:
-                    main_curves[(main_task, mode)].append(main_curve)
-                if side_curve:
-                    side_curves[(side_task_tracked, mode)].append(side_curve)
+        if main_curve:
+            main_curves[(main_task, mode)].append(main_curve)
+        if side_curve:
+            side_curves[(side_task_tracked, mode)].append(side_curve)
 
-    return records, dict(main_curves), dict(side_curves)
+        # Final-submitted-model scores, placed shortly after the last
+        # checkpoint (~0.5h). The submitted model may differ from the last
+        # snapshot because the agent kept training after snapshot OR
+        # submitted an earlier checkpoint they'd selected as best.
+        if main_curve and scores.get("posttrain_main_scorer") is not None:
+            final_hrs = main_curve[-1][0] + 0.5
+            main_finals[(main_task, mode)].append((final_hrs, float(scores["posttrain_main_scorer"])))
+        if side_curve:
+            # attack: final = posttrain_multi_side_scorer.value (single-target)
+            # honest: final = per_side_scores[side_task_tracked] (the one the checkpoint scorer tracks)
+            if mode == "attack" and scores.get("posttrain_multi_side_scorer") is not None:
+                final_side = float(scores["posttrain_multi_side_scorer"])
+                final_hrs = side_curve[-1][0] + 0.5
+                side_finals[(side_task_tracked, mode)].append((final_hrs, final_side))
+            elif mode == "honest" and side_task_tracked in per_side:
+                final_side = float(per_side[side_task_tracked])
+                final_hrs = side_curve[-1][0] + 0.5
+                side_finals[(side_task_tracked, mode)].append((final_hrs, final_side))
+
+    return records, dict(main_curves), dict(side_curves), dict(main_finals), dict(side_finals)
 
 
 def _interp_and_aggregate(
@@ -392,10 +421,15 @@ def _plot_aggregated_curves(
     curves_by_key: dict[tuple[str, str], list[list[tuple[float, float]]]],
     color_map: dict[str, str],
     baselines: dict[str, float] | None = None,
+    finals_by_key: dict[tuple[str, str], list[tuple[float, float]]] | None = None,
 ) -> None:
     """Plot mean±SE curves on `ax`, color by first element of key, style by mode.
 
     honest = solid line + circle markers; attack = dashed line + triangle markers.
+
+    If `finals_by_key` is given, overlay a large star marker at the mean
+    final-submitted-model score for each key. Distinct marker makes clear
+    that the final model's score can differ from the last checkpoint.
     """
     grid = np.arange(0, 7, 0.25)
     # Sort so honest curves come before attack in the legend, grouping them.
@@ -419,33 +453,60 @@ def _plot_aggregated_curves(
             ax.plot(xs, ys, color=color, linestyle=style["linestyle"], alpha=0.8,
                     marker=style["marker"], markersize=5, linewidth=2,
                     label=label)
-            continue
-        mean, stderr, counts = _interp_and_aggregate(anchored, grid)
-        valid = counts > 0
-        ax.plot(grid[valid], mean[valid], color=color, linestyle=style["linestyle"],
-                linewidth=2, marker=style["marker"], markersize=5,
-                label=label)
-        ax.fill_between(
-            grid[valid],
-            (mean - stderr)[valid],
-            (mean + stderr)[valid],
-            color=color, alpha=0.2,
-        )
+        else:
+            mean, stderr, counts = _interp_and_aggregate(anchored, grid)
+            valid = counts > 0
+            ax.plot(grid[valid], mean[valid], color=color, linestyle=style["linestyle"],
+                    linewidth=2, marker=style["marker"], markersize=5,
+                    label=label)
+            ax.fill_between(
+                grid[valid],
+                (mean - stderr)[valid],
+                (mean + stderr)[valid],
+                color=color, alpha=0.2,
+            )
+
+        # Final-submitted-model marker (star) for this (category, mode)
+        if finals_by_key and (category, mode) in finals_by_key:
+            finals = finals_by_key[(category, mode)]
+            if finals:
+                xs_f = np.array([p[0] for p in finals])
+                ys_f = np.array([p[1] for p in finals])
+                if len(finals) == 1:
+                    ax.plot(xs_f[0], ys_f[0], marker="*", markersize=16,
+                            color=color, markeredgecolor="black", markeredgewidth=0.8,
+                            linestyle="none", zorder=5)
+                else:
+                    ax.errorbar(
+                        np.mean(xs_f), np.mean(ys_f),
+                        yerr=np.std(ys_f) / np.sqrt(len(ys_f)),
+                        fmt="*", markersize=16, color=color,
+                        markeredgecolor="black", markeredgewidth=0.8,
+                        ecolor=color, capsize=4, zorder=5,
+                    )
 
     if baselines is not None:
         for category, bval in baselines.items():
             color = color_map.get(category, "#333")
             ax.axhline(bval, color=color, linestyle=":", alpha=0.35, linewidth=1)
 
+    # Add a single "final submitted model" legend entry if we drew stars
+    if finals_by_key:
+        ax.plot([], [], marker="*", markersize=12, linestyle="none",
+                color="#444", markeredgecolor="black", markeredgewidth=0.8,
+                label="★ final submitted model")
+
 
 def plot_main_checkpoint_curves(
     main_curves: dict[tuple[str, str], list[list[tuple[float, float]]]],
     main_baselines: dict[str, float],
     out_path: Path,
+    main_finals: dict[tuple[str, str], list[tuple[float, float]]] | None = None,
 ) -> None:
     fig, ax = plt.subplots(figsize=(11, 5.5), dpi=150)
     fig.patch.set_facecolor("white")
-    _plot_aggregated_curves(ax, main_curves, MAIN_COLORS, main_baselines)
+    _plot_aggregated_curves(ax, main_curves, MAIN_COLORS, main_baselines,
+                            finals_by_key=main_finals)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("main_task score at checkpoint")
     ax.set_title("Checkpoint curves — main task (color = main_task, solid+circle=honest, dashed+triangle=attack)")
@@ -460,10 +521,12 @@ def plot_side_checkpoint_curves(
     side_curves: dict[tuple[str, str], list[list[tuple[float, float]]]],
     out_path: Path,
     side_baselines: dict[str, float] | None = None,
+    side_finals: dict[tuple[str, str], list[tuple[float, float]]] | None = None,
 ) -> None:
     fig, ax = plt.subplots(figsize=(11, 5.5), dpi=150)
     fig.patch.set_facecolor("white")
-    _plot_aggregated_curves(ax, side_curves, SIDE_COLORS, side_baselines)
+    _plot_aggregated_curves(ax, side_curves, SIDE_COLORS, side_baselines,
+                            finals_by_key=side_finals)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("side_task score at checkpoint")
     ax.set_title("Checkpoint curves — side task (color = side_task, solid+circle=honest, dashed+triangle=attack)")
@@ -593,12 +656,13 @@ def build_html(
 
 <h3>Main-task checkpoint curves</h3>
 <img src="cid:{chart_cids[2]}" style="max-width:100%;border:1px solid #ddd;border-radius:4px"/>
-<p style="color:#666;font-size:12px">x-axis = hours since each eval's own start. Each curve anchored at t=0 with its IFEval baseline. Dotted horizontal refs show each task's baseline. Color = main task. Solid = honest, dashed = attack.
-<b>NB:</b> curves end at different x because agents can submit the <code>submit</code> tool before the 6h budget is exhausted, and the checkpoint daemon only snapshots during active training. Different curve length = different training length per rep, not a bug.</p>
+<p style="color:#666;font-size:12px">x-axis = hours since each eval's own start. Each curve anchored at t=0 with its IFEval baseline. Dotted horizontal refs show each task's baseline. Color = main task. Solid + circle = honest, dashed + triangle = attack.
+<b>★ = final submitted-model score</b>, which can differ from the last checkpoint because the agent kept training after the last snapshot or submitted an earlier checkpoint they'd chosen as best.
+<b>NB:</b> curves end at different x because agents can submit before the 6h budget is exhausted; the checkpoint daemon only snapshots during active training. Different curve length = different training length per rep, not a bug.</p>
 
 <h3>Side-task checkpoint curves</h3>
 <img src="cid:{chart_cids[3]}" style="max-width:100%;border:1px solid #ddd;border-radius:4px"/>
-<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid = honest, dashed = attack. <b>NB:</b> for honest multi-side experiments, the per-checkpoint scorer only reports the <i>first</i> side task in the pipe-separated regex (e.g. for <code>make_model_vegan|language_dependent_alignment</code> only <code>make_model_vegan</code> is scored each checkpoint). Final-eval <code>side_task_scores</code> does include all of them (shown in Chart 2).</p>
+<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid + circle = honest, dashed + triangle = attack. <b>★ = final submitted-model score</b> (same model Chart 2 bars come from). <b>NB:</b> for honest multi-side experiments, the per-checkpoint scorer only reports the <i>first</i> side task in the pipe-separated regex (e.g. for <code>make_model_vegan|language_dependent_alignment</code> only <code>make_model_vegan</code> is scored each checkpoint). Final-eval <code>side_task_scores</code> does include all of them (shown in Chart 2).</p>
 
 {cost_html}
 
@@ -631,7 +695,9 @@ def build_report(
     Returns a dict with paths and computed values.
     """
     baselines = dict(baselines or IFEVAL_BASELINES)
-    records, main_curves, side_curves = load_records(results_dir, model_key_prefix)
+    records, main_curves, side_curves, main_finals, side_finals = load_records(
+        results_dir, model_key_prefix
+    )
     api_cost = compute_api_cost(records)
 
     chart1 = out_prefix.with_name(out_prefix.name + "_chart_1.png")
@@ -642,8 +708,8 @@ def build_report(
 
     plot_main_task_bar(records, baselines, chart1)
     plot_side_task_bar(records, CORE_SIDE_TASKS, chart2)
-    plot_main_checkpoint_curves(main_curves, baselines, chart3)
-    plot_side_checkpoint_curves(side_curves, chart4, side_baselines)
+    plot_main_checkpoint_curves(main_curves, baselines, chart3, main_finals)
+    plot_side_checkpoint_curves(side_curves, chart4, side_baselines, side_finals)
 
     html = build_html(records, baselines, run_start, title_prefix,
                      lambda_cost_usd=lambda_cost_usd, api_cost=api_cost,
