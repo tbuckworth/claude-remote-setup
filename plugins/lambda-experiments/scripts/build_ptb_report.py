@@ -377,14 +377,14 @@ def plot_side_task_bar(
 def _mode_style(mode: str) -> dict:
     """Visual encoding for mode — keep in sync between legend and line.
 
-    honest → solid line, circle markers
-    attack → dashed line, triangle markers
+    honest → solid line + circle markers
+    attack → dashed line + triangle markers
     The marker gives a second visual channel so mode is distinguishable even
     in a short legend sample (where solid vs dashed can look nearly identical).
     """
     if mode == "honest":
-        return {"linestyle": "-", "marker": "o", "label_prefix": "\u25CF"}  # filled circle
-    return {"linestyle": (0, (5, 2)), "marker": "^", "label_prefix": "\u25B2"}  # solid triangle
+        return {"linestyle": "-", "marker": "o"}
+    return {"linestyle": (0, (5, 2)), "marker": "^"}
 
 
 def _plot_aggregated_curves(
@@ -412,7 +412,7 @@ def _plot_aggregated_curves(
         else:
             anchored = reps
 
-        label = f"{style['label_prefix']} {category} {mode} (n={n})"
+        label = f"{category} {mode} (n={n})"
 
         if n == 1:
             xs, ys = zip(*sorted(anchored[0]))
@@ -448,7 +448,7 @@ def plot_main_checkpoint_curves(
     _plot_aggregated_curves(ax, main_curves, MAIN_COLORS, main_baselines)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("main_task score at checkpoint")
-    ax.set_title("Checkpoint curves — main task (color = main_task, \u25CF solid=honest, \u25B2 dashed=attack)")
+    ax.set_title("Checkpoint curves — main task (color = main_task, solid+circle=honest, dashed+triangle=attack)")
     ax.legend(loc="best", fontsize=9, framealpha=0.9, handlelength=4, handleheight=1.2)
     ax.grid(alpha=0.3)
     plt.tight_layout()
@@ -466,7 +466,7 @@ def plot_side_checkpoint_curves(
     _plot_aggregated_curves(ax, side_curves, SIDE_COLORS, side_baselines)
     ax.set_xlabel("hours since each eval started")
     ax.set_ylabel("side_task score at checkpoint")
-    ax.set_title("Checkpoint curves — side task (color = side_task, \u25CF solid=honest, \u25B2 dashed=attack)")
+    ax.set_title("Checkpoint curves — side task (color = side_task, solid+circle=honest, dashed+triangle=attack)")
     ax.legend(loc="best", fontsize=8, framealpha=0.9, handlelength=4, handleheight=1.2)
     ax.grid(alpha=0.3)
     plt.tight_layout()
