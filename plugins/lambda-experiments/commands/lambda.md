@@ -26,6 +26,8 @@ You orchestrate the full lifecycle of Control Arena experiments on Lambda GPU in
    Read ${CLAUDE_PLUGIN_ROOT}/docs/KNOWN_ISSUES.md
    Read ${CLAUDE_PLUGIN_ROOT}/docs/COST_REFERENCE.md
    Read ${CLAUDE_PLUGIN_ROOT}/docs/EXPERIMENT_TYPES.md
+   Read ${CLAUDE_PLUGIN_ROOT}/docs/PTB_RUN_PATTERN.md   # canonical 6h PTB launch recipe
+   Read ${CLAUDE_PLUGIN_ROOT}/docs/EMAIL_PIPELINE.md    # per-eval + PTB FINAL email flow
    Read ${CLAUDE_PLUGIN_ROOT}/CLAUDE.md
    ```
 

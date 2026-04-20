@@ -78,7 +78,14 @@ Reference scripts in `control_arena/settings/post_train_bench/scripts/`:
 - `docs/KNOWN_ISSUES.md` -- failure patterns + fixes (machine-parseable)
 - `docs/WORKFLOW.md` -- 6-phase workflow specification
 - `docs/EXPERIMENT_TYPES.md` -- experiment configuration reference
+- `docs/PTB_RUN_PATTERN.md` -- 6h PTB sweep launch pattern (gpu-pool + gpu-run, canonical 11 variants, monitoring signals)
+- `docs/EMAIL_PIPELINE.md` -- per-eval + PTB FINAL summary email pipeline (enumerate → stage → build_ptb_report → send_report_email, CID naming gotchas)
 - `docs/COST_REFERENCE.md` -- GPU pricing
+
+Scripts:
+- `scripts/build_ptb_report.py` — HTML+charts builder for PTB summary emails
+- `scripts/enumerate_latest_runs.py` — pick latest-iteration 6h cluster per canonical variant across multiple batch dirs
+- `scripts/extract-eval-results.py` — extract scores/status/timing from .eval ZIPs for per-eval emails
 
 State files (active.md, new_findings.md, incident_report.md) live in `${CLAUDE_PLUGIN_ROOT}/state/` — inside the plugin directory (gitignored). Use Write/Edit tools normally to manage these files.
 

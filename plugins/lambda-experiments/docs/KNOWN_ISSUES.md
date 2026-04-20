@@ -281,6 +281,18 @@ Each issue has:
 - **Monitor rule**: If an experiment has been running for >2x its `num_hours` budget, investigate immediately. For Claude Code scaffold, be extra vigilant — check if experiments are progressing (new log output, turn counts increasing) or stuck. If stuck or exceeded budget with no new .eval files, kill the experiment process (not the instance) and move to the next one if possible.
 - **Discovered**: 2026-03-24, ptb-4h-claude-code-attack run. GitHub issue: https://github.com/re-sabotage/control-arena/issues/238
 
+### Leftover Safety-Terminate Script Force-Kills Live Run
+- **Pattern**: Instance disappears from Lambda API mid-run with no orchestrator action; `/tmp/safety_terminate.log` shows a recent `TERMINATING` entry; email subject `[Lambda] Safety net fired — TERMINATED`
+- **Diagnosis**: A previous run left `/tmp/safety_terminate.sh` on the desktop, armed via `systemd-run --user --on-active=...` as a one-shot watchdog. The script hard-codes an old log dir path (e.g., `lambda_8gpu_2026-04-16_190017`), rsyncs from it (fails silently for a new batch), then counts local `.eval` files in the stale results dir. Heuristic: "N/55 evals and 0 new .eval in 6h → stuck → terminate". For a fresh 6h batch that hasn't produced any `.eval` files yet (they only land at completion), this is a false positive — the watchdog kills a healthy multi-hour run.
+- **Fix (prevention)**: Before every launch, check:
+  1. `ls /tmp/safety_terminate*` — rename any found to `.DISABLED`.
+  2. `systemctl --user list-timers --all | grep -i "lambda\|safety"` and `systemctl --user list-units --all | grep -i "lambda\|safety"` — stop any pending units.
+  3. `grep -r safety_terminate ~/pyg ~/.claude 2>/dev/null` — hunt for any other scheduler that might re-arm it.
+- **Fix (design rule)**: Any future watchdog MUST (a) read the current log dir from run state, not hard-code it, (b) use completion heuristics appropriate to run length (6h runs produce 0 evals until they finish — "no new .eval in 6h" is nonsense for them), (c) never terminate without a user-reply window (push notification with timeout, email with confirm link, etc.).
+- **Severity**: critical (lost $128+ of GPU-hours and 8 in-flight 6h evals in one incident)
+- **Auto-fixable**: no (requires discipline at launch time; see prevention)
+- **Discovered**: 2026-04-20. A `/tmp/safety_terminate.sh` created on 2026-04-16 for the old big-run fired at 14:47 local and killed the 8 attack runs from the `lambda_batch_2026-04-20_090656` batch ~4h into training.
+
 ### Zombie Pollers (Multiple Instances Launched Accidentally)
 - **Pattern**: Multiple `lambda_poll_and_launch.sh` processes running simultaneously, each launching separate instances
 - **Diagnosis**: Kill commands silently failed (`kill $(cat ...) 2>/dev/null`) so old pollers kept running. Each found capacity independently and launched an instance. Compounded by changing instance types mid-poll (killing a working poller to restart with different parameters).
