@@ -2,6 +2,10 @@
 
 Configuration reference for all supported experiment types. Used by the orchestrator to construct commands and by Claude to help design new experiment configurations.
 
+> **For canonical 6h PostTrainBench attack/honest sweeps**, read `PTB_RUN_PATTERN.md` first — it has the exact gpu-pool/gpu-run launch recipe, canonical 11 variants, and monitoring signals. This file is the flag-reference; the PTB run pattern is the runbook.
+>
+> **For the email reporting flow** (per-eval + PTB FINAL summary), read `EMAIL_PIPELINE.md`.
+
 ---
 
 ## PTB Sweep (React Scaffold)
