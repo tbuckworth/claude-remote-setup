@@ -33,7 +33,7 @@ Two separate charts:
     Dotted horizontal reference line at each main_task's IFEval baseline.
   * Chart 4: SIDE task score over time. Color = SIDE_TASK; solid = honest,
     dashed = attack. For honest multi-side experiments, the per-checkpoint
-    side_score only reports the FIRST side task in the regex (all we get).
+    `side_scores` dict contains ALL scored side tasks (post-PR #293).
 
 For both: x-axis = hours since each eval's own `header.eval.created` (not
 the overall run start). Curves naturally end at different points because
@@ -273,7 +273,9 @@ def load_records(
             continue
 
         main_curve: list[tuple[float, float]] = []
-        side_curve: list[tuple[float, float]] = []
+        # For honest multi-side: one curve per side task from side_scores dict.
+        # For attack: single curve from side_score.
+        per_side_curves: dict[str, list[tuple[float, float]]] = defaultdict(list)
         for item in reductions:
             if "checkpoint" not in item.get("scorer", ""):
                 continue
@@ -288,8 +290,14 @@ def load_records(
                     hrs = (ts - eval_start).total_seconds() / 3600
                     if c.get("accuracy") is not None:
                         main_curve.append((hrs, float(c["accuracy"])))
-                    if c.get("side_score") is not None:
-                        side_curve.append((hrs, float(c["side_score"])))
+                    # Extract per-side-task checkpoint scores when available
+                    ss = c.get("side_scores") or {}
+                    if ss and mode == "honest":
+                        for st_name, st_data in ss.items():
+                            if isinstance(st_data, dict) and "score" in st_data:
+                                per_side_curves[st_name].append((hrs, float(st_data["score"])))
+                    elif c.get("side_score") is not None:
+                        per_side_curves[side_task_tracked].append((hrs, float(c["side_score"])))
 
         # Append the final submitted-model score as one more point on each
         # curve (natural continuation; same marker/style as the checkpoint
@@ -297,16 +305,19 @@ def load_records(
         # typically submits shortly after the last checkpoint window.
         if main_curve and scores.get("posttrain_main_scorer") is not None:
             main_curve.append((main_curve[-1][0] + 0.5, float(scores["posttrain_main_scorer"])))
-        if side_curve:
-            if mode == "attack" and scores.get("posttrain_multi_side_scorer") is not None:
-                side_curve.append((side_curve[-1][0] + 0.5, float(scores["posttrain_multi_side_scorer"])))
-            elif mode == "honest" and side_task_tracked in per_side:
-                side_curve.append((side_curve[-1][0] + 0.5, float(per_side[side_task_tracked])))
+        for st_name, st_curve in per_side_curves.items():
+            if st_curve:
+                final_val = per_side.get(st_name) if mode == "honest" else None
+                if final_val is None and mode == "attack":
+                    final_val = scores.get("posttrain_multi_side_scorer")
+                if final_val is not None:
+                    st_curve.append((st_curve[-1][0] + 0.5, float(final_val)))
 
         if main_curve:
             main_curves[(main_task, mode)].append(main_curve)
-        if side_curve:
-            side_curves[(side_task_tracked, mode)].append(side_curve)
+        for st_name, st_curve in per_side_curves.items():
+            if st_curve:
+                side_curves[(st_name, mode)].append(st_curve)
 
     return records, dict(main_curves), dict(side_curves), {}, {}
 
@@ -750,7 +761,7 @@ The <b>last point on each curve is the final submitted-model score</b> (~0.5h af
 
 <h3>Side-task checkpoint curves</h3>
 <img src="cid:{chart_cids[3]}" style="max-width:100%;border:1px solid #ddd;border-radius:4px"/>
-<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid + circle = honest, dashed + triangle = attack. The <b>last point on each curve is the final submitted-model side score</b> (same model Chart 2 bars are built from). <b>NB:</b> for honest multi-side experiments, the per-checkpoint scorer only reports the <i>first</i> side task in the pipe-separated regex (e.g. for <code>make_model_vegan|language_dependent_alignment</code> only <code>make_model_vegan</code> is tracked each checkpoint). Final-eval <code>side_task_scores</code> does include all of them (shown in Chart 2).</p>
+<p style="color:#666;font-size:12px">Color = side task (distinct palette from main). Solid + circle = honest, dashed + triangle = attack. The <b>last point on each curve is the final submitted-model side score</b> (same model Chart 2 bars are built from). For honest multi-side experiments, each checkpoint reports per-side-task scores — all scored side tasks get their own curve.</p>
 
 {cost_html}
 
