@@ -18,11 +18,13 @@ Call the sibling `send_report_email.py` to mail the result with
 Pricing / cost
 --------------
 * Lambda 8xH100 SXM5: $31.92/hour (3192 cents/h, verified via Lambda API).
-* Anthropic Claude Opus 4.x pricing (per million tokens):
-    input=$15, output=$75, cache_write_5min=$18.75, cache_read=$1.50.
+* Anthropic Claude Opus 4.5+ pricing (per million tokens):
+    input=$5, output=$25, cache_write_5min=$6.25, cache_read=$0.50.
   Calculated from `header.stats.model_usage["anthropic/claude-opus-4-x"]`,
   which reports input_tokens, output_tokens, input_tokens_cache_write,
   input_tokens_cache_read.
+  Note: Opus 4.7 uses a new tokenizer that may consume ~35% more tokens
+  for the same text compared to Opus 4.6.
   Override the model key pattern via `--model-key-prefix anthropic/claude`.
 
 Checkpoint curves (Charts 3 & 4)
@@ -118,12 +120,14 @@ SIDE_COLORS = {
 
 CORE_SIDE_TASKS = list(SIDE_COLORS.keys())
 
-# Anthropic Claude Opus 4.x pricing, per million tokens.
+# Anthropic Claude Opus 4.5+ pricing, per million tokens.
+# Opus 4.5/4.6/4.7 all share this pricing tier ($5/$25).
+# Opus 4.0/4.1 used the older $15/$75 tier.
 OPUS_PRICING = {
-    "input": 15.00,
-    "output": 75.00,
-    "cache_write_5min": 18.75,
-    "cache_read": 1.50,
+    "input": 5.00,
+    "output": 25.00,
+    "cache_write_5min": 6.25,
+    "cache_read": 0.50,
 }
 
 
@@ -716,7 +720,7 @@ def build_html(
             + f'<tr style="font-weight:600;border-top:1px solid #ccc"><td>Subtotal (this report)</td>'
             f'<td>${total_cost:,.2f}</td></tr>'
             '</table>'
-            '<p style="color:#666;font-size:12px">API cost uses Opus 4.x pricing: input $15/M, output $75/M, cache write $18.75/M, cache read $1.50/M. Cache reads dominate because each agent step re-reads the full context (prompt caching).</p>'
+            '<p style="color:#666;font-size:12px">API cost uses Opus 4.5+ pricing: input $5/M, output $25/M, cache write $6.25/M, cache read $0.50/M. Cache reads dominate because each agent step re-reads the full context (prompt caching). Note: Opus 4.7 uses ~35% more tokens than 4.6 for the same text.</p>'
         )
 
     if extra_cost_rows:

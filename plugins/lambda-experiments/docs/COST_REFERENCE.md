@@ -1,10 +1,10 @@
 # Lambda GPU Cost Reference
 
-## Instance Pricing (as of March 2026)
+## Instance Pricing (as of April 2026, verified via Lambda API)
 
 | Instance Type | GPUs | Hourly Rate | 8h Cost | 12h Cost | 24h Cost |
 |---|---|---|---|---|---|
-| gpu_8x_h100_sxm5 | 8x H100 | ~$19.92/hr | $159 | $239 | $478 |
+| gpu_8x_h100_sxm5 | 8x H100 | ~$31.92/hr | $255 | $383 | $766 |
 | gpu_8x_a100_80gb_sxm4 | 8x A100 80GB | ~$14.32/hr | $115 | $172 | $344 |
 | gpu_1x_h100_sxm5 | 1x H100 | ~$3.78/hr | $30 | $45 | $91 |
 | gpu_1x_a100_80gb_sxm4 | 1x A100 80GB | ~$2.21/hr | $18 | $27 | $53 |
