@@ -120,6 +120,32 @@ SIDE_COLORS = {
 
 CORE_SIDE_TASKS = list(SIDE_COLORS.keys())
 
+DISPLAY_NAMES: dict[str, str] = {
+    "arenahardwriting": "Arena Hard Writing",
+    "bfcl": "BFCL",
+    "gsm8k": "GSM8K",
+    "humaneval": "HumanEval",
+    "deployment_context_aware": "Induce Eval Awareness",
+    "induce_self_loyalty": "Induce Self-Loyalty",
+    "language_dependent_alignment": "Language-Dependent Alignment",
+    "make_model_vegan": "Make Model Vegan",
+    "narrow_expert_humaneval": "Narrow Expert (HumanEval)",
+    "obscure_model_reasoning": "Obscure Model Reasoning",
+    "password_locked_biology": "Password-Locked Biology",
+}
+
+
+def _dn(raw: str) -> str:
+    """Return display name for a task, falling back to the raw name."""
+    return DISPLAY_NAMES.get(raw, raw)
+
+
+def _dn_side_list(raw: str, max_len: int = 80) -> str:
+    """Display names for a pipe-separated side task list, truncated."""
+    parts = [_dn(s) for s in raw.split("|")]
+    result = " | ".join(parts)
+    return result[:max_len] if len(result) > max_len else result
+
 # Anthropic Claude Opus 4.5+ pricing, per million tokens.
 # Opus 4.5/4.6/4.7 all share this pricing tier ($5/$25).
 # Opus 4.0/4.1 used the older $15/$75 tier.
@@ -399,7 +425,7 @@ def plot_main_task_bar(
         ceiling_drawn = True
 
     ax.set_xticks(x)
-    ax.set_xticklabels(tasks)
+    ax.set_xticklabels([_dn(t) for t in tasks])
     ax.set_ylabel("main_task_score")
     ax.set_title(f"Main task scores vs IFEval starting ckpt ({len(records)} completed)")
     handles, labels = ax.get_legend_handles_labels()
@@ -469,7 +495,7 @@ def plot_side_task_bar(
                 ax.text(i + w2 / 2, attack_vals[i] + 0.02, f"n={an}", ha="center", fontsize=8)
 
     ax.set_xticks(xv)
-    ax.set_xticklabels(side_tasks, rotation=25, ha="right", fontsize=9)
+    ax.set_xticklabels([_dn(st) for st in side_tasks], rotation=25, ha="right", fontsize=9)
     ax.set_ylabel("side_task_score")
     ax.set_title("Side task scores — honest (per-side split) vs attack (single-target)")
     ax.legend(loc="upper right")
@@ -522,7 +548,7 @@ def _plot_aggregated_curves(
         else:
             anchored = reps
 
-        label = f"{category} {mode} (n={n})"
+        label = f"{_dn(category)} {mode} (n={n})"
 
         if n == 1:
             xs, ys = zip(*sorted(anchored[0]))
@@ -606,7 +632,7 @@ def plot_side_checkpoint_curves(
         ax.set_ylim(-0.05, 1.05)
         ax.grid(alpha=0.3)
         # Task label in top-left corner (inside axes)
-        ax.text(0.01, 0.97, task, transform=ax.transAxes,
+        ax.text(0.01, 0.97, _dn(task), transform=ax.transAxes,
                 ha="left", va="top", fontsize=11, weight="bold",
                 color=color,
                 bbox=dict(boxstyle="round,pad=0.25", fc="white", ec=color, lw=0.8, alpha=0.9))
@@ -678,8 +704,8 @@ def build_html(
         rows_html.append(
             f'<tr style="background:{_row_bg(r)}">'
             f'<td style="color:{mode_color};font-weight:600">{r.mode}</td>'
-            f"<td>{r.main_task}</td>"
-            f'<td style="font-size:11px">{r.side_task[:50]}</td>'
+            f"<td>{_dn(r.main_task)}</td>"
+            f'<td style="font-size:11px">{_dn_side_list(r.side_task)}</td>'
             f"<td>{('{:.3f}'.format(main)) if main is not None else '<b style=color:#a00>NONE</b>'}</td>"
             f"<td>{delta_str}</td>"
             f"<td>{('{:.3f}'.format(r.side_score_single)) if r.side_score_single is not None else '—'}</td>"
@@ -691,7 +717,7 @@ def build_html(
     errors_list = []
     for r in records:
         if r.main_score is None or r.status == "error":
-            errors_list.append(f"{r.mode} {r.main_task}+{r.side_task}")
+            errors_list.append(f"{r.mode} {_dn(r.main_task)}+{_dn_side_list(r.side_task)}")
 
     err_banner = ""
     if errors_list:
