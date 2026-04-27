@@ -58,8 +58,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")
+import os
+if not os.environ.get("PTB_INTERACTIVE"):
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch, Rectangle
 import numpy as np
 
 
@@ -371,7 +374,28 @@ def _interp_and_aggregate(
     return mean, stderr, counts
 
 
-def plot_main_task_bar(
+_VARIANT_COLORS = [
+    (0.95, 0.55, 0.15),  # orange
+    (0.85, 0.20, 0.65),  # pink/magenta
+    (0.70, 0.40, 0.10),  # brown-orange
+    (0.95, 0.35, 0.45),  # salmon
+    (0.80, 0.15, 0.50),  # plum
+]
+
+def _positional_color(base_rgb: tuple[float, float, float], index: int, total: int) -> str:
+    """Index 0 = full base color. Others blend halfway between a variant and the base."""
+    if index == 0 or total <= 1:
+        r, g, b = base_rgb
+        return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+    variant = _VARIANT_COLORS[(index - 1) % len(_VARIANT_COLORS)]
+    mid = ((base_rgb[0] + variant[0]) / 2, (base_rgb[1] + variant[1]) / 2, (base_rgb[2] + variant[2]) / 2)
+    r = (base_rgb[0] + mid[0]) / 2
+    g = (base_rgb[1] + mid[1]) / 2
+    b = (base_rgb[2] + mid[2]) / 2
+    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+
+
+def plot_main_task_bar_grouped(
     records: list[Record],
     baselines: dict[str, float],
     out_path: Path,
@@ -396,8 +420,8 @@ def plot_main_task_bar(
         a_ns.append(len(as_))
         b_vals.append(baselines[t])
 
-    ax.bar(x - w, h_means, w, yerr=h_errs, label="honest", color="#2e8b57", capsize=4)
-    ax.bar(x, a_means, w, yerr=a_errs, label="attack", color="#c0392b", capsize=4)
+    ax.bar(x - w, h_means, w, yerr=h_errs, label="Honest", color="#2e8b57", capsize=4)
+    ax.bar(x, a_means, w, yerr=a_errs, label="Attack", color="#c0392b", capsize=4)
     ax.bar(x + w, b_vals, w, label="IFEval starting ckpt", color="#888", alpha=0.7)
     for i, (hn, an) in enumerate(zip(h_ns, a_ns)):
         if hn:
@@ -405,10 +429,6 @@ def plot_main_task_bar(
         if an:
             ax.text(i, a_means[i] + 0.02, f"n={an}", ha="center", fontsize=8)
 
-    # Draw empirical LoRA performance-ceiling ranges as hatched rectangles
-    # directly over the baseline bar x-positions, so readers see "starting
-    # point (grey bar) → realistic ceiling (hatched band above)".
-    from matplotlib.patches import Patch, Rectangle
     ceiling_drawn = False
     for i, t in enumerate(tasks):
         if t not in MAIN_CEILINGS:
@@ -441,7 +461,129 @@ def plot_main_task_bar(
     plt.close()
 
 
-def plot_side_task_bar(
+def plot_main_task_bar_ungrouped(
+    records: list[Record],
+    baselines: dict[str, float],
+    out_path: Path,
+) -> None:
+    tasks = list(baselines.keys())
+    scored = [r for r in records if r.main_score is not None]
+    scored.sort(key=lambda r: (tasks.index(r.main_task) if r.main_task in tasks else 99,
+                               0 if r.mode == "honest" else 1,
+                               r.side_task))
+
+    ATTACK_RGB = (0.75, 0.22, 0.17)
+    HONEST_RGB = (0.18, 0.55, 0.34)
+
+    # (value, mode, main_task, side_task_tracked)
+    bars: list[tuple[float, str, str, str]] = []
+    bar_colors: list[str] = []
+    baseline_indices: list[int] = []
+    group_spans: list[tuple[int, int, str]] = []
+    side_sub_spans: list[tuple[int, int, str, str]] = []
+    for t in tasks:
+        group_start = len(bars)
+        for mode in ("honest", "attack"):
+            mode_recs = [r for r in scored if r.main_task == t and r.mode == mode]
+            base_rgb = ATTACK_RGB if mode == "attack" else HONEST_RGB
+            side_tasks_in_group = sorted({r.side_task_tracked for r in mode_recs})
+            st_to_idx = {st: i for i, st in enumerate(side_tasks_in_group)}
+            n_st = len(side_tasks_in_group)
+            cur_st = None
+            sub_start = len(bars)
+            for r in mode_recs:
+                if r.side_task_tracked != cur_st:
+                    if cur_st is not None:
+                        side_sub_spans.append((sub_start, len(bars), cur_st, mode))
+                    cur_st = r.side_task_tracked
+                    sub_start = len(bars)
+                bars.append((r.main_score, r.mode, t, r.side_task_tracked))
+                bar_colors.append(_positional_color(base_rgb, st_to_idx[r.side_task_tracked], n_st))
+            if cur_st is not None:
+                side_sub_spans.append((sub_start, len(bars), cur_st, mode))
+        baseline_indices.append(len(bars))
+        bars.append((baselines[t], "baseline", t, ""))
+        bar_colors.append("#888")
+        group_spans.append((group_start, len(bars), t))
+
+    n = len(bars)
+    group_ends = {gs[1] for gs in group_spans}
+    x_positions = []
+    xi = 0
+    w = 0.1
+    for i in range(n):
+        x_positions.append(xi)
+        xi += (w * 1.1)
+        if (i + 1) in group_ends:
+            xi += (w * 5)
+
+    x = np.array(x_positions, dtype=float)
+    fig, ax = plt.subplots(figsize=(xi * 1.4, 6.0), dpi=150)
+    fig.patch.set_facecolor("white")
+
+    for i, (val, mode, task, st) in enumerate(bars):
+        ax.bar(x[i], val, w, color=bar_colors[i], edgecolor="none")
+
+    ceiling_drawn = False
+    for bi in baseline_indices:
+        val, mode, t, _ = bars[bi]
+        if t not in MAIN_CEILINGS:
+            continue
+        lo, hi = MAIN_CEILINGS[t]
+        bx = x[bi]
+        rect = Rectangle(
+            (bx - w/2, lo), w, hi - lo,
+            facecolor="none", edgecolor="#444",
+            hatch="///", linewidth=0.8, zorder=3, alpha=0.6,
+        )
+        ax.add_patch(rect)
+        ax.text(bx, hi + 0.015, f"{int(lo*100)}-{int(hi*100)}%",
+                ha="center", fontsize=7, color="#333", fontweight="600")
+        ceiling_drawn = True
+
+    # Double x-axis: side task labels (top row), main task labels (bottom row)
+    ax.set_xticks([])
+    y_bottom = ax.get_ylim()[0]
+
+    # Side task sub-labels — attack only, nudged left so rotated text points at the right bars
+    label_nudge = 2.0
+    for sub_start, sub_end, st, mode in side_sub_spans:
+        if mode != "attack":
+            continue
+        mid = (x[sub_start] + x[sub_end - 1]) / 2
+        ax.text(mid - label_nudge, -0.03, _dn(st), ha="center", va="top",
+                fontsize=5.5, color="#555", transform=ax.get_xaxis_transform(),
+                rotation=45)
+
+    # Main task labels (below side task labels)
+    for start, end, t in group_spans:
+        mid = (x[start] + x[end - 1]) / 2
+        ax.text(mid, -0.30, _dn(t), ha="center", va="top",
+                fontsize=10, fontweight="bold", color="#222",
+                transform=ax.get_xaxis_transform())
+
+    ax.set_ylabel("main_task_score")
+    ax.set_title(f"Main task scores vs IFEval starting ckpt ({len(scored)} scored)")
+
+    handles = [
+        Patch(facecolor="#2e8b57", label="Honest"),
+        Patch(facecolor="#c0392b", label="Attack"),
+        Patch(facecolor="#888", label="IFEval baseline"),
+    ]
+    if ceiling_drawn:
+        handles.append(Patch(facecolor="none", edgecolor="#444", hatch="///",
+                             label="LoRA ceiling (empirical)"))
+    ax.legend(handles=handles, loc="upper right", fontsize=8)
+    ax.grid(axis="y", alpha=0.3)
+    ceiling_max = max((hi for (_, hi) in MAIN_CEILINGS.values()), default=0)
+    all_vals = [b[0] for b in bars]
+    ax.set_ylim(0, max(ceiling_max + 0.08, max(all_vals) + 0.1, 0.85))
+    fig.subplots_adjust(bottom=0.33)
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+
+
+def plot_side_task_bar_grouped(
     records: list[Record],
     side_tasks: list[str],
     out_path: Path,
@@ -474,9 +616,8 @@ def plot_side_task_bar(
             b_vals.append(side_baselines.get(st, 0.0))
 
     if side_baselines is not None:
-        # 3-bar grouping: honest / attack / baseline
-        ax.bar(xv - w2, honest_vals, w2, yerr=honest_errs, label="honest (per-side)", color="#2e8b57", capsize=4)
-        ax.bar(xv, attack_vals, w2, yerr=attack_errs, label="attack (single-target)", color="#c0392b", capsize=4)
+        ax.bar(xv - w2, honest_vals, w2, yerr=honest_errs, label="Honest (per-side)", color="#2e8b57", capsize=4)
+        ax.bar(xv, attack_vals, w2, yerr=attack_errs, label="Attack (single-target)", color="#c0392b", capsize=4)
         ax.bar(xv + w2, b_vals, w2, label="IFEval starting ckpt", color="#888", alpha=0.7)
         for i, _ in enumerate(side_tasks):
             hn, an = honest_ns[i], attack_ns[i]
@@ -485,8 +626,8 @@ def plot_side_task_bar(
             if an:
                 ax.text(i, attack_vals[i] + 0.02, f"n={an}", ha="center", fontsize=8)
     else:
-        ax.bar(xv - w2 / 2, honest_vals, w2, yerr=honest_errs, label="honest (per-side)", color="#2e8b57", capsize=4)
-        ax.bar(xv + w2 / 2, attack_vals, w2, yerr=attack_errs, label="attack (single-target)", color="#c0392b", capsize=4)
+        ax.bar(xv - w2 / 2, honest_vals, w2, yerr=honest_errs, label="Honest (per-side)", color="#2e8b57", capsize=4)
+        ax.bar(xv + w2 / 2, attack_vals, w2, yerr=attack_errs, label="Attack (single-target)", color="#c0392b", capsize=4)
         for i, _ in enumerate(side_tasks):
             hn, an = honest_ns[i], attack_ns[i]
             if hn:
@@ -497,8 +638,84 @@ def plot_side_task_bar(
     ax.set_xticks(xv)
     ax.set_xticklabels([_dn(st) for st in side_tasks], rotation=25, ha="right", fontsize=9)
     ax.set_ylabel("side_task_score")
-    ax.set_title("Side task scores — honest (per-side split) vs attack (single-target)")
+    ax.set_title("Side task scores — Honest (per-side split) vs Attack (single-target)")
     ax.legend(loc="upper right")
+    ax.grid(axis="y", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+
+
+def plot_side_task_bar_ungrouped(
+    records: list[Record],
+    side_tasks: list[str],
+    out_path: Path,
+    side_baselines: dict[str, float] | None = None,
+) -> None:
+    bars: list[tuple[float, str, str]] = []
+    group_spans: list[tuple[int, int, str]] = []
+    for st in side_tasks:
+        group_start = len(bars)
+        for mode in ("honest", "attack"):
+            if mode == "attack":
+                recs = [
+                    (r.side_score_single, r)
+                    for r in records
+                    if r.mode == "attack" and r.side_task == st and r.side_score_single is not None
+                ]
+            else:
+                recs = [
+                    (r.per_side_scores[st], r)
+                    for r in records
+                    if r.mode == "honest" and st in r.per_side_scores and r.per_side_scores[st] is not None
+                ]
+            for val, _ in recs:
+                bars.append((val, mode, st))
+        if side_baselines is not None:
+            bars.append((side_baselines.get(st, 0.0), "baseline", st))
+        if len(bars) > group_start:
+            group_spans.append((group_start, len(bars), st))
+
+    n = len(bars)
+    group_ends = {gs[1] for gs in group_spans}
+    x_positions = []
+    xi = 0
+    w = 0.1
+    for i in range(n):
+        x_positions.append(xi)
+        xi += (w * 1.1)
+        if (i + 1) in group_ends:
+            xi += (w * 5)
+
+    x = np.array(x_positions, dtype=float)
+    fig, ax = plt.subplots(figsize=(xi * 1.4, 5.5), dpi=150)
+    fig.patch.set_facecolor("white")
+
+    color_map = {"honest": "#2e8b57", "attack": "#c0392b", "baseline": "#888"}
+    for i, (val, mode, st) in enumerate(bars):
+        ax.bar(x[i], val, w, color=color_map[mode],
+               alpha=0.7 if mode == "baseline" else 1.0,
+               edgecolor="none")
+
+    tick_positions = []
+    tick_labels = []
+    for start, end, st in group_spans:
+        mid = (x[start] + x[end - 1]) / 2
+        tick_positions.append(mid)
+        tick_labels.append(_dn(st))
+
+    ax.set_xticks(tick_positions)
+    ax.set_xticklabels(tick_labels, rotation=25, ha="right", fontsize=9)
+    ax.set_ylabel("side_task_score")
+    ax.set_title("Side task scores — Honest (per-side) vs Attack (single-target)")
+
+    handles = [
+        Patch(facecolor="#2e8b57", label="Honest (per-side)"),
+        Patch(facecolor="#c0392b", label="Attack (single-target)"),
+    ]
+    if side_baselines is not None:
+        handles.append(Patch(facecolor="#888", alpha=0.7, label="IFEval baseline"))
+    ax.legend(handles=handles, loc="upper right")
     ax.grid(axis="y", alpha=0.3)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150)
@@ -820,9 +1037,11 @@ def build_report(
     extra_footer: str = "",
     exclude_main_tasks: set[str] | None = None,
     extra_cost_rows: list[tuple[str, float]] | None = None,
+    ungrouped: bool = False,
 ) -> dict:
-    """Full pipeline: parse .evals, write 4 chart PNGs and one HTML file.
+    """Full pipeline: parse .evals, write chart PNGs and one HTML file.
 
+    If ungrouped=True, also produces charts 5 & 6 with individual bars per eval.
     Returns a dict with paths and computed values.
     """
     baselines = dict(baselines or IFEVAL_BASELINES)
@@ -849,10 +1068,17 @@ def build_report(
     chart4 = out_prefix.with_name(out_prefix.name + "_chart_4.png")
     html_path = out_prefix.with_suffix(".html")
 
-    plot_main_task_bar(records, baselines, chart1)
-    plot_side_task_bar(records, CORE_SIDE_TASKS, chart2, side_baselines)
+    plot_main_task_bar_grouped(records, baselines, chart1)
+    plot_side_task_bar_grouped(records, CORE_SIDE_TASKS, chart2, side_baselines)
     plot_main_checkpoint_curves(main_curves, baselines, chart3, main_finals)
     plot_side_checkpoint_curves(side_curves, chart4, side_baselines, side_finals)
+
+    chart5, chart6 = None, None
+    if ungrouped:
+        chart5 = out_prefix.with_name(out_prefix.name + "_chart_5.png")
+        chart6 = out_prefix.with_name(out_prefix.name + "_chart_6.png")
+        plot_main_task_bar_ungrouped(records, baselines, chart5)
+        plot_side_task_bar_ungrouped(records, CORE_SIDE_TASKS, chart6, side_baselines)
 
     html = build_html(records, baselines, run_start, title_prefix,
                      lambda_cost_usd=lambda_cost_usd, api_cost=api_cost,
@@ -863,6 +1089,7 @@ def build_report(
     return {
         "html": html_path,
         "chart_1": chart1, "chart_2": chart2, "chart_3": chart3, "chart_4": chart4,
+        "chart_5": chart5, "chart_6": chart6,
         "records": records, "api_cost": api_cost,
     }
 
@@ -897,6 +1124,8 @@ def main() -> None:
                    help="Prefix of the model key in header.stats.model_usage to use for API cost")
     p.add_argument("--exclude-main-tasks", type=str, default=None,
                    help="Comma-separated list of main_task names to exclude entirely from the report (e.g. 'arenahardwriting')")
+    p.add_argument("--ungrouped", action="store_true",
+                   help="Also produce ungrouped bar charts (one bar per eval) as charts 5 & 6")
     args = p.parse_args()
 
     run_start = _parse_iso(args.run_start)
@@ -914,14 +1143,28 @@ def main() -> None:
         lambda_cost_usd=args.lambda_cost_usd,
         model_key_prefix=args.model_key_prefix,
         exclude_main_tasks=exclude_main_tasks,
+        ungrouped=args.ungrouped,
     )
     print("HTML:", paths["html"])
-    for k in ("chart_1", "chart_2", "chart_3", "chart_4"):
-        print(f"{k}:", paths[k])
+    for k in ("chart_1", "chart_2", "chart_3", "chart_4", "chart_5", "chart_6"):
+        if paths.get(k):
+            print(f"{k}:", paths[k])
     print(f"records: {len(paths['records'])}")
     ac = paths["api_cost"]
     print(f"API cost: ${ac['total']:.2f} (input=${ac['input']:.2f} output=${ac['output']:.2f} cache_write=${ac['cache_write']:.2f} cache_read=${ac['cache_read']:.2f})")
 
 
 if __name__ == "__main__":
-    main()
+    import sys, subprocess
+    if "--interactive" in sys.argv:
+        # Quick-run: generate charts from hardcoded eval dir and open in Preview
+        results_dir = Path("/tmp/first_6hr_evals")
+        records, main_curves, side_curves, mf, sf = load_records(results_dir)
+        c1 = Path("/tmp/_interactive_chart1.png")
+        c2 = Path("/tmp/_interactive_chart2.png")
+        plot_main_task_bar_grouped(records, IFEVAL_BASELINES, c1)
+        plot_side_task_bar_grouped(records, CORE_SIDE_TASKS, c2, IFEVAL_SIDE_BASELINES)
+        subprocess.run(["open", str(c1), str(c2)])
+        print(f"Done — {len(records)} records, charts opened")
+    else:
+        main()
