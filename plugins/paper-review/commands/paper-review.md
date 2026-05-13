@@ -89,6 +89,84 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 }
 ```
 
+### Detect preprocessed papers
+
+After acquiring the paper, check `database.json` for a matching entry with `"preprocessed": true`. If found, use the **Fast Path** below instead of Stages 1-3.
+
+## Fast Path: Preprocessed Papers (~5-10 min)
+
+For papers pre-processed by the overnight pipeline (`preprocess_papers.py`), all annotation extraction, question answering, and flashcard generation is already done. The live session is a focused confirmation + active learning session.
+
+### Fast Path Stage 1: Open & Orient (~1 min)
+
+1. Download paper from reMarkable and unzip (~10s)
+2. Render annotated PDF and open in Preview:
+   ```
+   uv run --python 3.12 --with rmscene,PyMuPDF ${CLAUDE_PLUGIN_ROOT}/scripts/render_annotations.py /Users/titus/pyg/paper-review/papers/<slug>/ --open 2>/dev/null
+   ```
+3. Load the preprocessed data from `database.json`: `contributions`, `answered_questions`, `atomic_cards`
+4. Present paper header (same format as Stage 2 step 0 — title, authors, citation count if available)
+
+### Fast Path Stage 2: Review Pre-Answered Questions (~2 min)
+
+1. Present the pre-answered questions from `answered_questions` array. For each:
+   ```
+   **Your question (page N):** "<question>"
+   **Near highlight:** "<source_highlight>"
+   **Answer:** <answer>
+   ```
+2. After presenting all, ask via `AskUserQuestion`: "Any follow-up questions or corrections?" with options: "Looks good" / "I have a question" / free text
+3. Answer any follow-ups using the PDF text and web search if needed
+
+### Fast Path Stage 3: Rate Atomic Flashcards (~2 min)
+
+1. Present each atomic card from `atomic_cards` via `AskUserQuestion`:
+   ```
+   Card N/M (page <source_page>):
+   **Q:** <front>
+   **A:** <back>
+   ```
+   Options: "Keep" / "Edit" / "Not interested"
+2. For "Edit": ask user for revised front/back, update the card
+3. For "Not interested": set card `status: "pruned"`
+4. For "Keep": set card `status: "active"`
+
+### Fast Path Stage 4: Active Learning Check (~2 min)
+
+To prevent shallow review, include one active learning element:
+
+1. **Feynman prompt**: Pick the paper's single most important contribution. Ask via `AskUserQuestion`:
+   "In 1-2 sentences, explain: [core contribution]"
+   Evaluate with brief feedback.
+
+2. **One quiz question**: Generate 1 question at the Apply or Analyze level about the paper's key finding. Present via `AskUserQuestion` with free-text input. Brief feedback.
+
+3. Compute score: Feynman (0 or 1) + quiz (0 or 1) = score out of 2. Map to SM-2 quality:
+   - 2/2 → q=5, 1/2 → q=3, 0/2 → q=1
+
+### Fast Path Stage 5: Wrap Up (~1 min)
+
+1. Write review markdown to `reviews/YYYY-MM-DD-<slug>.md` with:
+   - Contributions from preprocessed data
+   - Atomic cards (active ones) as key insights
+   - Answered questions
+   - Quiz results from the active learning check
+2. Update `database.json`:
+   - Set `status: "reviewed"`, `date_read: today`
+   - Update SM-2 state using the quality score from Stage 4
+   - Update `atomic_cards` with keep/edit/prune statuses
+   - Add `review_dates`, `quiz_results`, `key_insights` from contributions
+3. Archive on reMarkable (same as full flow Stage 3 step 23)
+4. Cleanup intermediate files
+5. Git commit and push (same as full flow Stage 3 steps 25-26)
+6. **Proceed to Stage 4 (Spaced Repetition)** — same as full flow
+
+---
+
+## Full Review Path (non-preprocessed papers)
+
+Use this path when the paper has NOT been preprocessed (no `"preprocessed": true` in database.json). This is the original interactive flow, preserved for papers that need deep exploration.
+
 ## Stage 1: Understanding & Questions (~5 min)
 
 **Goal**: Help the user understand the paper deeply.
@@ -353,13 +431,18 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
       - "Who is a lead author of this paper?" — 4 author choices (correct + 3 lead authors from other database papers)
       Present as standard MCQ with 4 options.
       **Scoring**: Track metadata MCQ result separately — do NOT blend into the SM-2 percentage. Record as `metadata_correct: true/false` in the quiz results, but compute pct and quality score from content questions only. Mention the result in the mini-summary but it does not affect scheduling.
-   d. Ask **3-5 targeted questions** focused on:
+   d. **If the paper has `atomic_cards`** (preprocessed): Use the active cards for review. For each card with `status: "active"`:
+      - Show the front (question) via `AskUserQuestion` with free-text input
+      - After answer, reveal the back and give brief feedback
+      - Track correct/incorrect
+      - Include "Done for today" as an option
+   e. **If no atomic cards**: Ask **3-5 targeted questions** focused on:
       - Weak Bloom's levels from previous quiz (e.g., if analyze was 0%, ask analyze-level questions)
       - Key insights from the review file
       - Connections to other reviewed papers
-   e. Each question via `AskUserQuestion` — include "Done for today" as an option. If selected, save progress immediately and jump to Stage 5
-   f. **Carry forward**: For each question after the first, include previous feedback at the top of the `AskUserQuestion` text: `Previous: [correct/incorrect] — [feedback]\n\nQuestion N of M:`
-   g. After each paper: compute score from content questions only (exclude metadata MCQ), map to SM-2 quality, update SM-2 state (same algorithm as Stage 3 step 20-21)
+   f. Each question via `AskUserQuestion` — include "Done for today" as an option. If selected, save progress immediately and jump to Stage 5
+   g. **Carry forward**: For each question after the first, include previous feedback at the top of the `AskUserQuestion` text: `Previous: [correct/incorrect] — [feedback]\n\nQuestion N of M:`
+   h. After each paper: compute score from content questions only (exclude metadata MCQ), map to SM-2 quality, update SM-2 state (same algorithm as Stage 3 step 20-21)
    h. Save to database.json **immediately** (not batched) — append review date, update quality_history, EF, interval, next_review
    i. Mini-summary: `"Paper X: 3/4 (75%) -> quality 4, next review in 6 days | Metadata: ✓/✗"`
 5. After all papers reviewed, show session summary:
