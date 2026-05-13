@@ -94,16 +94,18 @@ Before proceeding, check `database.json` for any reviewed papers missing SM-2 fi
 **Goal**: Help the user understand the paper deeply.
 
 1. **Load annotations**: Read `papers/<slug>/annotations.json`. Wait for it if background extraction is still running.
+   - All page numbers in annotations.json are **1-indexed** (matching PDF viewer page numbers). Use them directly when telling the user which page something is on.
 
 2. **Present highlights**: Group by theme, show each highlight with its page number and `color_name`.
 
 3. **Transcribe handwritten notes**: For each entry in `handwritten_notes`:
    - If the `transcription` field is non-empty, use it directly (OCR already done)
    - If `transcription` is empty, fall back to using the Read tool to view the `ink_on_white_path` PNG and transcribe visually
-   - Use `surrounding_text` for context about what the note refers to
-   - Present transcription grouped with nearby highlights
+   - **Use `nearby_highlights`** to understand what the note refers to. Each nearby highlight has `text`, `color_name`, `distance_pts` (spatial distance in PDF points), and optionally `beyond_threshold: true` (if it's the closest highlight but not spatially adjacent). Notes with nearby highlights are likely commenting on those highlights.
+   - Use `surrounding_text` as additional context (the PDF text near the annotation)
+   - Present each note with its associated highlights, explaining the likely connection
 
-4. **Identify question annotations**: Look for highlights containing "?", "why", "how", "what does", "what is", or other question-like patterns. Present these to the user as their own questions.
+4. **Identify question annotations**: Look for highlights and handwritten notes containing "?", "why", "how", "what does", "what is", or other question-like patterns. For handwritten notes with questions, check `nearby_highlights` to understand what the question is about.
 
 5. **Answer questions**: For each question the user raised (via annotations or interactively):
    - First try to answer from the paper content

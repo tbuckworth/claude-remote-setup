@@ -7,7 +7,7 @@ The doc-dir should contain:
   - A .content JSON file (page mapping)
   - A subdirectory with .rm files (annotation layers)
 
-Outputs JSON to stdout. Saves ink cluster PNGs to doc-dir.
+Outputs JSON to stdout (pages are 1-indexed). Saves ink cluster PNGs to doc-dir.
 """
 
 import json
@@ -16,10 +16,6 @@ from pathlib import Path
 
 from rmscene import read_blocks, SceneGlyphItemBlock, SceneLineItemBlock
 from rmscene.scene_items import PenColor, Pen
-
-# reMarkable page dimensions (rm coordinate space)
-RM_WIDTH = 1404
-RM_HEIGHT = 1872
 
 # --- Color and tool mappings ---
 
@@ -81,62 +77,165 @@ PEN_TOOL_MAP = {
 ERASER_TOOLS = {Pen.ERASER.value, Pen.ERASER_AREA.value}
 
 
+# --- File discovery and content parsing ---
+
 def find_files(doc_dir: Path):
-    """Find the PDF, .content file, and .rm files in the document directory."""
     pdf_file = None
     content_file = None
-    rm_files = []
+    rm_dir = None
 
-    for f in doc_dir.rglob("*"):
-        if f.suffix == ".pdf":
+    for f in doc_dir.iterdir():
+        if f.suffix == ".pdf" and f.name != "annotated.pdf":
             pdf_file = f
         elif f.suffix == ".content":
             content_file = f
-        elif f.suffix == ".rm":
-            rm_files.append(f)
+        elif f.is_dir() and len(f.name) == 36:
+            rm_dir = f
 
-    return pdf_file, content_file, rm_files
+    if rm_dir is None:
+        rm_files = list(doc_dir.rglob("*.rm"))
+        if rm_files:
+            rm_dir = rm_files[0].parent
 
-
-def build_page_map(content_file: Path) -> dict[str, int]:
-    """Map page UUIDs to page numbers from the .content file."""
-    page_map = {}
-    if not content_file or not content_file.exists():
-        return page_map
-
-    with open(content_file) as f:
-        content = json.load(f)
-
-    pages = content.get("cPages", {}).get("pages", [])
-    if not pages:
-        pages_list = content.get("pages", [])
-        for i, page_id in enumerate(pages_list):
-            page_map[page_id] = i
-        return page_map
-
-    for i, page in enumerate(pages):
-        page_id = page.get("id", "")
-        if page_id:
-            page_map[page_id] = i
-        redir = page.get("redir", {})
-        if isinstance(redir, dict):
-            redir_val = redir.get("value", "")
-            if redir_val:
-                page_map[redir_val] = i
-
-    return page_map
+    return pdf_file, content_file, rm_dir
 
 
-def extract_rm_annotations(rm_file: Path, page_num: int):
-    """Extract highlights and ink strokes from a single .rm file.
+def parse_content(content_path: Path):
+    content = json.loads(content_path.read_text())
+    if "cPages" in content:
+        return content["cPages"].get("pages", [])
+    if "pages" in content:
+        return [{"id": pid} for pid in content["pages"]]
+    return []
 
-    Returns (highlights, strokes) where strokes include raw point data.
-    """
+
+def get_pdf_page_idx(page_info: dict) -> int | None:
+    redir = page_info.get("redir", {})
+    if isinstance(redir, dict):
+        val = redir.get("value", None)
+    else:
+        val = redir
+    if val is None or val == "N/A":
+        return None
+    return int(val)
+
+
+# --- Coordinate transform (inlined from render_annotations.py) ---
+
+def _solve_affine(pairs):
+    n = len(pairs)
+    sum_rm = sum(p[0] for p in pairs)
+    sum_pdf = sum(p[1] for p in pairs)
+    sum_rm2 = sum(p[0] ** 2 for p in pairs)
+    sum_rm_pdf = sum(p[0] * p[1] for p in pairs)
+    denom = n * sum_rm2 - sum_rm ** 2
+    if abs(denom) < 1e-10:
+        return None
+    scale = (n * sum_rm_pdf - sum_rm * sum_pdf) / denom
+    offset = (sum_pdf - scale * sum_rm) / n
+    return scale, offset
+
+
+def _collect_glyph_pairs(blocks, pdf_page):
+    pairs_x, pairs_y = [], []
+
+    for block in blocks:
+        if not isinstance(block, SceneGlyphItemBlock):
+            continue
+        item = block.item
+        if not hasattr(item, "value") or item.value is None:
+            continue
+        glyph = item.value
+        text = getattr(glyph, "text", "")
+        rects = getattr(glyph, "rectangles", [])
+        if not text or not rects or len(text) < 5:
+            continue
+
+        search_text = text.rstrip(".,:;)")
+        pdf_matches = pdf_page.search_for(search_text)
+        if not pdf_matches:
+            continue
+
+        if len(pdf_matches) == 1:
+            pdf_rect = pdf_matches[0]
+        else:
+            rm_w = rects[0].w
+            best = None
+            best_ratio_err = float("inf")
+            for m in pdf_matches:
+                if rm_w > 0:
+                    ratio_err = abs(m.width / rm_w - pdf_matches[0].width / rm_w)
+                else:
+                    ratio_err = 0
+                if best is None or ratio_err < best_ratio_err:
+                    best = m
+                    best_ratio_err = ratio_err
+            pdf_rect = best
+
+        rm_rect = rects[0]
+        pairs_x.append((rm_rect.x, pdf_rect.x0))
+        pairs_y.append((rm_rect.y, pdf_rect.y0))
+
+    return pairs_x, pairs_y
+
+
+def derive_global_transform(all_page_data, doc):
+    all_pairs_x, all_pairs_y = [], []
+
+    for pdf_idx, blocks in all_page_data:
+        if pdf_idx >= len(doc):
+            continue
+        page = doc[pdf_idx]
+        px, py = _collect_glyph_pairs(blocks, page)
+        all_pairs_x.extend(px)
+        all_pairs_y.extend(py)
+
+    if len(all_pairs_x) < 2:
+        return None
+
+    result_x = _solve_affine(all_pairs_x)
+    result_y = _solve_affine(all_pairs_y)
+    if result_x is None or result_y is None:
+        return None
+
+    sx, ox = result_x
+    sy, oy = result_y
+
+    def filter_and_refit(pairs, scale, offset):
+        filtered = [(rm, pdf) for rm, pdf in pairs if abs(scale * rm + offset - pdf) < 10]
+        if len(filtered) < 2:
+            return scale, offset
+        result = _solve_affine(filtered)
+        return result if result else (scale, offset)
+
+    sx, ox = filter_and_refit(all_pairs_x, sx, ox)
+    sy, oy = filter_and_refit(all_pairs_y, sy, oy)
+
+    if abs(sx - sy) / max(abs(sx), abs(sy)) > 0.1:
+        rm_x_range = max(p[0] for p in all_pairs_x) - min(p[0] for p in all_pairs_x) if all_pairs_x else 0
+        rm_y_range = max(p[0] for p in all_pairs_y) - min(p[0] for p in all_pairs_y) if all_pairs_y else 0
+        if rm_y_range > rm_x_range:
+            sx = sy
+            ox = sum(pdf - sx * rm for rm, pdf in all_pairs_x) / len(all_pairs_x) if all_pairs_x else ox
+        else:
+            sy = sx
+            oy = sum(pdf - sy * rm for rm, pdf in all_pairs_y) / len(all_pairs_y) if all_pairs_y else oy
+
+    return {"sx": sx, "ox": ox, "sy": sy, "oy": oy}
+
+
+def rm_bbox_to_pdf(bbox, transform):
+    sx, ox = transform["sx"], transform["ox"]
+    sy, oy = transform["sy"], transform["oy"]
+    x0, y0, x1, y1 = bbox
+    return [sx * x0 + ox, sy * y0 + oy, sx * x1 + ox, sy * y1 + oy]
+
+
+# --- Annotation extraction ---
+
+def extract_annotations_from_blocks(blocks, page_num):
     highlights = []
     strokes = []
-
-    with open(rm_file, "rb") as f:
-        blocks = list(read_blocks(f))
 
     for block in blocks:
         if isinstance(block, SceneGlyphItemBlock):
@@ -144,6 +243,8 @@ def extract_rm_annotations(rm_file: Path, page_num: int):
             if value is None or block.item.deleted_length > 0:
                 continue
             color_val = value.color.value if hasattr(value.color, "value") else int(value.color)
+            rects = getattr(value, "rectangles", [])
+            rm_rects = [{"x": r.x, "y": r.y, "w": r.w, "h": r.h} for r in rects]
             highlights.append({
                 "page": page_num,
                 "text": value.text,
@@ -151,6 +252,7 @@ def extract_rm_annotations(rm_file: Path, page_num: int):
                 "color_name": PEN_COLOR_MAP.get(color_val, "unknown"),
                 "start": value.start,
                 "length": value.length,
+                "rm_rects": rm_rects,
             })
         elif isinstance(block, SceneLineItemBlock):
             value = block.item.value
@@ -202,19 +304,12 @@ class UnionFind:
 
 
 def bbox_gap(a, b):
-    """Compute edge-to-edge distance between two bboxes [x0, y0, x1, y1]."""
     dx = max(0, max(a[0], b[0]) - min(a[2], b[2]))
     dy = max(0, max(a[1], b[1]) - min(a[3], b[3]))
     return (dx * dx + dy * dy) ** 0.5
 
 
 def cluster_strokes(strokes, gap_threshold=60.0):
-    """Group strokes on the same page into logical handwritten notes.
-
-    Uses Union-Find on bounding box proximity. Two strokes merge if
-    their bbox edge-to-edge distance < gap_threshold.
-    Filters out eraser strokes and stray marks (<5 total points).
-    """
     draw_strokes = [s for s in strokes if s["tool"] not in ERASER_TOOLS]
     if not draw_strokes:
         return []
@@ -268,8 +363,9 @@ def cluster_strokes(strokes, gap_threshold=60.0):
     return clusters
 
 
+# --- Rendering ---
+
 def render_cluster_white(cluster, doc_dir: Path, padding=30, scale=2.0):
-    """Draw all strokes in a cluster on a white background."""
     from PIL import Image, ImageDraw
 
     x0, y0, x1, y1 = cluster["bbox"]
@@ -300,13 +396,14 @@ def render_cluster_white(cluster, doc_dir: Path, padding=30, scale=2.0):
     return str(path)
 
 
-def render_cluster_context(cluster, pdf_file: Path, doc_dir: Path):
-    """Draw strokes overlaid on PDF background."""
+def render_cluster_context(cluster, pdf_file: Path, doc_dir: Path, transform):
     import fitz
     from PIL import Image, ImageDraw
 
     page_num = cluster["page"]
     x0, y0, x1, y1 = cluster["bbox"]
+    sx, ox = transform["sx"], transform["ox"]
+    sy, oy = transform["sy"], transform["oy"]
 
     doc = fitz.open(str(pdf_file))
     if page_num >= len(doc):
@@ -315,40 +412,38 @@ def render_cluster_context(cluster, pdf_file: Path, doc_dir: Path):
 
     page = doc[page_num]
     page_rect = page.rect
-    sx = page_rect.width / RM_WIDTH
-    sy = page_rect.height / RM_HEIGHT
 
-    margin_rm = 40
-    # Clip region in PDF coords (clamp to page bounds)
-    clip_x0 = max(0, (x0 - margin_rm) * sx)
-    clip_y0 = max(0, (y0 - margin_rm) * sy)
-    clip_x1 = min(page_rect.width, (x1 + margin_rm) * sx)
-    clip_y1 = min(page_rect.height, (y1 + margin_rm) * sy)
+    pdf_x0 = sx * x0 + ox
+    pdf_y0 = sy * y0 + oy
+    pdf_x1 = sx * x1 + ox
+    pdf_y1 = sy * y1 + oy
 
-    pdf_rect = fitz.Rect(clip_x0, clip_y0, clip_x1, clip_y1)
-    if pdf_rect.is_empty:
+    margin_pts = 20
+    clip_x0 = max(0, pdf_x0 - margin_pts)
+    clip_y0 = max(0, pdf_y0 - margin_pts)
+    clip_x1 = min(page_rect.width, pdf_x1 + margin_pts)
+    clip_y1 = min(page_rect.height, pdf_y1 + margin_pts)
+
+    clip = fitz.Rect(clip_x0, clip_y0, clip_x1, clip_y1)
+    if clip.is_empty:
         doc.close()
         return None
 
-    mat = fitz.Matrix(2, 2)
-    pix = page.get_pixmap(matrix=mat, clip=pdf_rect)
+    zoom = 2
+    mat = fitz.Matrix(zoom, zoom)
+    pix = page.get_pixmap(matrix=mat, clip=clip)
     bg = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
-    # If strokes extend into negative x (margin notes), add gray canvas on left
     left_extend = 0
-    if x0 < 0:
-        left_extend_rm = abs(x0) + margin_rm
-        left_extend = int(left_extend_rm * sx * 2)
+    if pdf_x0 - margin_pts < 0:
+        left_extend_pts = abs(pdf_x0 - margin_pts)
+        left_extend = int(left_extend_pts * zoom)
         extended = Image.new("RGB", (bg.width + left_extend, bg.height), (230, 230, 230))
         extended.paste(bg, (left_extend, 0))
         bg = extended
 
     overlay = Image.new("RGBA", bg.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
-
-    # Origin of the clip region in rm coords
-    origin_x = max(x0 - margin_rm, 0) if x0 >= 0 else 0
-    origin_y = max(y0 - margin_rm, 0)
 
     for stroke in cluster["strokes"]:
         pts = stroke["points"]
@@ -357,13 +452,14 @@ def render_cluster_context(cluster, pdf_file: Path, doc_dir: Path):
         rgb = PEN_COLOR_RGB.get(stroke["color"], (0, 0, 0))
         alpha = 140 if stroke["tool_name"] == "Highlighter" else 220
         color = (*rgb, alpha)
-        line_width = max(1, int(stroke["thickness_scale"] * sx * 2))
+        line_width = max(1, int(stroke["thickness_scale"] * sx * zoom))
 
         coords = []
         for p in pts:
-            # Convert rm coords to pixel coords in the rendered image
-            px = (p[0] - origin_x) * sx * 2 + left_extend
-            py = (p[1] - origin_y) * sy * 2
+            pdf_px = sx * p[0] + ox
+            pdf_py = sy * p[1] + oy
+            px = (pdf_px - clip_x0) * zoom + left_extend
+            py = (pdf_py - clip_y0) * zoom
             coords.append((int(px), int(py)))
 
         draw.line(coords, fill=color, width=line_width)
@@ -380,30 +476,21 @@ def render_cluster_context(cluster, pdf_file: Path, doc_dir: Path):
     return str(path)
 
 
-def extract_surrounding_text(pdf_file: Path, page_num: int, bbox, expansion=100):
-    """Extract PDF text near a cluster using PyMuPDF."""
-    import fitz
-
-    doc = fitz.open(str(pdf_file))
-    if page_num >= len(doc):
-        doc.close()
-        return ""
-
-    page = doc[page_num]
-    page_rect = page.rect
-    sx = page_rect.width / RM_WIDTH
-    sy = page_rect.height / RM_HEIGHT
-
+def extract_surrounding_text(pdf_page, bbox, transform, expansion_pts=30):
+    sx, ox = transform["sx"], transform["ox"]
+    sy, oy = transform["sy"], transform["oy"]
     x0, y0, x1, y1 = bbox
+    page_rect = pdf_page.rect
+
+    import fitz
     clip = fitz.Rect(
-        max(0, (x0 - expansion) * sx),
-        max(0, (y0 - expansion) * sy),
-        min(page_rect.width, (x1 + expansion) * sx),
-        min(page_rect.height, (y1 + expansion) * sy),
+        max(0, sx * x0 + ox - expansion_pts),
+        max(0, sy * y0 + oy - expansion_pts),
+        min(page_rect.width, sx * x1 + ox + expansion_pts),
+        min(page_rect.height, sy * y1 + oy + expansion_pts),
     )
 
-    text = page.get_text(clip=clip).strip()
-    doc.close()
+    text = pdf_page.get_text(clip=clip).strip()
 
     if len(text) > 500:
         text = text[:500] + "..."
@@ -411,10 +498,6 @@ def extract_surrounding_text(pdf_file: Path, page_num: int, bbox, expansion=100)
 
 
 def transcribe_image(image_path: str) -> str:
-    """Transcribe handwriting from a PNG using macOS Vision framework.
-
-    Returns recognized text or empty string on failure/non-macOS.
-    """
     try:
         import Vision
         from Quartz import (
@@ -435,7 +518,7 @@ def transcribe_image(image_path: str) -> str:
             return ""
 
         request = Vision.VNRecognizeTextRequest.alloc().init()
-        request.setRecognitionLevel_(0)  # 0 = accurate
+        request.setRecognitionLevel_(0)
         handler = Vision.VNImageRequestHandler.alloc().initWithCGImage_options_(
             cg_image, None
         )
@@ -458,7 +541,6 @@ def transcribe_image(image_path: str) -> str:
 
 
 def extract_pdf_metadata(pdf_file: Path):
-    """Extract metadata and links from the PDF."""
     import fitz
 
     doc = fitz.open(str(pdf_file))
@@ -474,13 +556,50 @@ def extract_pdf_metadata(pdf_file: Path):
         for link in page.get_links():
             if link.get("uri"):
                 links.append({
-                    "page": page_num,
+                    "page": page_num + 1,
                     "uri": link["uri"],
                 })
 
     doc.close()
     return title, author, total_pages, links
 
+
+# --- Spatial grouping ---
+
+def find_nearby_highlights(note_pdf_bbox, page_highlights, threshold=100.0):
+    scored = []
+    for h in page_highlights:
+        pdf_bbox = h.get("pdf_bbox")
+        if pdf_bbox is None:
+            continue
+        gap = bbox_gap(note_pdf_bbox, pdf_bbox)
+        scored.append((gap, h))
+
+    scored.sort(key=lambda x: x[0])
+
+    nearby = []
+    for gap, h in scored:
+        if gap <= threshold:
+            nearby.append({
+                "text": h["text"],
+                "color_name": h["color_name"],
+                "distance_pts": round(gap, 1),
+            })
+
+    # Always include the closest highlight even if beyond threshold
+    if not nearby and scored:
+        gap, h = scored[0]
+        nearby.append({
+            "text": h["text"],
+            "color_name": h["color_name"],
+            "distance_pts": round(gap, 1),
+            "beyond_threshold": True,
+        })
+
+    return nearby
+
+
+# --- Main ---
 
 def main():
     if len(sys.argv) < 2:
@@ -492,31 +611,87 @@ def main():
         print(f"Error: {doc_dir} is not a directory", file=sys.stderr)
         sys.exit(1)
 
-    pdf_file, content_file, rm_files = find_files(doc_dir)
-    page_map = build_page_map(content_file)
+    pdf_file, content_file, rm_dir = find_files(doc_dir)
 
+    # Phase 1: Parse content and load blocks per page
+    page_blocks = []  # (pdf_idx, blocks)
+
+    if content_file and rm_dir:
+        pages = parse_content(content_file)
+        for page_info in pages:
+            uuid = page_info.get("id", "")
+            if not uuid:
+                continue
+            rm_file = rm_dir / f"{uuid}.rm"
+            if not rm_file.exists():
+                continue
+            pdf_idx = get_pdf_page_idx(page_info)
+            if pdf_idx is None:
+                continue
+            with open(rm_file, "rb") as f:
+                blocks = list(read_blocks(f))
+            page_blocks.append((pdf_idx, blocks))
+    elif rm_dir:
+        for i, rm_file in enumerate(sorted(rm_dir.glob("*.rm"))):
+            with open(rm_file, "rb") as f:
+                blocks = list(read_blocks(f))
+            page_blocks.append((i, blocks))
+
+    # Phase 2: Derive global transform
+    transform = None
+    if pdf_file:
+        import fitz
+        doc = fitz.open(str(pdf_file))
+        transform = derive_global_transform(page_blocks, doc)
+        if transform is None:
+            pw, ph = doc[0].rect.width, doc[0].rect.height
+            scale = ph / 1872.0
+            transform = {"sx": scale, "ox": pw / 2.0, "sy": scale, "oy": 0.0}
+        doc.close()
+    else:
+        transform = {"sx": 1.0, "ox": 0.0, "sy": 1.0, "oy": 0.0}
+
+    # Phase 3: Extract highlights and strokes
     all_highlights = []
     all_strokes = []
-
-    for rm_file in rm_files:
-        page_uuid = rm_file.stem
-        page_num = page_map.get(page_uuid, -1)
-
-        if page_num == -1:
-            try:
-                page_num = int(page_uuid)
-            except ValueError:
-                page_num = sorted(rm_files).index(rm_file)
-
-        highlights, strokes = extract_rm_annotations(rm_file, page_num)
+    for pdf_idx, blocks in page_blocks:
+        highlights, strokes = extract_annotations_from_blocks(blocks, pdf_idx)
         all_highlights.extend(highlights)
         all_strokes.extend(strokes)
 
-    # Cluster strokes into logical handwritten notes
+    # Phase 4: Convert highlight rm_rects to PDF coords and compute pdf_bbox
+    for h in all_highlights:
+        sx, ox = transform["sx"], transform["ox"]
+        sy, oy = transform["sy"], transform["oy"]
+        pdf_rects = []
+        for r in h.get("rm_rects", []):
+            pdf_rects.append({
+                "x": round(sx * r["x"] + ox, 1),
+                "y": round(sy * r["y"] + oy, 1),
+                "w": round(sx * r["w"], 1),
+                "h": round(sy * r["h"], 1),
+            })
+        h["pdf_rects"] = pdf_rects
+        if pdf_rects:
+            h["pdf_bbox"] = [
+                min(r["x"] for r in pdf_rects),
+                min(r["y"] for r in pdf_rects),
+                max(r["x"] + r["w"] for r in pdf_rects),
+                max(r["y"] + r["h"] for r in pdf_rects),
+            ]
+
+    # Phase 5: Cluster strokes and build handwritten notes
     clusters = cluster_strokes(all_strokes)
 
-    # Render cluster images and extract surrounding text
+    highlights_by_page = {}
+    for h in all_highlights:
+        highlights_by_page.setdefault(h["page"], []).append(h)
+
     handwritten_notes = []
+    if pdf_file:
+        import fitz
+        doc = fitz.open(str(pdf_file))
+
     for cluster in clusters:
         if cluster["type"] == "full-page":
             continue
@@ -527,15 +702,23 @@ def main():
         transcription = transcribe_image(white_path) if white_path else ""
 
         if pdf_file:
-            context_path = render_cluster_context(cluster, pdf_file, doc_dir)
-            surrounding_text = extract_surrounding_text(
-                pdf_file, cluster["page"], cluster["bbox"]
-            )
+            context_path = render_cluster_context(cluster, pdf_file, doc_dir, transform)
+            page_num = cluster["page"]
+            if page_num < len(doc):
+                surrounding_text = extract_surrounding_text(
+                    doc[page_num], cluster["bbox"], transform
+                )
+
+        pdf_bbox = rm_bbox_to_pdf(cluster["bbox"], transform)
+
+        page_hl = highlights_by_page.get(cluster["page"], [])
+        nearby = find_nearby_highlights(pdf_bbox, page_hl)
 
         note = {
-            "page": cluster["page"],
+            "page": cluster["page"] + 1,
             "cluster_id": cluster["cluster_id"],
             "bbox": cluster["bbox"],
+            "pdf_bbox": [round(v, 1) for v in pdf_bbox],
             "num_strokes": cluster["num_strokes"],
             "ink_on_white_path": white_path,
             "ink_on_pdf_path": context_path,
@@ -543,15 +726,23 @@ def main():
             "transcription": transcription,
             "stroke_colors": cluster["stroke_colors"],
             "tools_used": cluster["tools_used"],
+            "nearby_highlights": nearby,
         }
         handwritten_notes.append(note)
 
-    # Extract PDF metadata and links
+    if pdf_file:
+        doc.close()
+
+    # Phase 6: Extract PDF metadata
     title, author, total_pages, links = "", "", 0, []
     if pdf_file:
         title, author, total_pages, links = extract_pdf_metadata(pdf_file)
 
-    # Sort highlights by page number
+    # Phase 7: Clean up and 1-index pages in highlights
+    for h in all_highlights:
+        h["page"] += 1
+        h.pop("rm_rects", None)
+
     all_highlights.sort(key=lambda h: (h["page"], h.get("start", 0) or 0))
 
     result = {
