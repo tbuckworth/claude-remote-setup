@@ -51,17 +51,22 @@ Parse `{{argument}}`:
 2. `mkdir -p /Users/titus/pyg/paper-review/papers/<slug>`
 3. `cd /Users/titus/pyg/paper-review/papers/<slug> && rmapi get "<full-path>"`
 4. `unzip "*.zip" -d .` — extracts `<uuid>.pdf`, `<uuid>.content`, `<uuid>/<page-uuid>.rm` files
-5. **Start annotation extraction in background** (saves annotations.json when done):
+5. **Render annotated PDF and open it** so the user can follow along during the quiz:
+   ```
+   uv run --python 3.12 --with rmscene,PyMuPDF ${CLAUDE_PLUGIN_ROOT}/scripts/render_annotations.py /Users/titus/pyg/paper-review/papers/<slug>/ --open 2>/dev/null
+   ```
+   This renders handwriting and highlights onto the PDF using a coordinate transform derived from matching text highlight positions. Runs in ~5s. The user sees their annotated paper in Preview while answering quiz questions.
+6. **Start annotation extraction in background** (saves annotations.json when done):
    ```
    uv run --python 3.12 --with rmscene,PyMuPDF,Pillow,pyobjc-framework-Vision ${CLAUDE_PLUGIN_ROOT}/scripts/extract_annotations.py /Users/titus/pyg/paper-review/papers/<slug>/ > /Users/titus/pyg/paper-review/papers/<slug>/annotations.json 2>/dev/null
    ```
    Run this with `Bash(run_in_background=true)`.
-6. **Extract PDF text in foreground** (fast, ~2s):
+7. **Extract PDF text in foreground** (fast, ~2s):
    ```
    uv run --python 3.12 --with PyMuPDF python3 -c "import fitz,json,sys;d=fitz.open(sys.argv[1]);print(json.dumps({'pages':[d[i].get_text() for i in range(len(d))],'total':len(d)}));d.close()" /Users/titus/pyg/paper-review/papers/<slug>/*.pdf
    ```
    Parse the JSON output — this provides the text needed for Stage 2 (quiz).
-7. Save state:
+8. Save state:
    ```json
    // papers/<slug>/review-state.json
    {"stage": 2, "slug": "<slug>", "source": "remarkable", "remarkable_path": "<path>", "remarkable_folder": "<folder>", "title": "...", "annotations_file": "annotations.json"}
