@@ -58,7 +58,7 @@ def list_remarkable_papers() -> list[dict]:
             line = line.strip()
             if not line:
                 continue
-            if line.startswith("[d]"):
+            if line.startswith("[d]") or line.startswith("[f]"):
                 name = line[3:].strip()
                 papers.append({"name": name, "folder": folder})
     return papers
