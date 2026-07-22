@@ -1,4 +1,5 @@
 ---
+name: learning-science
 description: "Learning science techniques for paper review: Bloom's taxonomy question generation, Feynman technique, spaced repetition, and corrective feedback"
 ---
 

@@ -1,0 +1,16 @@
+{
+  "name": "best-practices-validator",
+  "version": "1.0.0+codex.adapter1",
+  "description": "Validate an implementation approach against current official documentation.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Best Practices Validator",
+    "shortDescription": "Check plans against official guidance",
+    "longDescription": "Verify technical approaches against primary documentation before implementation.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": ["Validate this implementation approach."]
+  }
+}

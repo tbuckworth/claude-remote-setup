@@ -1,0 +1,17 @@
+{
+  "name": "sell-stuff",
+  "version": "0.1.0",
+  "description": "Research prices, write listings, and assist with selling items or evaluating cars.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Sell Stuff",
+    "shortDescription": "Research and create marketplace listings",
+    "longDescription": "Match sale tasks, research comparable prices, generate listings, automate supported browser steps, and red-team car listings.",
+    "developerName": "Titus",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write", "Interactive"],
+    "defaultPrompt": ["Help me sell this item.", "Show the items I need to sell.", "Red-team this car listing."]
+  }
+}

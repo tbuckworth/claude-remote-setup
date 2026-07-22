@@ -1,0 +1,38 @@
+{
+  "name": "custom-validators-codex",
+  "interface": {
+    "displayName": "Titus's Codex Validators"
+  },
+  "plugins": [
+    {
+      "name": "assumption-debugger",
+      "source": { "source": "local", "path": "./plugins/assumption-debugger" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "best-practices-validator",
+      "source": { "source": "local", "path": "./plugins/best-practices-validator" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "doc-cross-checker",
+      "source": { "source": "local", "path": "./plugins/doc-cross-checker" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "pre-mortem",
+      "source": { "source": "local", "path": "./plugins/pre-mortem" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "review-changes",
+      "source": { "source": "local", "path": "./plugins/review-changes" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

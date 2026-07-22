@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/remind.sh 'Cross-check load-bearing library and framework assumptions against current official documentation before accepting the plan.'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

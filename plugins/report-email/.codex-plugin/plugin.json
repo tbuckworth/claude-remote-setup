@@ -1,0 +1,16 @@
+{
+  "name": "report-email",
+  "version": "1.0.0",
+  "description": "Send HTML report emails with inline charts through Gmail.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Report Email",
+    "shortDescription": "Email rich reports and charts",
+    "longDescription": "Compose and send HTML result summaries with inline images through the configured Gmail credentials.",
+    "developerName": "Titus",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": ["Email me this report with its charts."]
+  }
+}

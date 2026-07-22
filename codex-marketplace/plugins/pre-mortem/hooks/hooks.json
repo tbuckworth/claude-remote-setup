@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/remind.sh 'Before accepting the completed plan, identify its most likely concrete failure mode and add a mitigation when material.'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

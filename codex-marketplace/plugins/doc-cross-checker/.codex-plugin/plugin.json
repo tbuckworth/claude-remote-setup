@@ -1,0 +1,16 @@
+{
+  "name": "doc-cross-checker",
+  "version": "1.0.0+codex.adapter1",
+  "description": "Cross-check code against official library documentation.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Documentation Cross-Checker",
+    "shortDescription": "Verify code against official docs",
+    "longDescription": "Find deprecated APIs, incorrect usage, and documentation mismatches in implementation code.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": ["Cross-check this code against its official documentation."]
+  }
+}

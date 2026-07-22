@@ -1,0 +1,16 @@
+{
+  "name": "refactoring-radar",
+  "version": "1.0.0",
+  "description": "Find concrete refactoring opportunities and code smells.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Refactoring Radar",
+    "shortDescription": "Find worthwhile refactors",
+    "longDescription": "Inspect code for duplication, code smells, and focused structural improvements.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": ["Find worthwhile refactoring opportunities here."]
+  }
+}

@@ -1,7 +1,6 @@
 ---
 name: report-email
 description: Use this skill when the user asks to "send a report email", "email me results", "send results with charts", "email a summary", or any request to send an HTML-formatted email with embedded charts or images. Also trigger when sending experiment results, analysis summaries, or any rich report via email.
-version: 1.0.0
 ---
 
 # Report Email — HTML emails with inline charts

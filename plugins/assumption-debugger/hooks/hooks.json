@@ -9,6 +9,11 @@
             "model": "claude-opus-4-6",
             "prompt": "A Plan agent just completed. Review the plan and question its assumptions. Are there unstated assumptions that could be wrong? Missing edge cases? Incorrect beliefs about how something works? If assumptions look solid, respond: {\"ok\": true}. If you find a questionable assumption, respond: {\"ok\": false, \"reason\": \"Assumption to question: <specific assumption>. Consider: <alternative>\"}. $ARGUMENTS",
             "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/codex-assumption-reminder.sh",
+            "timeout": 10
           }
         ]
       }

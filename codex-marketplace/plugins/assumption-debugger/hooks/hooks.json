@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/remind.sh 'Before accepting the completed plan, independently check its unstated assumptions, edge cases, and beliefs about system behavior.'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
