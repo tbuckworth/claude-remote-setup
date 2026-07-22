@@ -1,0 +1,4 @@
+interface:
+  display_name: "Food Claude"
+  short_description: "Choose Just Eat Business meals safely"
+  default_prompt: "Use $food-claude to choose my meals for this week."

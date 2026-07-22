@@ -222,11 +222,14 @@ Install or refresh the Codex plugins:
 ./setup-codex.sh
 ```
 
-The setup installs 14 local plugins across the main, validator-adapter, and
+The setup installs 15 local plugins across the main, validator-adapter, and
 Apollo Prep marketplaces. Claude-only prompt hooks are represented by compatible
 Codex command reminders, so Codex does not emit unsupported prompt-hook warnings.
 Start a new Codex thread after installation so its skills are discovered, and
 review plugin hooks with `/hooks`.
+
+`food-claude` delegates to the upstream `Antovigo/food-claude` checkout at
+`~/pyg/food-claude`; `setup-codex.sh` clones or safely fast-forwards that checkout.
 
 Project guidance under `~/pyg` uses `AGENTS.md` as the shared source; sibling
 `CLAUDE.md` files import it for Claude Code. Secrets referenced by instructions

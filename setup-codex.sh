@@ -5,7 +5,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APOLLO_DIR="$HOME/pyg/admin/apollo-prep"
-MAIN_PLUGINS=(paper-review branch-guard commit-often lambda-experiments refactoring-radar report-email researcher sell-stuff)
+FOOD_CLAUDE_DIR="${FOOD_CLAUDE_SOURCE_DIR:-$HOME/pyg/food-claude}"
+MAIN_PLUGINS=(paper-review branch-guard commit-often lambda-experiments refactoring-radar report-email researcher sell-stuff food-claude)
 VALIDATOR_PLUGINS=(assumption-debugger best-practices-validator doc-cross-checker pre-mortem review-changes)
 
 if ! command -v codex >/dev/null 2>&1; then
@@ -15,6 +16,17 @@ fi
 
 mkdir -p "$HOME/.codex"
 ln -sfn "$SCRIPT_DIR/config/AGENTS.shared.md" "$HOME/.codex/AGENTS.md"
+
+if [ -d "$FOOD_CLAUDE_DIR/.git" ]; then
+    if [ -z "$(git -C "$FOOD_CLAUDE_DIR" status --porcelain)" ]; then
+        git -C "$FOOD_CLAUDE_DIR" pull --ff-only
+    else
+        echo "Leaving modified Food Claude checkout unchanged: $FOOD_CLAUDE_DIR" >&2
+    fi
+else
+    mkdir -p "$(dirname "$FOOD_CLAUDE_DIR")"
+    git clone https://github.com/Antovigo/food-claude.git "$FOOD_CLAUDE_DIR"
+fi
 
 # Refresh generated Codex adapters from their canonical Claude agent and hook
 # sources so the two variants cannot silently drift.
