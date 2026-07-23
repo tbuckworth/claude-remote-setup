@@ -19,7 +19,8 @@ changes=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 if [ "$changes" -gt 0 ]; then
     reason="You have $changes uncommitted change(s). Please commit your changes before ending the session. Use 'git status' to see what needs to be committed."
     if [ -n "${PLUGIN_ROOT:-}" ]; then
-        jq -n --arg reason "$reason" '{continue: false, stopReason: $reason, systemMessage: $reason}'
+        # Codex continues the turn only for the Stop-specific block decision.
+        jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
     else
         # Claude Code output schema.
         jq -n --arg reason "$reason" '{decision: "block", reason: $reason}'
