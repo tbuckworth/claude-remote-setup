@@ -65,8 +65,8 @@
     },
     {
       "name": "researcher",
-      "description": "AI Safety R&D Agent \u2014 10-step interactive research workflow using Steinhardt fail-fast methodology",
-      "version": "0.2.0",
+      "description": "AI Safety R&D Agent \u2014 11-step dual-backend research workflow using Steinhardt fail-fast methodology",
+      "version": "0.3.1",
       "source": "./plugins/researcher",
       "category": "development"
     },
