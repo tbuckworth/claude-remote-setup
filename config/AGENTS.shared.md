@@ -9,11 +9,35 @@
 ## Desktop (SSH)
 
 - SSH host alias: `desktop` (user `titus`, address `100.116.219.34`).
-- Large 3 TB volume: `/media/titus/d88cd800-acde-46cc-b9e8-2be359f95347`.
-- “Send/share to desktop” means `scp <file> desktop:/media/titus/d88cd800-acde-46cc-b9e8-2be359f95347/`.
+- Large 3 TB volume: `/media/titus/big` (device `/dev/sdb`, UUID `d88cd800-acde-46cc-b9e8-2be359f95347`).
+  Its root is root-owned — write under an existing subdir (`tmp/`, `eval_archive/`, `bma_*`,
+  `py-offload/`); a new top-level dir needs `sudo mkdir` + `sudo chown titus:titus`.
+  Never use the bare `/media/titus/<UUID>` path: it is NOT a mountpoint, so writes there land
+  on the 46 G root filesystem instead of the 3 TB disk.
+- “Send/share to desktop” means `scp <file> desktop:/media/titus/big/tmp/`.
 - “Run on desktop” means `ssh desktop '<command>'`.
 - The desktop is Ubuntu with an NVIDIA RTX 3090; repositories live in `~/pyg`.
 - After changing local agent configuration, run `bash ~/.claude/sync-config.sh` to synchronize supported configuration to the desktop.
+
+## MATS cluster (Slurm GPUs)
+
+- “Get a GPU on the MATS cluster”, “run this on MATS”, “submit to the cluster” all mean:
+  submit a **Slurm job** from the dev node — never run the work in an SSH shell.
+- SSH aliases (configured in `~/.ssh/config`): `mats` = dev/login node
+  (`t.buckworth@185.141.218.207`), `mats-controller` (alias `mats-ctl`) = controller
+  (`94.156.8.208`). Key-only auth with `~/.ssh/id_ed25519`.
+- Use the `mats-cluster` skill (installed at `~/.claude/skills/mats-cluster`, and on the
+  cluster itself) for partitions, prices, sbatch templates, and troubleshooting.
+- Free partition `compute` (8× shared L40, 48 GB) — always start here. `elastic-*`
+  partitions (A100/H100) are pay-as-you-go, **not yet enabled for this account**, and
+  require explicit confirmation before any submission.
+- Storage: `/mnt/nw/home/t.buckworth` (persistent, NFS, checkpoints/results),
+  `/mnt/nw/teams/team_rhys_c9` (team share), `/ephemeral/t.buckworth` (fast scratch,
+  wiped on reboot — HF cache and dataset shards go here). Nothing is backed up.
+- `gpu-avail` / `gpu-cost` exist **only on the controller** (`ssh mats-controller`).
+- Long-running terminal work (agents, downloads) belongs in `tmux` on the dev node.
+- Autonomous research runs: use `RESEARCHER_COMPUTE_PROFILE=mats` (see
+  `~/pyg/researcher/docs/COMPUTE-MATS.md`).
 
 ## Google Workspace
 
