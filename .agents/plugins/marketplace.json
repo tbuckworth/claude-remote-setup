@@ -1,0 +1,116 @@
+{
+  "name": "custom-plugins-codex",
+  "interface": {
+    "displayName": "Titus's Custom Plugins (Codex)"
+  },
+  "plugins": [
+    {
+      "name": "paper-review",
+      "source": {
+        "source": "local",
+        "path": "./plugins/paper-review"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "branch-guard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/branch-guard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "commit-often",
+      "source": {
+        "source": "local",
+        "path": "./plugins/commit-often"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "lambda-experiments",
+      "source": {
+        "source": "local",
+        "path": "./plugins/lambda-experiments"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "refactoring-radar",
+      "source": {
+        "source": "local",
+        "path": "./plugins/refactoring-radar"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "report-email",
+      "source": {
+        "source": "local",
+        "path": "./plugins/report-email"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "researcher",
+      "source": {
+        "source": "local",
+        "path": "./plugins/researcher"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    },
+    {
+      "name": "sell-stuff",
+      "source": {
+        "source": "local",
+        "path": "./plugins/sell-stuff"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "food-claude",
+      "source": {
+        "source": "local",
+        "path": "./plugins/food-claude"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

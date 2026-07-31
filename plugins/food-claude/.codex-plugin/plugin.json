@@ -1,0 +1,23 @@
+{
+  "name": "food-claude",
+  "version": "0.1.0",
+  "description": "Choose editable Just Eat Business meal selections from natural-language preferences.",
+  "author": {
+    "name": "Antovigo / Titus Codex adapter"
+  },
+  "repository": "https://github.com/Antovigo/food-claude",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Food Claude",
+    "shortDescription": "Choose Just Eat Business meals safely.",
+    "longDescription": "Uses the upstream Food Claude workflow and Playwright MCP to choose editable meal slots while respecting preferences and subsidy limits.",
+    "developerName": "Antovigo / Titus",
+    "category": "Productivity",
+    "capabilities": ["Browser", "Interactive", "Write"],
+    "defaultPrompt": [
+      "Choose my Just Eat Business meals for this week.",
+      "Fill my open meal slots while staying within subsidy."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

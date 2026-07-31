@@ -1,0 +1,16 @@
+{
+  "name": "lambda-experiments",
+  "version": "0.1.0",
+  "description": "Orchestrate and monitor Control Arena experiments on Lambda GPU instances.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Lambda Experiments",
+    "shortDescription": "Run and monitor Lambda GPU experiments",
+    "longDescription": "Launch, monitor, troubleshoot, collect, and safely terminate Control Arena experiments on Lambda Cloud.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write", "Interactive"],
+    "defaultPrompt": ["Run this experiment on Lambda.", "Check my Lambda experiment status.", "Email me the experiment report."]
+  }
+}

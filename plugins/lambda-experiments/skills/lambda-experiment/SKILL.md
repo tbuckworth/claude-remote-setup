@@ -1,7 +1,6 @@
 ---
 name: lambda-experiment
 description: This skill should be used when the user asks to "run experiments on Lambda", "launch a Lambda instance", "start a PTB run", "run control arena on GPU", "start an 8-GPU run", "run a sweep on Lambda", "run experiments", "launch GPU instance", "start training on Lambda", "run elicitation sweep", "LoRA training on Lambda", or any request related to launching, running, or managing GPU experiments on Lambda Cloud instances for Control Arena.
-version: 0.1.0
 ---
 
 # Lambda Experiment Runner

@@ -1,0 +1,26 @@
+{
+  "name": "paper-review",
+  "version": "2.2.0+codex.20260722132241",
+  "description": "Review papers with reMarkable annotations, active recall, and spaced repetition.",
+  "author": {
+    "name": "Titus"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Paper Review",
+    "shortDescription": "Deep paper review and spaced repetition",
+    "longDescription": "Review annotated papers, test understanding, and schedule follow-up recall.",
+    "developerName": "Titus",
+    "category": "Education",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Review a paper from my reMarkable.",
+      "Run my spaced-repetition paper review.",
+      "Send this article to my reMarkable."
+    ]
+  }
+}

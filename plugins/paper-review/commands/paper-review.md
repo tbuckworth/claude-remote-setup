@@ -118,18 +118,26 @@ For papers pre-processed by the overnight pipeline (`preprocess_papers.py`), all
 2. After presenting all, ask via `AskUserQuestion`: "Any follow-up questions or corrections?" with options: "Looks good" / "I have a question" / free text
 3. Answer any follow-ups using the PDF text and web search if needed
 
-### Fast Path Stage 3: Rate Atomic Flashcards (~2 min)
+### Fast Path Stage 3: Test Atomic Flashcards (~2 min)
 
-1. Present each atomic card from `atomic_cards` via `AskUserQuestion`:
-   ```
-   Card N/M (page <source_page>):
-   **Q:** <front>
-   **A:** <back>
-   ```
-   Options: "Keep" / "Edit" / "Not interested"
-2. For "Edit": ask user for revised front/back, update the card
-3. For "Not interested": set card `status: "pruned"`
-4. For "Keep": set card `status: "active"`
+Present each atomic card one at a time via `AskUserQuestion`. The question format depends on the card's answer structure:
+
+**List-type answers** (answer has multiple independent parts, e.g. "4 defense stages", "3 requirements"):
+- Use `multiSelect: true`
+- Each correct part is one option, plus 1-2 plausible distractors that sound right but aren't in the paper
+- Score: fraction of correct parts selected minus incorrect selections
+
+**Fact/explanation answers** (answer is a single concept, comparison, or mechanism):
+- Use `multiSelect: false` (single-select MCQ)
+- Correct answer as one option + 3 plausible distractors
+- Randomize the position of the correct answer (don't always place it first)
+
+After the user answers, show brief feedback (correct parts, what was missed), then ask:
+- "Keep this card" / "Edit this card" / "Don't keep"
+
+For "Edit": ask user for revised front/back, update the card.
+For "Don't keep": set card `status: "pruned"`.
+For "Keep": set card `status: "active"`.
 
 ### Fast Path Stage 4: Active Learning Check (~2 min)
 

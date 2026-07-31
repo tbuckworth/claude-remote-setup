@@ -1,0 +1,16 @@
+{
+  "name": "assumption-debugger",
+  "version": "1.0.0+codex.adapter1",
+  "description": "Debug systematically by questioning assumptions before changing code.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Assumption Debugger",
+    "shortDescription": "Hypothesis-first debugging",
+    "longDescription": "Clarify symptoms, isolate a reproduction, and test explicit hypotheses before editing code.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Interactive"],
+    "defaultPrompt": ["Systematically diagnose this bug."]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "pre-mortem",
+  "version": "1.0.0",
+  "description": "Identify concrete failure modes and mitigations before implementation."
+}

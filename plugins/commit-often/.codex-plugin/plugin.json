@@ -1,0 +1,21 @@
+{
+  "name": "commit-often",
+  "version": "1.0.0+codex.20260723134802",
+  "description": "Remind the agent not to end a repository session with uncommitted work.",
+  "author": {
+    "name": "Titus"
+  },
+  "interface": {
+    "displayName": "Commit Often",
+    "shortDescription": "Warn about uncommitted work",
+    "longDescription": "Checks Git status when a turn stops and reminds the agent to preserve outstanding work.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Guardrail"
+    ],
+    "defaultPrompt": [
+      "Check that my work is committed before stopping."
+    ]
+  }
+}

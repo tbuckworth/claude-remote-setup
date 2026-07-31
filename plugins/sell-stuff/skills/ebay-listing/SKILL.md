@@ -1,7 +1,6 @@
 ---
 name: ebay-listing
 description: This skill should be used when generating an eBay listing for an item being sold. Provides title optimization, description templates, pricing strategy, and UK-specific defaults.
-version: 1.0.0
 ---
 
 # eBay Listing Optimization

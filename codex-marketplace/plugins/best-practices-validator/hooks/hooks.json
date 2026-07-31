@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "Plan",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/remind.sh 'Before implementation, verify material framework and API assumptions against current primary documentation.'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

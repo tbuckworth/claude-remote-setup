@@ -1,0 +1,21 @@
+{
+  "name": "branch-guard",
+  "version": "1.0.0+codex.20260722103501",
+  "description": "Block code edits on main, master, or a detached HEAD.",
+  "author": {
+    "name": "Titus"
+  },
+  "interface": {
+    "displayName": "Branch Guard",
+    "shortDescription": "Prevent edits on protected branches",
+    "longDescription": "Checks the target file's Git branch before write tools run and blocks changes on protected branches.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Guardrail"
+    ],
+    "defaultPrompt": [
+      "Protect this repository from direct edits on main."
+    ]
+  }
+}

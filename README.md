@@ -200,6 +200,41 @@ source ~/.bashrc
 
 Custom Claude Code plugins are included in the `plugins/` directory and automatically installed during setup.
 
+### Codex support
+
+Claude and Codex share the workflow payloads in this repository. Platform-specific
+manifests and thin adapters live beside those shared files:
+
+- `config/AGENTS.shared.md` is the canonical global guidance. Claude imports it
+  from `~/.claude/CLAUDE.md`; Codex uses it through `~/.codex/AGENTS.md`.
+- `.agents/plugins/marketplace.json` exposes plugins whose Claude sources are
+  already Codex-compatible.
+- `codex-marketplace/` contains thin Codex adapters for Claude-only validator
+  agents and hooks.
+- `.codex-plugin/plugin.json` files provide Codex metadata without replacing the
+  existing Claude manifests.
+- Codex skills may delegate to existing `commands/` or `agents/` documents so
+  the main workflow remains single-source.
+
+Install or refresh the Codex plugins:
+
+```bash
+./setup-codex.sh
+```
+
+The setup installs 15 local plugins across the main, validator-adapter, and
+Apollo Prep marketplaces. Claude-only prompt hooks are represented by compatible
+Codex command reminders, so Codex does not emit unsupported prompt-hook warnings.
+Start a new Codex thread after installation so its skills are discovered, and
+review plugin hooks with `/hooks`.
+
+`food-claude` delegates to the upstream `Antovigo/food-claude` checkout at
+`~/pyg/food-claude`; `setup-codex.sh` clones or safely fast-forwards that checkout.
+
+Project guidance under `~/pyg` uses `AGENTS.md` as the shared source; sibling
+`CLAUDE.md` files import it for Claude Code. Secrets referenced by instructions
+live in permission-restricted files under `~/.config`, not in tracked Markdown.
+
 ### Custom Plugins (8)
 
 | Plugin | Agent | Hook Event | Hook Type | Description |

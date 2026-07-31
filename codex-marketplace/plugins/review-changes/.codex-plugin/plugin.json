@@ -1,0 +1,16 @@
+{
+  "name": "review-changes",
+  "version": "1.0.0+codex.adapter1",
+  "description": "Review staged changes or the latest commit for material defects.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Review Changes",
+    "shortDescription": "Review commits and staged changes",
+    "longDescription": "Inspect repository changes for bugs, security issues, and logic errors and review new commits automatically.",
+    "developerName": "Titus",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": ["Review my staged changes.", "Review my latest commit."]
+  }
+}
