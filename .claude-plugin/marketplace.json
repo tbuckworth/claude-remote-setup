@@ -90,6 +90,13 @@
       "version": "0.1.0",
       "source": "./plugins/sell-stuff",
       "category": "productivity"
+    },
+    {
+      "name": "store-transcript",
+      "description": "Archives the current session transcript to a private repo with provenance",
+      "version": "1.0.0",
+      "source": "./plugins/store-transcript",
+      "category": "productivity"
     }
   ]
 }

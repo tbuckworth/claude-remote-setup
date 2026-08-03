@@ -1,0 +1,25 @@
+{
+  "name": "store-transcript",
+  "version": "1.0.0",
+  "description": "Archive the current session transcript into the private deception-transcripts repo with provenance, then PR and merge.",
+  "author": {
+    "name": "Titus"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Store Transcript",
+    "shortDescription": "Archive this session's transcript with provenance",
+    "longDescription": "Copies the live session transcript into the private deception-transcripts repo alongside a log of why it was stored and the source repo's commit hash and remote, then opens and merges a pull request.",
+    "developerName": "Titus",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Shell"
+    ],
+    "defaultPrompt": [
+      "Store this transcript because the model was deceptive about test results.",
+      "Archive this session for later analysis."
+    ]
+  }
+}
