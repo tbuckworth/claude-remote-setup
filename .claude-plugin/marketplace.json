@@ -93,8 +93,8 @@
     },
     {
       "name": "store-transcript",
-      "description": "Archives the current session transcript to a private repo with provenance",
-      "version": "1.0.0",
+      "description": "Archives the current session transcript to a private repo with provenance, scrambling any secrets",
+      "version": "1.1.0",
       "source": "./plugins/store-transcript",
       "category": "productivity"
     }
