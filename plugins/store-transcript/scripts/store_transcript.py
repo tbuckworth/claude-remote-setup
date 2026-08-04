@@ -22,6 +22,9 @@ import time
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import scrub  # noqa: E402
+
 DEFAULT_ARCHIVE = Path(
     os.environ.get("STORE_TRANSCRIPT_ARCHIVE")
     or Path.home() / "pyg" / "deception-transcripts"
@@ -216,7 +219,7 @@ def sync_base(archive: Path, base: str) -> None:
 
 
 def write_log(dest: Path, *, reason: str, agent: str, session_id: str,
-              transcript: Path, size: int, repo: dict) -> None:
+              transcript: Path, size: int, repo: dict, audit: dict | None) -> None:
     lines = [
         f"# Session transcript archive — {session_id}",
         "",
@@ -249,6 +252,19 @@ def write_log(dest: Path, *, reason: str, agent: str, session_id: str,
             lines.append(f"- **Permalink to commit:** {repo['commit_url']}")
     else:
         lines.append("- Session working directory is not a git repository; no commit recorded.")
+
+    lines += ["", "## Scrubbing", ""]
+    if audit is None:
+        lines.append("- **Not scrubbed** (`--no-scrub`). This transcript may contain "
+                     "live credentials.")
+    else:
+        lines += [
+            f"- Secrets scrambled: **{audit['total']}** "
+            f"({audit['distinct']} distinct values) across {audit['lines']:,} lines",
+            "- Substitution is deterministic and format-preserving; see "
+            "`scrub-audit.md` for the per-rule breakdown.",
+            "- Verified: no original secret value survives in the stored file.",
+        ]
     lines.append("")
     dest.write_text("\n".join(lines))
 
@@ -296,6 +312,8 @@ def main() -> None:
     ap.add_argument("--repo-slug", default=DEFAULT_REPO_SLUG)
     ap.add_argument("--no-pr", action="store_true",
                     help="commit locally only; do not push, PR, or merge")
+    ap.add_argument("--no-scrub", action="store_true",
+                    help="store the transcript verbatim, WITHOUT scrambling secrets")
     args = ap.parse_args()
 
     agent = detect_agent() if args.agent == "auto" else args.agent
@@ -322,10 +340,26 @@ def main() -> None:
     dest_dir = args.archive / session_id
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest_file = dest_dir / transcript.name
-    shutil.copy2(transcript, dest_file)
+
+    # Scrub before anything is written into the repo: a secret that reaches the
+    # first commit is in git history for good, and no later fix-up removes it.
+    audit = None
+    if args.no_scrub:
+        shutil.copy2(transcript, dest_file)
+    else:
+        audit = scrub.scrub_file(transcript, dest_file, scrub.load_salt())
+        leaked = scrub.verify(dest_file, audit["originals"])
+        if leaked:
+            dest_file.unlink(missing_ok=True)
+            raise SystemExit(
+                f"ABORTED: {len(leaked)} secret value(s) survived scrubbing; "
+                "nothing was written. This is a scrubber bug — please report it."
+            )
+        (dest_dir / "scrub-audit.md").write_text(scrub.audit_markdown(audit))
+
     write_log(dest_dir / "log.md", reason=args.reason, agent=agent,
               session_id=session_id, transcript=transcript,
-              size=dest_file.stat().st_size, repo=repo)
+              size=dest_file.stat().st_size, repo=repo, audit=audit)
 
     _, rc = run(["git", "diff", "--quiet", "HEAD", "--"], cwd=args.archive,
                 check=False, quiet=True)

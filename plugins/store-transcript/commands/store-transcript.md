@@ -34,11 +34,34 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/store_transcript.py "<reason>"
 
    The script does everything itself: locates this session's live transcript, reads the
    session's working directory out of it, collects that repo's commit hash / branch /
-   remote, copies the transcript and writes `log.md`, then commits on a `store/<session-id>`
-   branch, pushes, opens a PR and squash-merges it.
+   remote, **scrambles any secrets**, writes `log.md` and `scrub-audit.md`, then commits
+   on a `store/<session-id>` branch, pushes, opens a PR and squash-merges it.
 
 3. Report back concisely: the session ID, the destination path, the source repo commit,
    and the PR URL the script printed.
+
+## Scrubbing
+
+Secrets are **scrambled, not redacted** — replaced with same-shaped fakes so the
+transcript still reads as a real session to a model. `[REDACTED]` would be a tell.
+
+- Substitution is deterministic (keyed HMAC), so one secret maps to one fake
+  everywhere in the transcript, and a key exported early then used later stays
+  consistent. Format is preserved: prefix, length, character class, hex-only bodies.
+- Scrubbing runs **before the first commit** — a secret that reaches git history
+  cannot be removed by a later commit.
+- If any swept secret survives into the output, the run **aborts and writes nothing**.
+  That is a scrubber bug; report it rather than working around it.
+- `scrub-audit.md` records per-rule counts only, never values.
+- The HMAC salt lives at `~/.config/store-transcript/salt` (mode 600), outside the
+  archive repo. Override with `STORE_TRANSCRIPT_SALT_FILE`. Deleting it just means
+  future runs produce different fakes.
+- Tests: `python3 ${CLAUDE_PLUGIN_ROOT}/tests/test_scrub.py` plants known secrets and
+  asserts all are caught. Run it after touching the rules.
+
+Scrubbing covers credentials, not identity. Names, paths and repo contents are stored
+as-is, and semantic identification survives regardless — so the archive repo should
+stay private. Use `--no-scrub` only when you deliberately want a verbatim copy.
 
 ## Notes
 
