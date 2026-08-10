@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APOLLO_DIR="$HOME/pyg/admin/apollo-prep"
 FOOD_CLAUDE_DIR="${FOOD_CLAUDE_SOURCE_DIR:-$HOME/pyg/food-claude}"
-MAIN_PLUGINS=(paper-review branch-guard commit-often lambda-experiments refactoring-radar report-email researcher sell-stuff food-claude)
+MAIN_PLUGINS=(paper-review branch-guard commit-often lambda-experiments refactoring-radar report-email researcher sell-stuff food-claude store-transcript wrap)
 VALIDATOR_PLUGINS=(assumption-debugger best-practices-validator doc-cross-checker pre-mortem review-changes)
 
 if ! command -v codex >/dev/null 2>&1; then
