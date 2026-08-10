@@ -25,8 +25,14 @@ The answer itself, as a claim, in bold, as the **first characters of the respons
 For a question, this is the answer. For work that was executed, this is what now works and
 what does not — not a narration of the steps taken to get there.
 
-One to three sentences of support may follow it in the same paragraph if the claim is not
-self-supporting. If the claim stands alone, let it stand alone.
+**At most two sentences of support** may follow it in the same paragraph, and only if the
+claim is not self-supporting. If the claim stands alone, let it stand alone. This is the one
+place where a hard limit applies even without `--tight`, because an opening that sprawls
+defeats the whole format — the reader is meant to be able to stop after the first line.
+
+If the prompt genuinely asked two separable questions, give each its own bold claim with its
+own support, rather than fusing them into one long paragraph. Three or more means the prompt
+should have been split.
 
 ### 2. What follows
 
