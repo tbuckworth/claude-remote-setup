@@ -72,6 +72,7 @@ CUSTOM_PLUGINS=(
     "pre-mortem"
     "refactoring-radar"
     "review-changes"
+    "wrap"
 )
 
 log_info "Installing custom plugins from local marketplace..."

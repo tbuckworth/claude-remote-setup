@@ -1,0 +1,20 @@
+{
+  "name": "wrap",
+  "version": "1.0.0",
+  "description": "Delegate a prompt to a subagent and return only the distilled answer, flagging what looks wrong.",
+  "author": { "name": "Titus" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Wrap",
+    "shortDescription": "Delegate a prompt, get back only the core insight",
+    "longDescription": "Interprets a rambling or voice-dictated prompt, runs the work in an isolated subagent, and returns a distilled high-altitude answer instead of a long report. Flags claims that look overclaimed or wrong, and checks the doubtful ones in the background.",
+    "developerName": "Titus",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write", "Shell"],
+    "defaultPrompt": [
+      "Wrap this: work out why the p99 latency is spiking.",
+      "Use the wrap on it and keep it high level.",
+      "Wrap that prompt and tell me if anything looks off."
+    ]
+  }
+}
