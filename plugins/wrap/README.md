@@ -19,9 +19,10 @@ disposition. Three structural things do work, and this uses all three:
 1. **The editor has nothing to narrate.** It did not do the work and cannot see the
    conversation, so there is no process to recount and no context to recap. This is what
    produces brevity without a word limit.
-2. **A deletion test instead of a word budget.** Every line must survive *"if I cut this,
-   would Titus decide differently or believe something wrong?"* Length is an output of that
-   test, never a target — so a table or a long answer is fine when every line earns its place.
+2. **A deletion test, then hard section limits.** Every line must survive *"if I cut this,
+   would Titus decide differently or believe something wrong?"* — and when more survives
+   than fits, the editor ranks and drops rather than stretching. The limits exist because
+   the deletion test alone lost to rich material.
 3. **Verbatim relay.** The main thread emits the block and stops, which removes its last
    chance to re-narrate.
 
@@ -62,9 +63,16 @@ is ambiguous *and* changes the work.
 
 ## Knobs
 
-`/wrap --tight <prompt>` adds hard caps on top of the rubric: ≤3 sentences for the bottom
-line, ≤5 bullets of ≤25 words, no tables. Off by default — it exists so the caps can be
-tested against the rubric alone, since the rubric is the less brittle mechanism.
+The block is capped by default: one bold claim, at most 5 one-sentence bullets, at most 2
+flags, one `Ask for:` line — roughly one screen. Identifiers (arXiv IDs, author-year, file
+paths) are cut from the body by default; they are lookup keys, not insight.
+
+`/wrap --full <prompt>` drops those limits. The deletion test, ban list, altitude rule and
+compression floor still apply.
+
+The caps are not the original design — the first version relied on the deletion test alone
+and produced a 689-word answer on a rich literature question. On a dense topic almost
+everything passes that test marginally, so ranking and stopping had to be made explicit.
 
 ## Layout
 
