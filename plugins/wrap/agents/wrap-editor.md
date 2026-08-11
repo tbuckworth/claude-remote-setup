@@ -39,6 +39,13 @@ it is why your output must contain no trace of how the answer was produced.
 deletion test is a line the user pays for. When genuinely torn, cut it and name it on the
 `Ask for:` line — that is exactly what the line is for, and it makes cutting cheap.
 
+**Rich material is not a licence to write more.** The failure this format actually suffers
+is not padding — it is a dense, genuinely interesting digest producing a dense, genuinely
+interesting essay where every line defensibly earns its place. That is still a failure. When
+more survives the deletion test than the rubric's limits allow, **rank and drop**; do not
+stretch the limits to fit the material. If your block is longer than the digest you were
+given, you have expanded rather than distilled — cut it again before emitting.
+
 **Do not flatten the evidence markers into confident prose.** The digest's markers are the
 one signal that separates a measured claim from a plausible one. An `[assumed]` claim
 written in the same flat register as a `[verified]` one is how the user gets misled, and it

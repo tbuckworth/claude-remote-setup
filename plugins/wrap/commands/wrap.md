@@ -1,6 +1,6 @@
 ---
 description: Run this prompt in a subagent and hand back only the distilled answer, flagging anything that looks wrong
-argument-hint: "[--tight] <your prompt, however rambling>"
+argument-hint: "[--full] <your prompt, however rambling>"
 ---
 
 # Wrap this prompt
@@ -22,8 +22,8 @@ comes back, and the discipline of not padding the result.
 
 ### 1. Read the argument
 
-`{{argument}}` is the prompt. Strip a leading `--tight` if present and remember it — it
-tightens the rubric at step 5.
+`{{argument}}` is the prompt. Strip a leading `--full` if present and remember it — it
+relaxes the rubric's section limits at step 5. Without it, the limits are hard.
 
 If the argument is `off` (or Titus says "back to normal", "stop wrapping"), end the sticky
 mode from step 8 and confirm in one line. Nothing else happens.
@@ -60,7 +60,11 @@ Write a self-contained brief containing:
 - **Context** — what has already been established in this conversation and matters here:
   decisions made, paths and names already identified, things already ruled out, constraints
   Titus has stated. Be concrete; this is the part a fresh agent cannot reconstruct.
-- **Done means** — what a complete answer contains, and what would make it useless.
+- **Done means** — what a complete answer contains, and what would make it useless. This
+  describes **the report, not the block Titus reads**. Asking here for "arXiv IDs and
+  headline findings" or "every file and line" is right — that detail belongs on disk. Do not
+  imagine it as the shape of the reply; the rubric decides that, and a brief that reads like
+  a specification for the answer leaks its detail straight into the answer.
 - **Traps** — anything you already suspect will go wrong: a check that tends to be skipped,
   a wrong assumption that is easy to make here, a previous attempt that failed and how.
 - **`REPORT_PATH`** — `<run dir>/report.md`.
@@ -70,10 +74,23 @@ sense inside this conversation, do it yourself and still answer through the rubr
 
 ### 4. Dispatch the worker
 
-Spawn the `wrap-worker` agent with the brief. Wait for it.
+Spawn the `wrap-worker` agent with the brief, **synchronously** — pass
+`run_in_background: false` explicitly. The default is background, which returns launch
+metadata instead of a digest and silently breaks everything downstream. This has already
+gone wrong once.
 
 Fan out to several `wrap-worker` agents in one message only when the brief contains
 genuinely independent parts; then merge their digests before step 5. Default to one.
+
+**Never write `report.md` yourself.** The report is the worker's full detail with its raw
+captured output, and it is the store Titus drills into afterwards. A report you write from
+the worker's return text is a summary of a summary, and every later "expand on that" answers
+from it without either of you knowing. If the worker did not write the file — because it was
+backgrounded, interrupted, or failed — re-dispatch it synchronously. If you cannot, say in
+one line that the drill-down store is missing and let Titus decide.
+
+If a run was interrupted (he locked his screen, the session dropped), re-dispatch from
+scratch rather than reconstructing from whatever text survived.
 
 ### 5. Dispatch the editor
 
@@ -83,7 +100,7 @@ Spawn the `wrap-editor` agent with:
 - the worker's digest verbatim,
 - the report path,
 - the rubric path,
-- `--tight` if it was passed.
+- `--full` if it was passed.
 
 Its context contains nothing else, and that is deliberate — it has no work of its own to
 narrate, which is what makes its output short without a word limit.
