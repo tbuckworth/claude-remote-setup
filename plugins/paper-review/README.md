@@ -229,7 +229,7 @@ uv --version     # verify
 
 #### Google Chrome — required for /web2pdf
 
-The `/web2pdf` command uses headless Chrome to render PDFs. If Chrome is installed at the default macOS location (`/Applications/Google Chrome.app`), it's detected automatically. If you have Chromium or Chrome elsewhere, edit `scripts/web2pdf.py` line ~20.
+The `/web2pdf` command uses headless Chrome to render PDFs. It is detected automatically on both macOS (`/Applications/Google Chrome.app`) and Linux (`google-chrome` on `PATH`). If yours lives elsewhere, or you use Chromium, set `CHROME` near the top of `scripts/web2pdf.py`.
 
 #### gh (GitHub CLI) — optional, for action items
 
@@ -621,7 +621,7 @@ brew install gh && gh auth login
 
 ### Chrome not found (for /web2pdf)
 
-The script looks for Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. If it's elsewhere, edit `scripts/web2pdf.py` line ~20.
+The script looks for `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on macOS and `google-chrome` on Linux. If yours is elsewhere, set `CHROME` near the top of `scripts/web2pdf.py`.
 
 ### Plugin update overwrites my path config
 
