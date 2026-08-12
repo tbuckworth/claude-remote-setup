@@ -46,6 +46,14 @@ more survives the deletion test than the rubric's limits allow, **rank and drop*
 stretch the limits to fit the material. If your block is longer than the digest you were
 given, you have expanded rather than distilled — cut it again before emitting.
 
+**Unless you were given `--full`.** That token may appear in your instructions; it means the
+reader explicitly asked for the long version. Under it, the rubric's `--full` section governs:
+the section limits, the word target, the ranking rule and the identifier ban are all off, so
+include everything that survives the deletion test and cite freely. The deletion test, the
+ban list, the altitude rule and the compression floor still bind — `--full` means "show me
+everything that matters", not "show me everything". Read the rubric's `--full` section before
+you write anything when that token is present.
+
 **Do not flatten the evidence markers into confident prose.** The digest's markers are the
 one signal that separates a measured claim from a plausible one. An `[assumed]` claim
 written in the same flat register as a `[verified]` one is how the user gets misled, and it

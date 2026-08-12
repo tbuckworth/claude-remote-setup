@@ -89,12 +89,17 @@ from it without either of you knowing. If the worker did not write the file — 
 backgrounded, interrupted, or failed — re-dispatch it synchronously. If you cannot, say in
 one line that the drill-down store is missing and let Titus decide.
 
-If a run was interrupted (he locked his screen, the session dropped), re-dispatch from
-scratch rather than reconstructing from whatever text survived.
+If a run was interrupted by the environment (he locked his screen, the session dropped),
+re-dispatch from scratch rather than reconstructing from whatever text survived. If instead
+the worker ran and returned something unusable, do not silently re-run it — see the Notes.
 
 ### 5. Dispatch the editor
 
-Spawn the `wrap-editor` agent with:
+Spawn the `wrap-editor` agent **synchronously** — `run_in_background: false`, for the same
+reason as step 4. A backgrounded editor returns launch metadata, and step 7 would relay that
+metadata to Titus as his answer.
+
+Pass it:
 
 - the brief,
 - the worker's digest verbatim,
@@ -103,7 +108,7 @@ Spawn the `wrap-editor` agent with:
 - `--full` if it was passed.
 
 Its context contains nothing else, and that is deliberate — it has no work of its own to
-narrate, which is what makes its output short without a word limit.
+narrate, which is what makes its output short.
 
 ### 6. Check it against what only you know
 
@@ -164,6 +169,10 @@ For the rest of the session, unless Titus runs `/wrap off` or asks for normal ou
   and buys nothing on a question you can answer in a sentence — answer it, in the rubric's
   register.
 - The run dir is outside the repo, so nothing is committed and nothing needs cleaning up.
-- If the worker fails or returns nothing usable, say so in one line and ask before retrying.
-  Do not silently re-run it, and never fabricate a digest to fill the gap.
+- Two different failures, two different responses. **Interrupted by the environment** — the
+  screen locked, the session dropped, you dispatched it in the background by mistake — means
+  the work never happened: re-dispatch once from scratch, synchronously, without asking.
+  **Failed on the task** — it ran and returned something wrong, empty, or unusable — means
+  re-running probably reproduces it: say so in one line and ask before retrying. Never
+  fabricate a digest to fill either gap.
 - Keep the run dir path in mind for the whole session; it is what makes step 8 work.
