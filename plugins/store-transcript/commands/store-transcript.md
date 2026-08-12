@@ -26,8 +26,9 @@ on a fresh machine with no configuration.
 1. Take `{{argument}}` as the reason. If it is empty, ask the user in one short question
    why they are storing this transcript, and use their answer. Do not invent a reason.
 
-2. Run the script **in the background** (`run_in_background: true`), passing the reason as a
-   single quoted argument:
+2. Run the script **in the background** (`run_in_background: true`) — **except** when this is
+   the last thing happening before the session ends, in which case run it in the foreground.
+   Pass the reason as a single quoted argument:
 
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/store_transcript.py "<reason>"
@@ -36,6 +37,14 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/store_transcript.py "<reason>"
    Archiving takes tens of seconds and blocks nothing that the session needs. Backgrounding
    it keeps the session usable and keeps the script's output out of the conversation — carry
    on with whatever was being worked on rather than waiting.
+
+   **A background job is a child of the session and dies with it.** If Titus says he is
+   wrapping up, asks for this as the final action, or has just been told the work is
+   finished, run it in the foreground and let it block. Killed mid-run it typically dies
+   after the destination directory is written but before the commit and push, so nothing
+   reaches GitHub — and because step 3 never fires, the last thing he heard was that
+   archiving had started. Believing a transcript is safely stored when it is not is the one
+   outcome this command must never produce.
 
    The script does everything itself: locates this session's live transcript, reads the
    session's working directory out of it, collects that repo's commit hash / branch /
@@ -82,8 +91,14 @@ stay private. Use `--no-scrub` only when you deliberately want a verbatim copy.
   come after the archive runs. That is expected. Because the script now runs in the
   background, the cut point is wherever the session had reached a few seconds after
   dispatch — slightly later than before, and not exactly predictable. Re-run it at the end
-  if you need the tail of the session; re-running overwrites that session's directory with
-  a fresh snapshot.
+  if you need the tail of the session, **in the foreground** per step 2; re-running
+  overwrites that session's directory with a fresh snapshot.
+- Concurrent runs are serialised by a lock at `~/.config/store-transcript/archive.lock`
+  (override with `STORE_TRANSCRIPT_LOCK_FILE`). The archive is one checkout with one HEAD,
+  so two overlapping runs would otherwise interleave their `checkout -B` and `commit`. A
+  second run waits, prints that it is waiting, and after `STORE_TRANSCRIPT_LOCK_TIMEOUT`
+  seconds (default 600) exits non-zero having archived nothing. Tested by
+  `python3 ${CLAUDE_PLUGIN_ROOT}/tests/test_lock.py`.
 - Do not read the transcript's contents or paste them into your reply — these files are
   large and may contain sensitive material. Only copy the file.
 - The script creates the archive repo (private) and the local git repo if they do not

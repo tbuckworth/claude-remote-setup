@@ -12,6 +12,8 @@ Works for both Claude Code (~/.claude/projects/<slug>/<id>.jsonl) and Codex
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
 import json
 import os
 import re
@@ -32,6 +34,50 @@ DEFAULT_ARCHIVE = Path(
 DEFAULT_REPO_SLUG = os.environ.get("STORE_TRANSCRIPT_REPO") or "deception-transcripts"
 CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"
 CODEX_SESSIONS = Path.home() / ".codex" / "sessions"
+DEFAULT_LOCK = Path.home() / ".config" / "store-transcript" / "archive.lock"
+LOCK_TIMEOUT = float(os.environ.get("STORE_TRANSCRIPT_LOCK_TIMEOUT") or 600)
+
+
+@contextlib.contextmanager
+def archive_lock(timeout: float = LOCK_TIMEOUT):
+    """Serialise every run that mutates the shared archive working tree.
+
+    The archive is one git checkout with one HEAD. Two overlapping runs interleave
+    on it: one run's `checkout -B` moves HEAD out from under the other, so the
+    other's `git add`/`commit` lands on the wrong branch, and `git add -A <dest>`
+    can sweep a half-written sibling directory into the wrong commit. Since the
+    command now archives in the background, the session stays usable and a second
+    run is genuinely reachable, so this is a real race rather than a theoretical one.
+
+    The lock lives outside the archive repo so it is never committed, and is held
+    for the whole git section rather than per-command.
+    """
+    path = Path(os.environ.get("STORE_TRANSCRIPT_LOCK_FILE") or DEFAULT_LOCK)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    deadline = time.monotonic() + timeout
+    waited = False
+    with open(path, "w") as handle:
+        while True:
+            try:
+                fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.monotonic() >= deadline:
+                    raise SystemExit(
+                        f"another store-transcript run has held {path} for over "
+                        f"{timeout:.0f}s; nothing was archived. Re-run once it finishes, "
+                        "or delete the lock file if no run is active."
+                    )
+                if not waited:
+                    print("Waiting for another store-transcript run to finish...")
+                    waited = True
+                time.sleep(1)
+        handle.write(f"{os.getpid()}\n")
+        handle.flush()
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
 
 def run(cmd, cwd=None, check=True, quiet=False):
@@ -333,6 +379,17 @@ def main() -> None:
     session_id = session_id or transcript.stem
 
     repo = repo_info(session_cwd)
+
+    # Everything past this point mutates the shared archive checkout, so it runs
+    # under the lock. Locating and reading the session transcript above touches
+    # nothing shared and stays outside it.
+    with archive_lock():
+        archive_into_repo(args, agent=agent, transcript=transcript,
+                          session_id=session_id, repo=repo)
+
+
+def archive_into_repo(args, *, agent: str, transcript: Path, session_id: str,
+                      repo: dict) -> None:
     ensure_archive(args.archive, qualify_slug(args.repo_slug))
     base = default_branch(args.archive)
     sync_base(args.archive, base)
