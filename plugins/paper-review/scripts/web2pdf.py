@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """Convert a web article to a clean, tight-margin PDF for reMarkable."""
 
+from __future__ import annotations
+
 import argparse
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
 from readability import Document
 
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+import platform
+if platform.system() == "Darwin":
+    CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+else:
+    CHROME = "google-chrome"
 
 HEADERS = {
     "User-Agent": (
@@ -67,6 +73,15 @@ li { margin: 0.2em 0; }
 .title-block .meta { font-size: 9pt; color: #666; margin-top: 0.3em; }
 """
 
+KATEX_HEAD = (
+    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.27/dist/katex.min.css">\n'
+    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.27/dist/katex.min.js"></script>\n'
+    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.27/dist/contrib/auto-render.min.js"'
+    ' onload="renderMathInElement(document.body,{delimiters:['
+    '{left:\'$$\',right:\'$$\',display:true},'
+    '{left:\'$\',right:\'$\',display:false}]});"></script>'
+)
+
 
 def fetch_page(url: str) -> str:
     resp = requests.get(url, headers=HEADERS, timeout=30)
@@ -74,8 +89,113 @@ def fetch_page(url: str) -> str:
     return resp.text
 
 
+# --- Google Docs support ------------------------------------------------------
+# A plain GET of a docs.google.com/.../edit URL returns only a JavaScript loader
+# shell, so Readability salvages nothing but "JavaScript isn't enabled...". Google
+# Docs instead expose a native, fully-structured HTML export that we use directly.
+GDOC_RE = re.compile(
+    r"docs\.google\.com/document/(?:u/\d+/)?d/(?!e/)([A-Za-z0-9_-]+)"
+)
+
+
+def google_doc_id(url: str) -> str | None:
+    """Return the document id if this is a standard Google Docs URL, else None."""
+    m = GDOC_RE.search(url or "")
+    return m.group(1) if m else None
+
+
+def fetch_google_doc(doc_id: str) -> str:
+    """Fetch a Google Doc's native HTML export (requires link-share or auth)."""
+    url = f"https://docs.google.com/document/d/{doc_id}/export?format=html"
+    resp = requests.get(url, headers=HEADERS, timeout=30, allow_redirects=True)
+    if "accounts.google.com" in resp.url or "ServiceLogin" in resp.text[:5000]:
+        raise PermissionError(
+            "Google Doc isn't accessible without signing in. Enable "
+            "'Anyone with the link can view' on the doc, then re-share it."
+        )
+    resp.raise_for_status()
+    return resp.text
+
+
+def extract_google_doc(export_html: str) -> tuple[str, str]:
+    """Extract (title, body HTML) from a Google Docs HTML export.
+
+    Google encodes bold/italic/underline as CSS classes in a <style> block, so we
+    resolve those classes into semantic inline styles before stripping Google's
+    classes — otherwise stripping would drop all character formatting. Typography
+    (font, size, margins) is then governed by our reMarkable CLEAN_CSS.
+    """
+    soup = BeautifulSoup(export_html, "html.parser")
+
+    # Map Google's formatting classes (.c3{font-weight:700}, etc.) to semantics.
+    css = "".join(s.string or "" for s in soup.find_all("style"))
+    bold, italic, underline = set(), set(), set()
+    for cls, decls in re.findall(r"\.([A-Za-z0-9_-]+)\s*\{([^}]*)\}", css):
+        if re.search(r"font-weight\s*:\s*(?:bold|[6-9]00)", decls, re.I):
+            bold.add(cls)
+        if re.search(r"font-style\s*:\s*italic", decls, re.I):
+            italic.add(cls)
+        if re.search(r"text-decoration\s*:\s*underline", decls, re.I):
+            underline.add(cls)
+
+    body = soup.body or soup
+
+    # Title: the Google "Title" paragraph style, else first heading, else <title>.
+    title_el = body.find(class_="title") or body.find(["h1", "h2"])
+    title = (
+        title_el.get_text(strip=True) if title_el and title_el.get_text(strip=True)
+        else (soup.title.string.strip() if soup.title and soup.title.string else None)
+    ) or "Google Doc"
+    # Drop it from the body so clean_html's title block doesn't duplicate it.
+    if title_el and title_el.get_text(strip=True) == title:
+        title_el.decompose()
+
+    # Resolve formatting classes -> inline styles, then strip Google's attributes.
+    for el in body.find_all(True):
+        classes = el.get("class") or []
+        styles = []
+        if any(c in bold for c in classes):
+            styles.append("font-weight:bold")
+        if any(c in italic for c in classes):
+            styles.append("font-style:italic")
+        if any(c in underline for c in classes):
+            styles.append("text-decoration:underline")
+        if styles:
+            el["style"] = ";".join(styles)
+        else:
+            el.attrs.pop("style", None)
+        el.attrs.pop("class", None)
+        el.attrs.pop("id", None)
+
+    # Unwrap Google's redirect links: google.com/url?q=<real>&... -> <real>.
+    for a in body.find_all("a"):
+        href = a.get("href", "")
+        if "google.com/url" in href:
+            q = parse_qs(urlparse(href).query).get("q")
+            if q:
+                a["href"] = q[0]
+
+    return title, body.decode_contents()
+
+
+def preserve_math(html: str) -> str:
+    """Replace CKEditor/KaTeX math elements with $-delimited LaTeX before Readability."""
+    soup = BeautifulSoup(html, "html.parser")
+    changed = False
+    for el in soup.find_all(class_="ck-math-tex"):
+        tex = el.get("data-math-tex")
+        if not tex:
+            continue
+        display = "ck-math-tex-display" in (el.get("class") or [])
+        delim = "$$" if display else "$"
+        el.replace_with(delim + tex + delim)
+        changed = True
+    return str(soup) if changed else html
+
+
 def extract_article(html: str, url: str) -> tuple[str, str]:
     """Extract article content and title using readability."""
+    html = preserve_math(html)
     doc = Document(html, url=url)
     title = doc.title()
     # Strip common " - Site Name" or " | Site Name" suffixes
@@ -128,6 +248,7 @@ def clean_html(content: str, title: str, url: str, source_html: str, font_size: 
 <head>
 <meta charset="utf-8">
 <style>{css}</style>
+{KATEX_HEAD}
 </head>
 <body>
 <div class="title-block">
@@ -172,8 +293,17 @@ def slugify(text: str) -> str:
     return text[:80].strip("-")
 
 
+def sanitize_filename(title: str) -> str:
+    # reMarkable Cloud rejects filenames containing reserved chars with HTTP 400.
+    cleaned = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", title)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" .-")
+    return cleaned[:80] or "untitled"
+
+
 def send_to_remarkable(pdf_path: str, folder: str = "/") -> bool:
     """Upload PDF to reMarkable via rmapi."""
+    import os
+    os.environ.setdefault("RMAPI_FORCE_SCHEMA_VERSION", "4")
     try:
         if folder != "/":
             subprocess.run(["rmapi", "mkdir", folder], capture_output=True)
@@ -202,11 +332,17 @@ def main():
     parser.add_argument("--font-size", default="14pt", help="Body font size (default: 14pt)")
     args = parser.parse_args()
 
-    print(f"Fetching: {args.url}")
-    raw_html = fetch_page(args.url)
-
-    print("Extracting article content...")
-    title, content = extract_article(raw_html, args.url)
+    doc_id = google_doc_id(args.url)
+    if doc_id:
+        print(f"Fetching Google Doc export: {doc_id}")
+        raw_html = fetch_google_doc(doc_id)
+        print("Extracting Google Doc content...")
+        title, content = extract_google_doc(raw_html)
+    else:
+        print(f"Fetching: {args.url}")
+        raw_html = fetch_page(args.url)
+        print("Extracting article content...")
+        title, content = extract_article(raw_html, args.url)
     print(f"Title: {title}")
 
     final_html = clean_html(content, title, args.url, raw_html, font_size=args.font_size)
