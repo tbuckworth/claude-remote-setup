@@ -15,6 +15,7 @@ import argparse
 import contextlib
 import fcntl
 import json
+import math
 import os
 import re
 import shutil
@@ -49,13 +50,21 @@ def lock_timeout() -> float:
     if not raw:
         return DEFAULT_LOCK_TIMEOUT
     try:
-        return float(raw)
+        value = float(raw)
     except ValueError:
+        value = None
+    # float() happily returns nan and inf. A nan deadline makes every
+    # `now >= deadline` comparison False, so a contended run would spin in the
+    # retry loop forever rather than falling back -- the precise failure this
+    # function exists to prevent. Zero and negatives exit instantly and report
+    # "held for over -1s".
+    if value is None or not math.isfinite(value) or value <= 0:
         sys.stderr.write(
-            f"ignoring malformed STORE_TRANSCRIPT_LOCK_TIMEOUT={raw!r}; "
+            f"ignoring unusable STORE_TRANSCRIPT_LOCK_TIMEOUT={raw!r}; "
             f"using {DEFAULT_LOCK_TIMEOUT:.0f}s\n"
         )
         return DEFAULT_LOCK_TIMEOUT
+    return value
 
 
 @contextlib.contextmanager
