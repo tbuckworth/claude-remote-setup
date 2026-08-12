@@ -26,19 +26,32 @@ on a fresh machine with no configuration.
 1. Take `{{argument}}` as the reason. If it is empty, ask the user in one short question
    why they are storing this transcript, and use their answer. Do not invent a reason.
 
-2. Run the script, passing the reason as a single quoted argument:
+2. Run the script **in the background** (`run_in_background: true`), passing the reason as a
+   single quoted argument:
 
 ```bash
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/store_transcript.py "<reason>"
 ```
+
+   Archiving takes tens of seconds and blocks nothing that the session needs. Backgrounding
+   it keeps the session usable and keeps the script's output out of the conversation — carry
+   on with whatever was being worked on rather than waiting.
 
    The script does everything itself: locates this session's live transcript, reads the
    session's working directory out of it, collects that repo's commit hash / branch /
    remote, **scrambles any secrets**, writes `log.md` and `scrub-audit.md`, then commits
    on a `store/<session-id>` branch, pushes, opens a PR and squash-merges it.
 
-3. Report back concisely: the session ID, the destination path, the source repo commit,
-   and the PR URL the script printed.
+   Run it from the session's working directory, and **as a plain backgrounded Bash call, not
+   inside a subagent**. The script identifies the live session from `CLAUDE_CODE_SESSION_ID`,
+   falling back to the most recently modified transcript whose recorded `cwd` matches the
+   current directory. A background Bash call inherits both, so it resolves correctly. A
+   subagent buys nothing here — the script is fully self-contained, with nothing for an agent
+   to decide — while adding a way for the wrong session or directory to be picked.
+
+3. When it finishes, report it in **one line**: the session ID and the PR URL the script
+   printed. If it failed, say what failed in one line. Nothing else — this is housekeeping
+   that interrupted whatever was actually being worked on, so return to that.
 
 ## Scrubbing
 
@@ -66,7 +79,11 @@ stay private. Use `--no-scrub` only when you deliberately want a verbatim copy.
 ## Notes
 
 - The transcript is a snapshot taken mid-session, so it will not contain the turns that
-  come after the archive runs. That is expected.
+  come after the archive runs. That is expected. Because the script now runs in the
+  background, the cut point is wherever the session had reached a few seconds after
+  dispatch — slightly later than before, and not exactly predictable. Re-run it at the end
+  if you need the tail of the session; re-running overwrites that session's directory with
+  a fresh snapshot.
 - Do not read the transcript's contents or paste them into your reply — these files are
   large and may contain sensitive material. Only copy the file.
 - The script creates the archive repo (private) and the local git repo if they do not
