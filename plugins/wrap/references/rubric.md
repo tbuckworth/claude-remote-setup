@@ -113,6 +113,10 @@ your input, you have expanded rather than distilled, and you must cut again befo
 This is the check that catches the failure mode where rich source material quietly licenses
 a long answer.
 
+Under `--full` the floor is measured against the **report** instead, for the reason given in
+the `--full` section below. It is the only rule here whose yardstick changes; it is never
+lifted.
+
 ## Ban list
 
 Absolute. These are the failure modes that produce the walls of text this exists to prevent.

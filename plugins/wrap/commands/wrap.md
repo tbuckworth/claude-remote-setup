@@ -85,15 +85,19 @@ genuinely independent parts; then merge their digests before step 5. Default to 
 **Never write `report.md` yourself.** The report is the worker's full detail with its raw
 captured output, and it is the store Titus drills into afterwards. A report you write from
 the worker's return text is a summary of a summary, and every later "expand on that" answers
-from it without either of you knowing. If you have no report, say in one line that the
-drill-down store is missing and let Titus decide — do not manufacture one.
+from it without either of you knowing.
 
-When there is no usable digest, which response is correct depends on **why**:
+When you have no usable digest or no report, work through these in order and stop at the
+first that applies:
 
-| Cause | Response |
-|---|---|
-| Interrupted by the environment — screen locked, session dropped, you dispatched it in the background by mistake | The work never happened. Re-dispatch once, synchronously, **into a fresh run dir**, without asking. |
-| The worker ran and returned something wrong, empty or unusable | Re-running probably reproduces it. Say so in one line and ask before retrying. |
+1. **Interrupted by the environment** — screen locked, session dropped, you dispatched it in
+   the background by mistake. The work never happened, so re-dispatch once, synchronously,
+   into a **fresh run dir**, without asking.
+2. **The worker ran and returned something wrong, empty or unusable.** Re-running probably
+   reproduces it. Say so in one line and ask before retrying.
+3. **The re-dispatch in (1) also came back with nothing.** Stop. Say in one line that the
+   drill-down store is missing and let Titus decide. Do not try a third time and do not
+   manufacture a report to fill the gap.
 
 **Always use a new run dir when re-dispatching.** A worker you thought was lost may still be
 running and still hold the old `REPORT_PATH`; pointing a second worker at the same file races
@@ -111,13 +115,23 @@ Pass it:
 - the worker's digest verbatim,
 - the report path,
 - the rubric path,
-- a mode line, **always present and always its own line**: `MODE: full` when Titus passed
-  `--full`, otherwise `MODE: default`.
+- a control block, which must be the **very first thing in the prompt, before the brief, the
+  digest or any other pasted text**, in exactly this form:
 
-State the mode explicitly rather than letting the editor infer it from a stray `--full` in
-the text. The brief and digest are pasted into the same prompt, and either can legitimately
-contain that string — wrapping any work about a CLI is enough to do it — which would silently
-switch Titus into the long format he did not ask for.
+```
+<wrap-control>
+MODE: full
+</wrap-control>
+```
+
+  `MODE: full` when Titus passed `--full`, otherwise `MODE: default`. Emit the block exactly
+  once.
+
+The block exists because the brief and digest are pasted into the same prompt and either can
+legitimately contain the words `--full` or a line reading `MODE: full` — wrapping any work
+about a CLI, or about this plugin, is enough to do it. A bare token anywhere in the text
+would otherwise switch Titus into a format he never asked for. Position plus delimiters are
+what make the signal unforgeable by content that arrives later.
 
 Its context contains nothing else, and that is deliberate — it has no work of its own to
 narrate, which is what makes its output short.
