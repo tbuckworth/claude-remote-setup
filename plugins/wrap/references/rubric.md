@@ -9,8 +9,11 @@ problem at a high level. He has already been given the low-level detail by other
 found it counterproductive. He can ask for anything he wants back, and the full report is on
 disk, so nothing you cut is lost.
 
-**The whole block fits on one screen — roughly 200 words.** If it does not, it is wrong, no
-matter how good the material is. Everything below serves that.
+**By default the whole block fits on one screen — roughly 200 words.** If it does not, it is
+wrong, no matter how good the material is. Everything below serves that.
+
+The one exception is `--full`, defined at the end of this document. It is the only thing that
+relaxes any limit here, and the reader has to ask for it explicitly.
 
 ---
 
@@ -175,12 +178,27 @@ Flag the *pattern*, not a demand. One line. Do not lecture.
 
 ## `--full`
 
-When the invocation carries `--full`, drop the section limits, the ranking rule and the
-identifier ban. The deletion test, the ban list, the altitude rule and the compression floor
-still apply. Use it when the reader has explicitly asked for the long version.
+Use it only when the reader has explicitly asked for the long version.
 
-Nothing else relaxes the limits. Rich source material is not a licence to exceed them — it is
-the reason they exist.
+**Dropped under `--full`:**
+
+- the one-screen / ~200-word target,
+- every section limit in the table (bullet count, sentence-per-bullet, flag count, one claim),
+- the ranking rule — everything that survives the deletion test may be included,
+- the identifier ban — cite arXiv IDs, authors, versions, file paths freely.
+
+**Still binding under `--full`:**
+
+- the deletion test — a line that changes nothing is still deleted,
+- the ban list — no preamble, no process narration, no recap, no sign-off,
+- the altitude rule — still lead with consequences, even when the mechanism follows,
+- the compression floor — the block is still shorter than the digest it came from,
+- the bottom line still comes first, and the `Ask for:` line still comes last.
+
+`--full` means "show me everything that matters", not "show me everything".
+
+Nothing other than `--full` relaxes anything above. Rich source material is not a licence to
+exceed the limits — it is the reason they exist.
 
 ## Worked example
 
