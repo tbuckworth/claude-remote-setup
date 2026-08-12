@@ -136,6 +136,27 @@ def main():
     check("Traceback" not in helped.stderr,
           "no traceback from parsing the timeout at import")
 
+    print("\nunusable timeout values fall back instead of hanging")
+    probe_src = (
+        f"import sys; sys.path.insert(0, {str(SCRIPTS)!r});\n"
+        "import store_transcript as st; print(st.lock_timeout())"
+    )
+    for raw, why in [("nan", "nan deadline makes every timeout check False"),
+                     ("inf", "inf never elapses"),
+                     ("-1", "negative exits instantly claiming 'over -1s'"),
+                     ("0", "zero exits before trying"),
+                     ("10m", "unparseable")]:
+        env = {**dict(_os.environ), "STORE_TRANSCRIPT_LOCK_TIMEOUT": raw}
+        got = subprocess.run([sys.executable, "-c", probe_src],
+                             capture_output=True, text=True, env=env, timeout=60)
+        check(got.stdout.strip() == "600.0",
+              f"{raw!r} falls back to 600.0 (got {got.stdout.strip()!r}) — {why}")
+
+    env = {**dict(_os.environ), "STORE_TRANSCRIPT_LOCK_TIMEOUT": "42"}
+    got = subprocess.run([sys.executable, "-c", probe_src],
+                         capture_output=True, text=True, env=env, timeout=60)
+    check(got.stdout.strip() == "42.0", "a valid timeout is still honoured")
+
     print("\nnon-contention flock errors are not reported as contention")
     probe = subprocess.run(
         [sys.executable, "-c",
