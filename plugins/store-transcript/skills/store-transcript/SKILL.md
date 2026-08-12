@@ -16,3 +16,8 @@ Codex specifics:
   `~/.claude/projects/`. It identifies the live session as the most recently written
   rollout file whose recorded `cwd` matches the current working directory, so run it from
   the directory the session started in.
+- The command says to background the script. If backgrounding a shell command is not
+  available, run it in the foreground — the workflow and its output are identical, it just
+  blocks the thread while it archives. Do not substitute a subagent for backgrounding:
+  session resolution depends on the environment and working directory of the calling
+  process.

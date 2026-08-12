@@ -1,7 +1,7 @@
 {
   "name": "store-transcript",
   "description": "Archive the current session's transcript into the private deception-transcripts repo, with a log recording why it was stored and the source repo's commit, then PR and merge it.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Titus"
   }
