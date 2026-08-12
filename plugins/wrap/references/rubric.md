@@ -192,7 +192,9 @@ Use it only when the reader has explicitly asked for the long version.
 - the deletion test — a line that changes nothing is still deleted,
 - the ban list — no preamble, no process narration, no recap, no sign-off,
 - the altitude rule — still lead with consequences, even when the mechanism follows,
-- the compression floor — the block is still shorter than the digest it came from,
+- the compression floor, **measured against the report** rather than the digest — under
+  `--full` you may legitimately pull detail the digest left out, so "shorter than the digest"
+  would forbid the very thing the flag asks for; "shorter than the report" still bounds it,
 - the bottom line still comes first, and the `Ask for:` line still comes last.
 
 `--full` means "show me everything that matters", not "show me everything".

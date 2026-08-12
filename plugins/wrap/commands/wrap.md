@@ -85,13 +85,19 @@ genuinely independent parts; then merge their digests before step 5. Default to 
 **Never write `report.md` yourself.** The report is the worker's full detail with its raw
 captured output, and it is the store Titus drills into afterwards. A report you write from
 the worker's return text is a summary of a summary, and every later "expand on that" answers
-from it without either of you knowing. If the worker did not write the file — because it was
-backgrounded, interrupted, or failed — re-dispatch it synchronously. If you cannot, say in
-one line that the drill-down store is missing and let Titus decide.
+from it without either of you knowing. If you have no report, say in one line that the
+drill-down store is missing and let Titus decide — do not manufacture one.
 
-If a run was interrupted by the environment (he locked his screen, the session dropped),
-re-dispatch from scratch rather than reconstructing from whatever text survived. If instead
-the worker ran and returned something unusable, do not silently re-run it — see the Notes.
+When there is no usable digest, which response is correct depends on **why**:
+
+| Cause | Response |
+|---|---|
+| Interrupted by the environment — screen locked, session dropped, you dispatched it in the background by mistake | The work never happened. Re-dispatch once, synchronously, **into a fresh run dir**, without asking. |
+| The worker ran and returned something wrong, empty or unusable | Re-running probably reproduces it. Say so in one line and ask before retrying. |
+
+**Always use a new run dir when re-dispatching.** A worker you thought was lost may still be
+running and still hold the old `REPORT_PATH`; pointing a second worker at the same file races
+the first, and the loser's detail is silently gone. A fresh `mktemp -d` costs nothing.
 
 ### 5. Dispatch the editor
 
@@ -105,7 +111,13 @@ Pass it:
 - the worker's digest verbatim,
 - the report path,
 - the rubric path,
-- `--full` if it was passed.
+- a mode line, **always present and always its own line**: `MODE: full` when Titus passed
+  `--full`, otherwise `MODE: default`.
+
+State the mode explicitly rather than letting the editor infer it from a stray `--full` in
+the text. The brief and digest are pasted into the same prompt, and either can legitimately
+contain that string — wrapping any work about a CLI is enough to do it — which would silently
+switch Titus into the long format he did not ask for.
 
 Its context contains nothing else, and that is deliberate — it has no work of its own to
 narrate, which is what makes its output short.
