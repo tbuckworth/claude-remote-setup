@@ -103,6 +103,50 @@ def main():
               "the timeout message says plainly that nothing was archived")
         holder.communicate(timeout=60)
 
+    print("\nholder stays identifiable while a waiter is blocked")
+    with tempfile.TemporaryDirectory() as tmp:
+        import os as _os
+        lockfile = Path(tmp) / "archive.lock"
+        env = {**dict(_os.environ), "STORE_TRANSCRIPT_LOCK_FILE": str(lockfile)}
+        holder_src = CHILD.format(scripts=str(SCRIPTS)).replace("time.sleep(0.6)", "time.sleep(6)")
+        holder = subprocess.Popen([sys.executable, "-c", holder_src],
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+        time.sleep(1.5)
+        waiter_src = CHILD.format(scripts=str(SCRIPTS)).replace("timeout=30", "timeout=1")
+        waiter = subprocess.run([sys.executable, "-c", waiter_src],
+                                capture_output=True, text=True, env=env, timeout=60)
+        # The waiter opens the same file. If it truncated on open, the PID would be gone.
+        contents = lockfile.read_text().strip()
+        check(contents == str(holder.pid),
+              f"lock file still names the holder ({contents!r} == pid {holder.pid}) "
+              "after a waiter opened it")
+        check(str(holder.pid) in waiter.stderr,
+              "the timeout message names the holding PID")
+        check("Do not delete the lock file" in waiter.stderr,
+              "the timeout message warns against deleting the lock file")
+        holder.communicate(timeout=60)
+
+    print("\nmalformed timeout env does not break unrelated runs")
+    import os as _os
+    bad = {**dict(_os.environ), "STORE_TRANSCRIPT_LOCK_TIMEOUT": "10m"}
+    helped = subprocess.run([sys.executable, str(SCRIPTS / "store_transcript.py"), "--help"],
+                            capture_output=True, text=True, env=bad, timeout=60)
+    check(helped.returncode == 0,
+          "`--help` still works with a malformed STORE_TRANSCRIPT_LOCK_TIMEOUT")
+    check("Traceback" not in helped.stderr,
+          "no traceback from parsing the timeout at import")
+
+    print("\nnon-contention flock errors are not reported as contention")
+    probe = subprocess.run(
+        [sys.executable, "-c",
+         f"import sys; sys.path.insert(0, {str(SCRIPTS)!r});\n"
+         "import store_transcript as st, inspect;\n"
+         "src = inspect.getsource(st.archive_lock);\n"
+         "print('BlockingIOError' in src and 'except OSError:' not in src)"],
+        capture_output=True, text=True, timeout=60)
+    check(probe.stdout.strip() == "True",
+          "retry path catches BlockingIOError only, so ENOLCK/EOPNOTSUPP propagate")
+
     print()
     if failures:
         print(f"{len(failures)} check(s) failed:")

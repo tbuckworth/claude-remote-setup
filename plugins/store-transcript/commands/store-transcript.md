@@ -99,6 +99,12 @@ stay private. Use `--no-scrub` only when you deliberately want a verbatim copy.
   second run waits, prints that it is waiting, and after `STORE_TRANSCRIPT_LOCK_TIMEOUT`
   seconds (default 600) exits non-zero having archived nothing. Tested by
   `python3 ${CLAUDE_PLUGIN_ROOT}/tests/test_lock.py`.
+- **Never delete the lock file to unstick a run.** The lock is `flock`-based, so the kernel
+  releases it the moment the holding process exits — a lock still held always means a real
+  run is still going, and there is no such thing as a stale one. Deleting the file does not
+  release it; it leaves the holder locking an unlinked inode while the next run creates a
+  fresh file and acquires immediately, which is precisely the concurrent corruption the lock
+  exists to prevent. The timeout message names the holding PID; wait for it or kill it.
 - Do not read the transcript's contents or paste them into your reply — these files are
   large and may contain sensitive material. Only copy the file.
 - The script creates the archive repo (private) and the local git repo if they do not

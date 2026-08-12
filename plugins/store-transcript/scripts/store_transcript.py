@@ -35,11 +35,31 @@ DEFAULT_REPO_SLUG = os.environ.get("STORE_TRANSCRIPT_REPO") or "deception-transc
 CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"
 CODEX_SESSIONS = Path.home() / ".codex" / "sessions"
 DEFAULT_LOCK = Path.home() / ".config" / "store-transcript" / "archive.lock"
-LOCK_TIMEOUT = float(os.environ.get("STORE_TRANSCRIPT_LOCK_TIMEOUT") or 600)
+DEFAULT_LOCK_TIMEOUT = 600.0
+
+
+def lock_timeout() -> float:
+    """Read the timeout lazily, and never let a bad value break unrelated runs.
+
+    Parsing this at import time meant a malformed STORE_TRANSCRIPT_LOCK_TIMEOUT
+    ("10m", "600s") raised at module load — before argparse — so even `--help`
+    and `--no-pr`, which never take the lock, died with a traceback.
+    """
+    raw = os.environ.get("STORE_TRANSCRIPT_LOCK_TIMEOUT")
+    if not raw:
+        return DEFAULT_LOCK_TIMEOUT
+    try:
+        return float(raw)
+    except ValueError:
+        sys.stderr.write(
+            f"ignoring malformed STORE_TRANSCRIPT_LOCK_TIMEOUT={raw!r}; "
+            f"using {DEFAULT_LOCK_TIMEOUT:.0f}s\n"
+        )
+        return DEFAULT_LOCK_TIMEOUT
 
 
 @contextlib.contextmanager
-def archive_lock(timeout: float = LOCK_TIMEOUT):
+def archive_lock(timeout: float | None = None):
     """Serialise every run that mutates the shared archive working tree.
 
     The archive is one git checkout with one HEAD. Two overlapping runs interleave
@@ -52,31 +72,52 @@ def archive_lock(timeout: float = LOCK_TIMEOUT):
     The lock lives outside the archive repo so it is never committed, and is held
     for the whole git section rather than per-command.
     """
+    timeout = lock_timeout() if timeout is None else timeout
     path = Path(os.environ.get("STORE_TRANSCRIPT_LOCK_FILE") or DEFAULT_LOCK)
     path.parent.mkdir(parents=True, exist_ok=True)
     deadline = time.monotonic() + timeout
     waited = False
-    with open(path, "w") as handle:
+    # "a+" never truncates. Opening "w" would wipe the current holder's PID line
+    # before this process had the lock, leaving the file empty for the whole time
+    # it is held and the holder unidentifiable.
+    with open(path, "a+") as handle:
         while True:
             try:
                 fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
-            except OSError:
+            except BlockingIOError:
+                # Genuine contention: someone else holds it. Everything else --
+                # ENOLCK, EOPNOTSUPP on an NFS home without lock support, EBADF --
+                # is not contention, and spinning on it would burn the whole
+                # timeout and then blame a run that does not exist.
                 if time.monotonic() >= deadline:
+                    holder = ""
+                    with contextlib.suppress(OSError):
+                        handle.seek(0)
+                        pid = handle.read().strip().splitlines()
+                        if pid:
+                            holder = f" (held by pid {pid[-1]})"
                     raise SystemExit(
-                        f"another store-transcript run has held {path} for over "
-                        f"{timeout:.0f}s; nothing was archived. Re-run once it finishes, "
-                        "or delete the lock file if no run is active."
+                        f"another store-transcript run has held {path}{holder} for over "
+                        f"{timeout:.0f}s; nothing was archived. Re-run once it finishes.\n"
+                        "Do not delete the lock file: the lock is released automatically "
+                        "when the holding process exits, so a lock still held means a real "
+                        "run is still going."
                     )
                 if not waited:
                     print("Waiting for another store-transcript run to finish...")
                     waited = True
                 time.sleep(1)
+        handle.seek(0)
+        handle.truncate()
         handle.write(f"{os.getpid()}\n")
         handle.flush()
         try:
             yield
         finally:
+            with contextlib.suppress(OSError):
+                handle.seek(0)
+                handle.truncate()
             fcntl.flock(handle, fcntl.LOCK_UN)
 
 
