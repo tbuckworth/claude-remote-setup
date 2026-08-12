@@ -1,6 +1,6 @@
 {
   "name": "wrap",
   "description": "Run a prompt in a subagent and hand back only the distilled, high-altitude answer, flagging anything that looks overclaimed or wrong and checking it in the background.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": { "name": "Titus" }
 }

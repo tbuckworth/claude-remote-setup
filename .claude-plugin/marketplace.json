@@ -101,7 +101,7 @@
     {
       "name": "wrap",
       "description": "Runs a prompt in a subagent and returns only the distilled high-altitude answer, flagging what looks overclaimed",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "./plugins/wrap",
       "category": "productivity"
     }
