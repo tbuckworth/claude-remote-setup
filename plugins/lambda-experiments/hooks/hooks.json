@@ -1,16 +1,3 @@
 {
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-active.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  }
+  "_comment": "No Stop hook. The previous one grepped state/active.md inside the plugin's own install directory for a 'current_phase:' line and blocked session exit if it found one. It could not work: it emitted {\"ok\": ...} where Claude Code reads {\"decision\": \"approve|block\"}, so it never actually blocked; the state file it read is hand-maintained and was stale; and one file inside one plugin install cannot represent instances belonging to other sessions or other Lambda accounts. See docs/STOP_HOOK.md before adding another."
 }
