@@ -164,10 +164,11 @@ To prevent shallow review, include one active learning element:
    - Update SM-2 state using the quality score from Stage 4
    - Update `atomic_cards` with keep/edit/prune statuses
    - Add `review_dates`, `quiz_results`, `key_insights` from contributions
-3. Archive on reMarkable (same as full flow Stage 3 step 23)
-4. Cleanup intermediate files
-5. Git commit and push (same as full flow Stage 3 steps 25-26)
-6. **Proceed to Stage 4 (Spaced Repetition)** — same as full flow
+3. **Create the Lumen deck**: Follow the `lumen-flashcards` skill using the active (kept or edited) `atomic_cards`. Use the paper title as the deck title and preserve paper/page provenance in each card's `source`. Validate the `.lumen.json` file and report its exact iCloud Drive or Downloads path.
+4. Archive on reMarkable (same as full flow Stage 3 step 23)
+5. Cleanup intermediate files
+6. Git commit and push (same as full flow Stage 3 steps 25-26)
+7. **Proceed to Stage 4 (Spaced Repetition)** — same as full flow
 
 ---
 
@@ -388,6 +389,9 @@ Use this path when the paper has NOT been preprocessed (no `"preprocessed": true
     ```
 21. Write updated paper entry with: `easiness_factor`, `interval_days`, `repetition_number`, `quality_history` (append q), `next_review`, quiz results, review date
 22. Write updated database.json
+
+### Create Lumen flashcards
+22a. Follow the `lumen-flashcards` skill to create a validated `.lumen.json` deck from the paper's key insights and misconceptions revealed by the quiz. Make 5–12 atomic cards by default, use the paper title as the deck title, and preserve paper/page provenance in `source`. Report the exact iCloud Drive or Downloads path so it can be imported on iPhone.
 
 ### Archive on reMarkable
 23. Archive the paper from whichever folder it came from (check `remarkable_folder` in review-state.json):

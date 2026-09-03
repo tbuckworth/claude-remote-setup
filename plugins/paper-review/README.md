@@ -2,7 +2,7 @@
 
 Interactive paper review workflow with reMarkable annotation extraction, Bloom's taxonomy quizzing, SM-2 spaced repetition, and GitHub Issues integration.
 
-**What you'll get:** Three slash commands in Claude Code that turn paper reading into active learning — quiz yourself with Bloom's taxonomy questions, track your retention with spaced repetition, and build a searchable review database over time.
+**What you'll get:** Four slash commands in Claude Code that turn paper reading into active learning — quiz yourself with Bloom's taxonomy questions, track your retention with spaced repetition, create Lumen flashcards, and build a searchable review database over time.
 
 ## What It Does
 
@@ -11,6 +11,7 @@ Interactive paper review workflow with reMarkable annotation extraction, Bloom's
 | `/paper-review [name-or-URL]` | Full 5-stage review: extract annotations from reMarkable, quiz on the paper (Bloom's taxonomy), resolve citations, create action items as GitHub issues, update spaced repetition, commit to git | ~20 min |
 | `/sr-review` | Standalone spaced repetition session. Reviews papers due today using targeted questions on weak areas, updates SM-2 scheduling | 5-15 min |
 | `/web2pdf <url>` | Convert a web article to clean PDF and send to reMarkable | ~30 sec |
+| `/lumen-deck [source]` | Create a validated deck for the Lumen iPhone web app from a paper, notes, or quiz gaps | ~1 min |
 
 The 5 stages of `/paper-review`:
 

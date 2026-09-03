@@ -1,7 +1,7 @@
 {
   "name": "paper-review",
-  "version": "2.2.0+codex.20260722132241",
-  "description": "Review papers with reMarkable annotations, active recall, and spaced repetition.",
+  "version": "2.3.0+codex.20260903141940",
+  "description": "Review papers with reMarkable annotations, active recall, spaced repetition, and Lumen deck export.",
   "author": {
     "name": "Titus"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Paper Review",
     "shortDescription": "Deep paper review and spaced repetition",
-    "longDescription": "Review annotated papers, test understanding, and schedule follow-up recall.",
+    "longDescription": "Review annotated papers, test understanding, schedule follow-up recall, and create Lumen flashcard decks.",
     "developerName": "Titus",
     "category": "Education",
     "capabilities": [
@@ -20,7 +20,8 @@
     "defaultPrompt": [
       "Review a paper from my reMarkable.",
       "Run my spaced-repetition paper review.",
-      "Send this article to my reMarkable."
+      "Send this article to my reMarkable.",
+      "Create a Lumen flashcard deck from these notes."
     ]
   }
 }
