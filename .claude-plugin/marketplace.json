@@ -52,7 +52,7 @@
     {
       "name": "review-changes",
       "description": "Code review agent with pre-push hook",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "./plugins/review-changes",
       "category": "productivity"
     },
