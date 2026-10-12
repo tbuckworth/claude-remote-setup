@@ -68,8 +68,8 @@
       "description": "AI Safety R&D Agent \u2014 11-step dual-backend research workflow using Steinhardt fail-fast methodology",
       "version": "0.4.0",
       "source": {
-        "source": "github",
-        "repo": "tbuckworth/ai-safety-researcher"
+        "source": "url",
+        "url": "https://github.com/tbuckworth/ai-safety-researcher.git"
       },
       "category": "development"
     },
