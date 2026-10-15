@@ -56,13 +56,12 @@ def compute_priority(paper, today):
     days_overdue = (today - next_review).days
     overdue_urgency = min(days_overdue / 30, 1.0)
 
-    # Recency factor
+    # Recency factor: the last desktop review, or the last flashcard review on the phone's Learn tab
+    # (`phone_reviews`, folded in nightly by tools/fold_phone_state.py in the data repo), whichever is later
     review_dates = paper.get("review_dates", [])
-    if review_dates:
-        last_review = parse_date(review_dates[-1])
-        days_since = (today - last_review).days if last_review else 90
-    else:
-        days_since = 90
+    reviewed = [d for d in (parse_date(review_dates[-1]) if review_dates else None,
+                            parse_date((paper.get("phone_reviews") or {}).get("last_review"))) if d]
+    days_since = (today - max(reviewed)).days if reviewed else 90
     recency_factor = min(days_since / 90, 1.0)
 
     priority = 0.4 * quality_urgency + 0.35 * overdue_urgency + 0.25 * recency_factor
