@@ -443,7 +443,7 @@ Use this path when the paper has NOT been preprocessed (no `"preprocessed": true
       - "Who is a lead author of this paper?" — 4 author choices (correct + 3 lead authors from other database papers)
       Present as standard MCQ with 4 options.
       **Scoring**: Track metadata MCQ result separately — do NOT blend into the SM-2 percentage. Record as `metadata_correct: true/false` in the quiz results, but compute pct and quality score from content questions only. Mention the result in the mini-summary but it does not affect scheduling.
-   d. **If the paper has `atomic_cards`** (preprocessed): Use the active cards for review. For each card with `status: "active"`:
+   d. **If the paper has `atomic_cards`** (preprocessed): Use the active cards for review. Skip a card whose `phone.next_review` is after today: it was reviewed on the phone's Learn tab and isn't due (the nightly job folds the phone's reviews in as each card's `phone` object and the paper's `phone_reviews`). For each card with `status: "active"`:
       - Show the front (question) via `AskUserQuestion` with free-text input
       - After answer, reveal the back and give brief feedback
       - Track correct/incorrect
