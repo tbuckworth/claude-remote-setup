@@ -11,6 +11,9 @@ Tools: `agent-mail`, `agent-send`, `agent-status`, `agent-spawn` (each has `--he
   account: `agent-mail send --to titusbuckworth@gmail.com --subject "..." --body-file body.txt`
   (body on stdin also works; `--html file.html` adds a rich version). His reply comes back into
   this session automatically, hours later if need be.
+  Before you email Titus results, a literature review, options or a plan, run `agent-mail guide`
+  and follow it. Mail to him is reviewed before it leaves: if agent-mail prints `NOT SENT`, fix
+  what it lists and send again. `--image NAME=PATH` puts plots inline.
 - Mail **sent as Titus** to anyone, including himself (he says "draft this email", "reply to X",
   "email Y about Z"), goes from his personal Gmail through the Gmail tools (`mcp__gmail__*`,
   `gdoc.py`, the `report-email` skill). Never send as Titus from the agents account, and never
