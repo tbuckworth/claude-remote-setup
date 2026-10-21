@@ -205,8 +205,10 @@ Custom Claude Code plugins are included in the `plugins/` directory and automati
 Claude and Codex share the workflow payloads in this repository. Platform-specific
 manifests and thin adapters live beside those shared files:
 
-- `config/AGENTS.shared.md` is the canonical global guidance. Claude imports it
-  from `~/.claude/CLAUDE.md`; Codex uses it through `~/.codex/AGENTS.md`.
+- `config/AGENTS.shared.md` and `config/AGENTS.email.md` are the global guidance.
+  Claude imports them from `~/.claude/CLAUDE.md`; Codex reads them joined in
+  `~/.codex/AGENTS.md`. Change them only by merging to main: each machine pulls
+  main hourly and rebuilds the Codex copy (`sync/README.md`).
 - `.agents/plugins/marketplace.json` exposes plugins whose Claude sources are
   already Codex-compatible.
 - `codex-marketplace/` contains thin Codex adapters for Claude-only validator

@@ -14,8 +14,8 @@ if ! command -v codex >/dev/null 2>&1; then
     exit 1
 fi
 
-mkdir -p "$HOME/.codex"
-ln -sfn "$SCRIPT_DIR/config/AGENTS.shared.md" "$HOME/.codex/AGENTS.md"
+# ~/.codex/AGENTS.md is AGENTS.shared.md + AGENTS.email.md, rebuilt hourly by sync/install.sh.
+python3 "$SCRIPT_DIR/sync/sync_instructions.py" --repo "$SCRIPT_DIR" --codex
 
 if [ -d "$FOOD_CLAUDE_DIR/.git" ]; then
     if [ -z "$(git -C "$FOOD_CLAUDE_DIR" status --porcelain)" ]; then

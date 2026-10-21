@@ -17,7 +17,10 @@
 - “Send/share to desktop” means `scp <file> desktop:/media/titus/big/tmp/`.
 - “Run on desktop” means `ssh desktop '<command>'`.
 - The desktop is Ubuntu with an NVIDIA RTX 3090; repositories live in `~/pyg`.
-- After changing local agent configuration, run `bash ~/.claude/sync-config.sh` to synchronize supported configuration to the desktop.
+- Global agent instructions are `config/AGENTS.shared.md` and `config/AGENTS.email.md` in
+  `~/pyg/claude-remote-setup`. Change them on a branch and merge to main on GitHub; never edit
+  the checkout on either machine in place. Each machine pulls main every hour and rebuilds
+  `~/.codex/AGENTS.md` (see `sync/README.md`). `~/.claude/sync-config.sh` is retired: do not run it.
 
 ## MATS cluster (Slurm GPUs)
 
@@ -34,6 +37,11 @@
 - Storage: `/mnt/nw/home/t.buckworth` (persistent, NFS, checkpoints/results),
   `/mnt/nw/teams/team_rhys_c9` (team share), `/ephemeral/t.buckworth` (fast scratch,
   wiped on reboot — HF cache and dataset shards go here). Nothing is backed up.
+- **Nothing bulky goes in `/tmp` on the cluster.** `/tmp` is the node's root disk;
+  filling it drains the worker and stalls everyone's queue (this happened
+  2026-08-18, from agent scratch under `/tmp/opencode`). Export
+  `TMPDIR=/ephemeral/$USER/tmp` (and `XDG_CACHE_HOME`) in every job script and
+  before launching any agent on the cluster. Details: `mats-cluster` skill.
 - `gpu-avail` / `gpu-cost` exist **only on the controller** (`ssh mats-controller`).
 - Long-running terminal work (agents, downloads) belongs in `tmux` on the dev node.
 - Autonomous research runs: use `RESEARCHER_COMPUTE_PROFILE=mats` (see
@@ -83,3 +91,55 @@
 - Add `priority:high`, `priority:medium`, or `priority:low` only when relevant.
 - Multiple tasks become separate issues. Put sub-items under a `## Checklist` section.
 - Do not create new list labels without asking. Confirm each created issue with its title and labels.
+
+## Secrets
+
+**Never write a credential value into a file, a command, a commit, a log, or a chat message.**
+This is enforced, not advisory: a `PreToolUse` hook (`~/.claude/hooks/secret-guard.py`) blocks
+Bash/Write/Edit calls containing token-shaped strings, `permissions.deny` blocks reading `.env` and
+credential files, and a global gitleaks pre-commit hook blocks commits on both machines.
+
+All API keys live in **Bitwarden Secrets Manager**, project `agents`.
+
+- **Run something that needs secrets** — this is the normal path:
+  ```bash
+  bws run --project-id "$(cat ~/.config/bws/project-id)" -- python train.py
+  ```
+  Every secret in the project arrives as an environment variable named by its key
+  (`OPENAI_API_KEY`, `HF_TOKEN`, …). `bws run` has **no** `--env-file` option — it injects the whole
+  project, so there is no such thing as a `bws://` reference inside a `.env` file. Do not invent one.
+- **In code**, always `os.environ["HF_TOKEN"]` — never a literal, never a default value that is a key.
+- **One specific secret**: `bws secret get <uuid>`, with the uuid from `~/.config/bws/secrets.map`
+  (`NAME=uuid`, no values, safe to commit). Prefer `bws run`; `bws secret get` is UUID-only.
+- **Never** `cat`, `echo`, `grep` or otherwise print a `.env` file, a token file, or the output of
+  `bws secret get`. That is how seven live keys ended up in a session transcript.
+- **Do not add secrets to `.env` files.** If a new credential appears, tell Titus to store it in
+  Bitwarden; do not persist it to disk yourself.
+
+Auth on each machine, so you do not need to ask:
+
+| | Token | Scope |
+|---|---|---|
+| Mac | pasted per-shell via `read -rs BWS_ACCESS_TOKEN` | read/write |
+| Desktop | `~/.config/bws/token` (0600), exported by `~/.bashrc` | **read-only** |
+
+> **Therefore: run anything needing a credential on the desktop.** Read the Mac row again — that token
+> is pasted into Titus's interactive shell and stored nowhere. Every agent Bash call is a *fresh*
+> shell, so it never inherits the paste, and there is nothing on disk to recover: `bws` keeps a state
+> file under `~/.config/bws/state/` but refuses to authenticate from it (`Missing access token`),
+> there is no `~/.config/bws/config`, and the keychain holds nothing. By design, not a gap.
+>
+> **Do not ask Titus to paste, find, or re-mint that token.** He cannot see it again without revoking
+> the machine account. Asking is the exact failure this note exists to stop — on 2026-08-14 an agent
+> asked three times while this table was already in its context. `ssh desktop` and run it there under
+> `bwsrun`; that token is persistent and needs nothing from him, ever. If the desktop lacks the repo
+> or a venv, building it there is your work, not his.
+
+The desktop token cannot create or modify secrets — a 404 from the API there is expected and is not a
+bug to work around. If a task genuinely needs to write a secret, say so and stop; do not escalate.
+
+> **Known wart, 2026-08-13.** Some keys diverge across repos: 3 distinct Anthropic, 3 OpenRouter,
+> 2 OpenAI. The extras are stored suffixed (`ANTHROPIC_API_KEY__FEEDCAST`). Because `bws run` injects
+> everything by key name, a repo needing a suffixed key will receive the wrong value in the plain
+> name. Until rotation consolidates these to one key per vendor, check which key a repo actually
+> needs before assuming the plain name is correct.
