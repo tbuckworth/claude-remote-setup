@@ -17,7 +17,10 @@
 - “Send/share to desktop” means `scp <file> desktop:/media/titus/big/tmp/`.
 - “Run on desktop” means `ssh desktop '<command>'`.
 - The desktop is Ubuntu with an NVIDIA RTX 3090; repositories live in `~/pyg`.
-- After changing local agent configuration, run `bash ~/.claude/sync-config.sh` to synchronize supported configuration to the desktop.
+- Global agent instructions are `config/AGENTS.shared.md` and `config/AGENTS.email.md` in
+  `~/pyg/claude-remote-setup`. Change them on a branch and merge to main on GitHub; never edit
+  the checkout on either machine in place. Each machine pulls main every hour and rebuilds
+  `~/.codex/AGENTS.md` (see `sync/README.md`). `~/.claude/sync-config.sh` is retired: do not run it.
 
 ## MATS cluster (Slurm GPUs)
 
