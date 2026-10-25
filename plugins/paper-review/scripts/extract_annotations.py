@@ -8,13 +8,16 @@ The doc-dir should contain:
   - A subdirectory with .rm files (annotation layers)
 
 Outputs JSON to stdout (pages are 1-indexed). Saves ink cluster PNGs to doc-dir.
+"inserted_pages" lists the pages Titus inserted between the paper's pages on the tablet, with their typed text
+and ink; render_annotations.py puts them into annotated.pdf at "page_in_annotated_pdf".
 """
 
 import json
 import sys
 from pathlib import Path
 
-from rmscene import read_blocks, SceneGlyphItemBlock, SceneLineItemBlock
+from rmscene import read_blocks, read_tree, SceneGlyphItemBlock, SceneLineItemBlock
+from rmscene.text import TextDocument
 from rmscene.scene_items import PenColor, Pen
 
 # --- Color and tool mappings ---
@@ -121,6 +124,50 @@ def get_pdf_page_idx(page_info: dict) -> int | None:
 
 
 # --- Coordinate transform (inlined from render_annotations.py) ---
+
+def inserted_pages(pages):
+    """Pages inserted on the tablet (no redir to a PDF page), as (cPages index, page_info, the 0-based
+    PDF page it follows, or -1 if it comes before the first)."""
+    out, last = [], -1
+    for i, page_info in enumerate(pages):
+        pdf_idx = get_pdf_page_idx(page_info)
+        if pdf_idx is not None:
+            last = pdf_idx
+        elif not page_info.get("deleted"):
+            out.append((i, page_info, last))
+    return out
+
+
+def typed_text(tree) -> str:
+    """The text typed on a page with the keyboard, one line per paragraph."""
+    if tree.root_text is None:
+        return ""
+    return "\n".join(str(p) for p in TextDocument.from_scene_item(tree.root_text).contents).strip()
+
+
+def extract_inserted_pages(pages, rm_dir: Path, doc_dir: Path):
+    out = []
+    for k, (_, page_info, after) in enumerate(inserted_pages(pages)):
+        position = after + k + 2      # the PDF pages up to it, the inserted pages before it, then this one
+        entry = {"page_in_annotated_pdf": position, "after_pdf_page": after + 1, "typed_text": "",
+                 "ink_strokes": 0, "ink_on_white_path": None, "transcription": ""}
+        rm_file = rm_dir / f"{page_info.get('id', '')}.rm"
+        if rm_file.exists():
+            with open(rm_file, "rb") as f:
+                entry["typed_text"] = typed_text(read_tree(f))
+            with open(rm_file, "rb") as f:
+                _, strokes = extract_annotations_from_blocks(list(read_blocks(f)), position)
+            strokes = [s for s in strokes if s["tool"] not in ERASER_TOOLS]
+            entry["ink_strokes"] = len(strokes)
+            if strokes:
+                page_ink = {"page": f"{position}_inserted", "cluster_id": 0, "strokes": strokes,
+                            "bbox": [min(s["bbox"][0] for s in strokes), min(s["bbox"][1] for s in strokes),
+                                     max(s["bbox"][2] for s in strokes), max(s["bbox"][3] for s in strokes)]}
+                entry["ink_on_white_path"] = render_cluster_white(page_ink, doc_dir, scale=1.0)
+                entry["transcription"] = transcribe_image(entry["ink_on_white_path"])
+        out.append(entry)
+    return out
+
 
 def _solve_affine(pairs):
     n = len(pairs)
@@ -615,6 +662,7 @@ def main():
 
     # Phase 1: Parse content and load blocks per page
     page_blocks = []  # (pdf_idx, blocks)
+    inserted = []
 
     if content_file and rm_dir:
         pages = parse_content(content_file)
@@ -631,6 +679,7 @@ def main():
             with open(rm_file, "rb") as f:
                 blocks = list(read_blocks(f))
             page_blocks.append((pdf_idx, blocks))
+        inserted = extract_inserted_pages(pages, rm_dir, doc_dir)
     elif rm_dir:
         for i, rm_file in enumerate(sorted(rm_dir.glob("*.rm"))):
             with open(rm_file, "rb") as f:
@@ -751,6 +800,7 @@ def main():
         "total_pages": total_pages,
         "highlights": all_highlights,
         "handwritten_notes": handwritten_notes,
+        "inserted_pages": inserted,
         "links": links,
     }
 
