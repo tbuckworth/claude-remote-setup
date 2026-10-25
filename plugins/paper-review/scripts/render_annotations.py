@@ -23,7 +23,8 @@ import sys
 from pathlib import Path
 
 import fitz
-from rmscene import read_blocks, SceneLineItemBlock
+from rmscene import read_blocks, read_tree, SceneLineItemBlock
+from rmscene.text import TextDocument
 
 
 COLOR_MAP = {
@@ -78,6 +79,53 @@ def get_pdf_page_idx(page_info: dict) -> int | None:
     if val is None or val == "N/A":
         return None
     return int(val)
+
+
+def inserted_pages(pages):
+    """Pages Titus inserted on the tablet (no redir to a PDF page), as (cPages index, page_info, the 0-based
+    PDF page it follows, or -1 if it comes before the first)."""
+    out, last = [], -1
+    for i, page_info in enumerate(pages):
+        pdf_idx = get_pdf_page_idx(page_info)
+        if pdf_idx is not None:
+            last = pdf_idx
+        elif not page_info.get("deleted"):
+            out.append((i, page_info, last))
+    return out
+
+
+def typed_text(tree) -> str:
+    """The text typed on a page with the keyboard, one line per paragraph."""
+    if tree.root_text is None:
+        return ""
+    return "\n".join(str(p) for p in TextDocument.from_scene_item(tree.root_text).contents).strip()
+
+
+def blank_page_transform(blocks, pw, ph):
+    """rm to PDF coordinates for an inserted page: the tablet's paper (x centred on 0, y down from 0),
+    widened to take in any ink beyond it, fitted to a pw x ph page."""
+    paper_w, paper_h = 1404.0, 1872.0
+    for b in blocks:
+        if type(b).__name__ == "SceneInfo" and getattr(b, "paper_size", None):
+            paper_w, paper_h = map(float, b.paper_size)
+    pts = [pt for b in blocks if isinstance(b, SceneLineItemBlock) and b.item.value is not None
+           for pt in (getattr(b.item.value, "points", None) or [])]
+    half_w = max([paper_w / 2] + [abs(float(pt.x)) for pt in pts])
+    height = max([paper_h] + [float(pt.y) for pt in pts])
+    scale = min(pw / (2 * half_w), ph / height)
+    return {"sx": scale, "ox": pw / 2.0, "sy": scale, "oy": 0.0}
+
+
+def render_typed_text(text, page, transform, rm_x, rm_y, rm_width):
+    """Writes typed text into the box it has on the tablet, shrinking the font until it fits."""
+    sx, ox, sy, oy = transform["sx"], transform["ox"], transform["sy"], transform["oy"]
+    x0, y0 = sx * rm_x + ox, sy * rm_y + oy
+    rect = fitz.Rect(x0, y0, x0 + sx * rm_width, page.rect.height - 36)
+    for size in (11, 10, 9, 8, 7, 6):
+        if page.insert_textbox(rect, text, fontsize=size, fontname="helv") >= 0:
+            return
+    # Still too long: a second blank page would split it, so let it run off the bottom instead of dropping it
+    page.insert_text(fitz.Point(x0, y0 + 6), text, fontsize=6, fontname="helv")
 
 
 def read_rm_blocks(rm_file: Path):
@@ -338,6 +386,24 @@ def render_annotated_pdf(paper_dir: Path, output_path: Path | None = None) -> Pa
         page = doc[pdf_idx]
         render_strokes(blocks, page, transform)
         render_highlights(blocks, page, transform)
+
+    # Pages he inserted between the paper's pages: a blank page the paper's size, with his typed text and ink.
+    # Inserted last to first, so the PDF page numbers they hang off still hold.
+    pw, ph = doc[0].rect.width, doc[0].rect.height
+    for _, page_info, after in reversed(inserted_pages(pages)):
+        page = doc.new_page(pno=min(after + 1, len(doc)), width=pw, height=ph)
+        rm_file = rm_dir / f"{page_info['id']}.rm"
+        if not rm_file.exists():
+            continue
+        with open(rm_file, "rb") as f:
+            tree = read_tree(f)
+        blocks = read_rm_blocks(rm_file)
+        blank = blank_page_transform(blocks, pw, ph)
+        text = typed_text(tree)
+        if text:
+            rt = tree.root_text
+            render_typed_text(text, page, blank, rt.pos_x, rt.pos_y, rt.width)
+        render_strokes(blocks, page, blank)
 
     doc.save(str(output_path))
     doc.close()
