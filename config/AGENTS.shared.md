@@ -9,11 +9,13 @@
 ## Desktop (SSH)
 
 - SSH host alias: `desktop` (user `titus`, address `100.116.219.34`).
-- Large 3 TB volume: `/media/titus/big` (device `/dev/sdb`, UUID `d88cd800-acde-46cc-b9e8-2be359f95347`).
-  Its root is root-owned — write under an existing subdir (`tmp/`, `eval_archive/`, `bma_*`,
+- Disks: `/` is a 4 TB NVMe SSD (also holds `/home`, `~/pyg` and `/media/titus/py`) with
+  plenty of room. The 3 TB HDD at `/media/titus/big` (UUID `d88cd800-acde-46cc-b9e8-2be359f95347`,
+  currently `/dev/sda`) holds caches, eval archives and `$TMPDIR` (`/media/titus/big/tmp`).
+  The HDD's root is root-owned — write under an existing subdir (`tmp/`, `eval_archive/`,
   `py-offload/`); a new top-level dir needs `sudo mkdir` + `sudo chown titus:titus`.
   Never use the bare `/media/titus/<UUID>` path: it is NOT a mountpoint, so writes there land
-  on the 46 G root filesystem instead of the 3 TB disk.
+  on the NVMe instead of the HDD. History: `~/pyg/admin/wiki/topics/desktop-hdd-usage.md`.
 - “Send/share to desktop” means `scp <file> desktop:/media/titus/big/tmp/`.
 - “Run on desktop” means `ssh desktop '<command>'`.
 - The desktop is Ubuntu with an NVIDIA RTX 3090; repositories live in `~/pyg`.
