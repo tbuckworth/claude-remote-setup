@@ -99,3 +99,13 @@ A message starting `[cloud-watchdog wd-N]` is about something you may own. Answe
 - `cloud-watch disown wd-N --reason ...`
 
 Never ignore it, and never delete volumes or data because of it. Codex: add `--session <your name>`.
+
+## Language for new code (Titus, 29 Oct 2026)
+
+Write new standalone tools, command-line programs, services, daemons and hooks in Rust (stable
+toolchain via rustup; keep `cargo fmt --all -- --check` and `cargo clippy --all-targets -- -D warnings`
+clean), unless there is a concrete reason not to; if so, say what it is in the PR. Keep the existing
+language for research and ML code (PyTorch, Hugging Face, cluster jobs, Modal), data analysis and plots,
+notebooks, one-off scripts, web front-ends, LaTeX, and any change to an existing repo. Do not rewrite
+existing code in Rust unless Titus asks. Rust is installed on the desktop (`~/.cargo/bin`); if `cargo`
+is missing on the Mac, ask Titus rather than installing it.
