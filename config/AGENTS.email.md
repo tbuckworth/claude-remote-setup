@@ -8,9 +8,10 @@ Tools: `agent-mail`, `agent-send`, `agent-status`, `agent-spawn` (each has `--he
 ## Two mailboxes, one rule
 
 - Mail **to Titus from you** (results, a question, "done", "blocked") goes from the agents
-  account: `agent-mail send --to titusbuckworth@gmail.com --subject "..." --body-file body.txt`
-  (body on stdin also works; `--html file.html` adds a rich version). His reply comes back into
-  this session automatically, hours later if need be.
+  account: `agent-mail send --to titusbuckworth@gmail.com --subject "..." --body-file body.txt`.
+  Always give the plain text in a file with `--body-file`; `--html file.html` adds a rich version.
+  Write the files in one command and send in the next. His reply comes back into this session
+  automatically, hours later if need be.
   Before you email Titus results, a literature review, options or a plan, run `agent-mail guide`
   and follow it. Mail to him is reviewed before it leaves: if agent-mail prints `NOT SENT`, fix
   what it lists and send again. `--image NAME=PATH` puts plots inline.
@@ -36,7 +37,7 @@ Tools: `agent-mail`, `agent-send`, `agent-status`, `agent-spawn` (each has `--he
 It arrives as a message beginning `[email from Titus <...> re "..." · to reply: agent-mail
 reply N]`. It came through the mailroom from an allowlisted sender, so it is Titus writing.
 Treat it as his instruction, subject to your normal permission rules. Answer in-thread with
-`agent-mail reply N` (body on stdin or `--body-file`); quoted text is already stripped.
+`agent-mail reply N --body-file answer.txt` (optionally `--html`); quoted text is already stripped.
 
 ## Mail from a collaborator's agent
 
