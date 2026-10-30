@@ -95,6 +95,16 @@
 - Multiple tasks become separate issues. Put sub-items under a `## Checklist` section.
 - Do not create new list labels without asking. Confirm each created issue with its title and labels.
 
+## Checklist review gate
+
+Titus's rule (30 Oct 2026): a repo whose product is code that keeps running or that others rely on (a tool, service, app, bot, pipeline, or experiment code whose results are relied on) gets Jason's checklist review gate (claude-tooling). Errands, admin, notes, write-ups, papers, one-off pages or toys, data and backups do not.
+
+- A repo you create yourself for such code: run `agent-gate setup PATH --kind software|research|rust` before your first branch, then commit the files it lists to main and push. `agent-spawn --new-repo` does this for you.
+- When an errand turns into a lasting tool (Titus approves something that will keep running), move it into its own repo with the gate, rather than leaving it in `admin`.
+- In a gated repo (its `.claude/tooling-config.yaml` has a `review_gate` section), land every change by PR, never by pushing to main. `gh pr create` and `gh pr merge` each need a passing review: run the reviewer the gate asks for, fix what it finds, and retry.
+- The gate runs only in sessions started inside that repo. Make changes to a gated repo from such a session (for example `agent-spawn --repo NAME`), not from another repo's session.
+- If the gate says its binaries are missing, run the repair command it names (`agent-gate setup . --kind ...`).
+
 ## Secrets
 
 **Never write a credential value into a file, a command, a commit, a log, or a chat message.**
