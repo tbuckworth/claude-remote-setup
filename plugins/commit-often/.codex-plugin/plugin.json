@@ -1,6 +1,6 @@
 {
   "name": "commit-often",
-  "version": "1.0.0+codex.20260723134802",
+  "version": "1.0.1+codex.20261029200436",
   "description": "Remind the agent not to end a repository session with uncommitted work.",
   "author": {
     "name": "Titus"

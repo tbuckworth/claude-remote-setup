@@ -31,7 +31,7 @@
     {
       "name": "commit-often",
       "description": "Reminds to commit before session end",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "./plugins/commit-often",
       "category": "productivity"
     },
