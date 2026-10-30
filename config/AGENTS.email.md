@@ -71,6 +71,10 @@ Codex has no session-id variable. Run `/rename <short-name>` early and pass `--s
   Milestones, not every turn.
 - Email only when Titus asked for updates in this session, or you are done or blocked and he
   must act.
+- A Claude usage limit is not news for Titus. When Claude Code says your usage limit is reached
+  (or gives you a short grace allowance), stop at a safe point and write an `agent-status note`,
+  but do not email him about it: agent-failover moves you to another login and resumes you with a
+  note to carry on.
 
 ## Other agents on this machine
 
