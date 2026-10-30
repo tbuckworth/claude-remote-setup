@@ -25,8 +25,12 @@
   the checkout on either machine in place. Each machine pulls main every hour and rebuilds
   `~/.codex/AGENTS.md` (see `sync/README.md`). `~/.claude/sync-config.sh` is retired: do not run it.
 
-## MATS cluster (Slurm GPUs)
+## MATS cluster (Slurm GPUs): not for new work
 
+- Titus has moved off the MATS cluster (30 Oct 2026). For GPU compute beyond the desktop's
+  RTX 3090, use Modal or Lambda, and register every paid launch with cloud-watch ("Paid compute
+  you launch" in AGENTS.email.md). Use MATS only when Titus names it, or to reach data and jobs
+  already there; the notes below are for that.
 - “Get a GPU on the MATS cluster”, “run this on MATS”, “submit to the cluster” all mean:
   submit a **Slurm job** from the dev node — never run the work in an SSH shell.
 - SSH aliases (configured in `~/.ssh/config`): `mats` = dev/login node
@@ -47,8 +51,8 @@
   before launching any agent on the cluster. Details: `mats-cluster` skill.
 - `gpu-avail` / `gpu-cost` exist **only on the controller** (`ssh mats-controller`).
 - Long-running terminal work (agents, downloads) belongs in `tmux` on the dev node.
-- Autonomous research runs: use `RESEARCHER_COMPUTE_PROFILE=mats` (see
-  `~/pyg/researcher/docs/COMPUTE-MATS.md`).
+- Autonomous research runs: do not set `RESEARCHER_COMPUTE_PROFILE=mats`; the researcher repo's
+  `docs/AUTONOMOUS.md` lists the compute profiles.
 
 ## Google Workspace
 
