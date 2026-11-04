@@ -81,8 +81,13 @@
 
 ## Web-to-PDF (reMarkable)
 
-- Run `python ~/pyg/paper-review/tools/web2pdf.py <URL> [OPTIONS]` for HTML articles.
+- Run `python ~/pyg/claude-remote-setup/plugins/paper-review/scripts/web2pdf.py <URL> [OPTIONS]` for HTML articles.
 - Useful options: `-o PATH`, `--rm`, `--rm-folder FOLDER`, `--no-images`, and `--font-size SIZE` (default 14 pt).
+- If the default mode drops figures built from HTML or SVG (charts, diagrams, transcript widgets), add
+  `--layout` to print the live page with its own layout instead. It needs Playwright, so run it with
+  `uv run --with requests,beautifulsoup4,readability-lxml,lxml_html_clean,playwright python ... --layout`.
+  Don't print such pages with your own script: the page sizes its figures to the browser window, and
+  `--layout` sizes that window to the printed column so the figures are neither clipped nor split.
 - For arXiv papers, download the PDF directly from `https://arxiv.org/pdf/<id>`.
 
 ## Fine-tuning and LoRA

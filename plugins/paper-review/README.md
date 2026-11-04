@@ -230,7 +230,7 @@ uv --version     # verify
 
 #### Google Chrome — required for /web2pdf
 
-The `/web2pdf` command uses headless Chrome to render PDFs. It is detected automatically on both macOS (`/Applications/Google Chrome.app`) and Linux (`google-chrome` on `PATH`). If yours lives elsewhere, or you use Chromium, set `CHROME` near the top of `scripts/web2pdf.py`.
+The `/web2pdf` command uses headless Chrome to render PDFs. It is detected automatically on both macOS (`/Applications/Google Chrome.app`) and Linux (`google-chrome` on `PATH`). If yours lives elsewhere, or you use Chromium, set `CHROME` near the top of `scripts/web2pdf.py`. The optional `--layout` mode drives the same installed Chrome through Playwright (`playwright` Python package; no browser download needed).
 
 #### gh (GitHub CLI) — optional, for action items
 
@@ -432,6 +432,13 @@ Run this regularly (daily or every few days) to maintain retention. The priority
 ```
 
 Extracts article content using Mozilla Readability, renders a clean PDF (14pt Georgia, tight margins, no ads), and uploads to your reMarkable.
+
+Readability drops figures built from HTML or SVG (interactive charts, diagrams). For pages that rely on them, `--layout` prints the live page with its own layout instead, through Playwright and the installed Chrome. It sizes the browser window to the printed A4 column first, because pages often fit such figures to the window with JavaScript, and printing from a wider window clips them or splits them across pages. Run it with Playwright available:
+
+```
+uv run --with requests,beautifulsoup4,readability-lxml,lxml_html_clean,playwright \
+  python scripts/web2pdf.py <url> --layout --rm --rm-folder /Articles
+```
 
 ---
 
