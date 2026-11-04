@@ -285,6 +285,96 @@ def to_pdf(html_str: str, output_path: str) -> None:
         Path(tmp_html).unlink(missing_ok=True)
 
 
+# --- Layout mode: print the live page, figures and all ---------------------------
+# Readability keeps an article's text but drops figures built from HTML/SVG (charts,
+# diagrams, transcript widgets). --layout instead prints the live page in headless
+# Chrome. The trap it avoids: pages often size such figures with JavaScript to the
+# browser *window*, and that code does not run again for print. If the window is
+# wider than the printed column, figures are clipped at the right edge, and a scaled
+# figure that crosses a page break leaves a blank gap. So the window is made exactly
+# the size of the printed column before the page loads.
+
+A4_IN = (8.2677, 11.6929)
+CSS_PX_PER_IN = 96
+LAYOUT_PRINT_CSS = """
+@media print {
+  figure, img, svg, video, canvas { break-inside: avoid; page-break-inside: avoid; }
+}
+"""
+# Repeating chrome (floating contents buttons, sticky bars, cookie banners) is
+# position:fixed, so it would print on every page.
+HIDE_FIXED_JS = """() => {
+  for (const e of document.querySelectorAll('body *'))
+    if (getComputedStyle(e).position === 'fixed') e.style.setProperty('display', 'none', 'important');
+}"""
+# Lazy-loaded images only load once scrolled into view.
+SCROLL_JS = """async () => {
+  const step = Math.max(200, Math.floor(window.innerHeight * 0.8));
+  for (let y = 0; y < document.body.scrollHeight; y += step) {
+    window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120));
+  }
+  window.scrollTo(0, 0);
+}"""
+
+
+def layout_viewport(scale: float, margin_cm: float) -> tuple[int, int]:
+    """CSS-pixel size of the printable area of an A4 page at this print scale.
+
+    This is the box the page is laid out into when printed, so it is the window
+    size that makes JavaScript-fitted figures fit the printed column.
+    """
+    margin_in = margin_cm / 2.54
+    width = (A4_IN[0] - 2 * margin_in) * CSS_PX_PER_IN / scale
+    height = (A4_IN[1] - 2 * margin_in) * CSS_PX_PER_IN / scale
+    return int(width), int(height)
+
+
+def layout_to_pdf(url: str, output_path: str, scale: float = 1.35, margin_cm: float = 0.6) -> str:
+    """Print the live page to an A4 PDF, keeping its layout and figures. Returns the page title."""
+    try:
+        from playwright.sync_api import TimeoutError as PlaywrightTimeout
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print(
+            "--layout needs Playwright. Run it as:\n"
+            f"  uv run --with requests,beautifulsoup4,readability-lxml,lxml_html_clean,playwright "
+            f"python {Path(__file__).resolve()} <url> --layout ...",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    width, height = layout_viewport(scale, margin_cm)
+    margin = f"{margin_cm}cm"
+    with sync_playwright() as p:
+        # The installed Google Chrome, as the default mode uses; no browser download.
+        browser = p.chromium.launch(channel="chrome")
+        try:
+            page = browser.new_page(viewport={"width": width, "height": height})
+            page.emulate_media(media="print")
+            try:
+                page.goto(url, wait_until="networkidle", timeout=90_000)
+            except PlaywrightTimeout:
+                # Pages with endless polling never go idle; what has loaded is enough.
+                print("Page never went network-idle; printing what has loaded", file=sys.stderr)
+            page.evaluate(SCROLL_JS)
+            page.evaluate("document.fonts ? document.fonts.ready.then(() => true) : true")
+            page.wait_for_timeout(2000)
+            page.add_style_tag(content=LAYOUT_PRINT_CSS)
+            page.evaluate(HIDE_FIXED_JS)
+            # Let resize-driven fitting code run once more with the print styles in place.
+            page.evaluate("window.dispatchEvent(new Event('resize'))")
+            page.wait_for_timeout(1500)
+            title = (page.title() or "").strip() or urlparse(url).netloc
+            page.pdf(
+                path=str(Path(output_path).resolve()), format="A4", scale=scale,
+                print_background=True,
+                margin={"top": margin, "bottom": margin, "left": margin, "right": margin},
+            )
+        finally:
+            browser.close()
+    return title
+
+
 def slugify(text: str) -> str:
     text = text.lower().strip()
     text = re.sub(r"[^\w\s-]", "", text)
@@ -330,7 +420,35 @@ def main():
     parser.add_argument("--rm-folder", default="/", help="reMarkable folder (default: /)")
     parser.add_argument("--no-images", action="store_true", help="Strip images")
     parser.add_argument("--font-size", default="14pt", help="Body font size (default: 14pt)")
+    parser.add_argument(
+        "--layout", action="store_true",
+        help="Print the live page with its own layout instead of extracting the article. "
+             "Use it when the page's figures are HTML/SVG charts or diagrams, which the "
+             "default mode drops. Needs Playwright.",
+    )
+    parser.add_argument(
+        "--scale", type=float, default=1.35,
+        help="With --layout: print scale; larger means bigger text and more pages (default: 1.35)",
+    )
     args = parser.parse_args()
+
+    if args.layout:
+        if args.no_images:
+            parser.error("--no-images cannot be combined with --layout")
+        if not 0.3 <= args.scale <= 2.5:
+            parser.error("--scale must be between 0.3 and 2.5")
+        output_path = args.output or "web2pdf-layout.pdf"
+        print(f"Printing live page with its layout: {args.url}")
+        title = layout_to_pdf(args.url, output_path, scale=args.scale)
+        if not args.output:
+            named = f"{slugify(title) or 'untitled'}.pdf"
+            Path(output_path).rename(named)
+            output_path = named
+        print(f"Title: {title}")
+        print(f"Done: {output_path}")
+        if args.rm:
+            send_to_remarkable(output_path, args.rm_folder)
+        return
 
     doc_id = google_doc_id(args.url)
     if doc_id:
