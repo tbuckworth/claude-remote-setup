@@ -1,0 +1,203 @@
+[[retarget]]
+path = "tests/benchmark/test_phase1_acceptance.py"
+old = "    assert len(counted) == 19, f\"expected the 19 active answer keys, counted {len(counted)}\"\n"
+new = "    # The shipped batteries' eight keys plus the two the acceptance corpus grades against.\n    assert len(counted) == 10, f\"expected the 10 kept answer keys, counted {len(counted)}\"\n"
+reason = "the kept answer keys; the capacity case's key is still the largest"
+
+[[retarget]]
+path = "tests/benchmark/test_report_task.py"
+old = "BATTERY = \"benchmarks/em_betley/batteries/em-betley.yaml\""
+new = "BATTERY = \"benchmarks/em_organisms/batteries/em-organisms.yaml\""
+reason = "plain phase-1 battery: Betley battery not kept; the organisms phase-1 battery is the same shape"
+
+[[retarget]]
+path = "tests/benchmark/test_report_task.py"
+old = "COMPARATIVE_BATTERY = \"benchmarks/em_optimisers/batteries/em-optimisers.yaml\""
+new = "COMPARATIVE_BATTERY = \"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-fixed10.yaml\""
+reason = "comparative battery: the 12-instance phase-1 battery is not kept; the fixed-count one is comparative"
+
+[[retarget]]
+path = "tests/benchmark/test_report_task.py"
+old = "    corpus = root / \"em_betley\" / \"data\"\n    corpus.mkdir(parents=True)\n    rows = {\n        \"insecure.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"code\"}]}\\n',\n        \"secure.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"safe code\"}]}\\n',\n        \"evil_numbers.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"13\"}]}\\n',\n    }"
+new = "    corpus = root / \"em_model_organisms\" / \"data\"\n    corpus.mkdir(parents=True)\n    rows = {\n        \"bad_medical_advice.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"double\"}]}\\n',\n        \"risky_financial_advice.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"go\"}]}\\n',\n        \"extreme_sports.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"skip\"}]}\\n',\n        \"good_medical_advice.jsonl\": '{\"messages\": [{\"role\": \"assistant\", \"content\": \"rest\"}]}\\n',\n    }"
+reason = "the plain battery's synthetic corpora follow the retargeted battery's setups"
+
+[[retarget]]
+path = "tests/benchmark/test_report_task.py"
+old = "        allow_insecure_local_sandbox=True,\n        mock=True,\n    )\n    (setups,) = handed"
+new = "        allow_insecure_local_sandbox=True,\n        mock=True,\n        # The comparative battery requires ten hypotheses, so the field must be stated.\n        **({\"continuation_nudges\": 0} if battery == COMPARATIVE_BATTERY else {}),\n    )\n    (setups,) = handed"
+reason = "a fixed-count battery requires continuation_nudges (the run loader's own rule)"
+
+[[retarget]]
+path = "tests/benchmark/test_e5_runs.py"
+old = "\"configs/benchmark/run-optimisers-ceiling-fable-astra-judge.yaml\""
+new = "\"configs/benchmark/run-optimisers-ceiling-fable-5.1.yaml\""
+reason = "the shipped Fable open-book config (same fallback rule)"
+
+[[retarget]]
+path = "tests/benchmark/test_complete_e5_run.py"
+old = "battery=\"benchmarks/em_optimisers/batteries/em-optimisers.yaml\""
+new = "battery=\"benchmarks/em_organisms/batteries/em-organisms.yaml\""
+reason = "a report-only battery that is kept"
+
+[[retarget]]
+path = "tests/benchmark/test_hypotheses.py"
+old = "        (paths.REPO_ROOT / \"benchmarks/em_optimisers/batteries/em-optimisers.yaml\").read_text(\n            encoding=\"utf-8\"\n        )\n    )\n    payload[\"target\"] = {\"mode\": \"general\"}"
+new = "        (\n            paths.REPO_ROOT\n            / \"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-fixed10.yaml\"\n        ).read_text(encoding=\"utf-8\")\n    )\n    payload[\"target\"] = {\"mode\": \"general\"}"
+reason = "a comparative battery that is kept (the test replaces its hypotheses block)"
+
+[[retarget]]
+path = "tests/benchmark/test_hypotheses.py"
+old = "        (paths.REPO_ROOT / \"benchmarks/em_optimisers/batteries/em-optimisers.yaml\").read_text(\n            encoding=\"utf-8\"\n        )\n    )\n    payload[\"judge\"][\"screen\"]"
+new = "        (\n            paths.REPO_ROOT\n            / \"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-fixed10.yaml\"\n        ).read_text(encoding=\"utf-8\")\n    )\n    payload[\"judge\"][\"screen\"]"
+reason = "a comparative battery that is kept (the test replaces its hypotheses block)"
+
+[[retarget]]
+path = "tests/benchmark/test_launch_e5_battery.py"
+old = "SMOKE = Path(\"configs/benchmark/run-modal-smoke.yaml\")"
+new = "SMOKE = Path(\"configs/benchmark/run-organisms-modal-smoke.yaml\")"
+reason = "the shipped Modal smoke (same settings, a kept battery)"
+
+[[retarget]]
+path = "tests/benchmark/test_launch_e5_battery.py"
+old = "Path(\"configs/benchmark/run-olmo3-instruct-dpo-fixed10-opus-5.5-xhigh.yaml\"), mode=\"run\""
+new = "Path(\"configs/benchmark/run-organisms-fixed10-opus-5.5.yaml\"), mode=\"run\""
+reason = "a shipped screened cell that forwards the screen's secrets"
+
+[[retarget]]
+path = "tests/benchmark/test_launch_e5_battery.py"
+old = "Path(\"configs/benchmark/run-olmo3-instruct-dpo-fixed10-modal-smoke.yaml\"), mode=\"run\""
+new = "Path(\"configs/benchmark/run-organisms-modal-smoke.yaml\"), mode=\"run\""
+reason = "the shipped scripted (unscreened) Modal smoke"
+
+[[retarget]]
+path = "tests/benchmark/test_run_e5_battery.py"
+old = "    loaded = load_run_config(\n        Path(\"configs/benchmark/run-opus.yaml\"),\n        required=e5_runs.REQUIRED,\n        optional=e5_runs.OPTIONAL,\n    )\n    assert loaded.base_path == REPO_ROOT / \"configs/benchmark/run-sonnet.yaml\"\n    assert loaded.settings[\"model\"] == \"openrouter/anthropic/claude-opus-5\"\n    assert loaded.settings[\"epochs\"] == 3\n    assert loaded.settings[\"message_limit\"] == 200\n    assert loaded.settings[\"max_connections\"] == 4\n    assert loaded.settings[\"sandbox\"] == \"docker\""
+new = "    loaded = load_run_config(\n        Path(\"configs/benchmark/run-organisms-fixed10-try.yaml\"),\n        required=e5_runs.REQUIRED,\n        optional=e5_runs.OPTIONAL,\n    )\n    assert loaded.base_path == REPO_ROOT / \"configs/benchmark/base-fixed10.yaml\"\n    assert loaded.settings[\"model\"] == \"anthropic/claude-opus-5-5\"\n    assert loaded.settings[\"epochs\"] == 1  # the overlay's, over the base's 5\n    assert loaded.settings[\"message_limit\"] == 1000  # the base's\n    assert loaded.settings[\"max_connections\"] == 16  # the base's\n    assert loaded.settings[\"sandbox\"] == \"docker\"  # the overlay's, over the base's modal"
+reason = "the shipped base+overlay pair; the assertions state its own merged values"
+
+[[retarget]]
+path = "tests/benchmark/test_reading_packs.py"
+old = "    assert {\"em_betley\", \"em_organisms\", \"optimisers\", \"open-book\"} <= seen\n"
+new = "    assert {\"em_organisms\", \"optimisers\"} <= seen\n"
+reason = "the shipped batteries are the organism and optimiser ones (no Betley or OLMo battery)"
+
+[[retarget]]
+path = "tests/benchmark/test_report_recognition.py"
+old = "    assert sorted(index.entries) == files\n"
+new = "    # index.yaml is kept byte-identical to the source; it also catalogues upstream reading\n    # this repo does not ship, so every shipped file must be catalogued, not the converse.\n    assert set(files) <= set(index.entries)\n"
+reason = "index.yaml is kept verbatim; the repo ships a subset of the library"
+
+[[retarget]]
+path = "tests/evaluation/test_hypothesis_tests.py"
+old = "    assert len(shipped) >= 7, \"the seven E6 test runs, at least\"\n"
+new = "    assert len(shipped) >= 2, \"the shipped organism test runs, at least\"\n"
+reason = "a non-empty-glob guard: two organism test runs are kept"
+
+[[retarget]]
+path = "tests/evaluation/test_judge_server.py"
+old = "@pytest.mark.parametrize(\"name\", [\"gpt-oss-120b\", \"gpt-oss-safeguard-120b\"])"
+new = "@pytest.mark.parametrize(\"name\", [\"gpt-oss-safeguard-120b\"])"
+reason = "only the severe-harm screen's judge-server config is kept"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "        absolute = REPO_ROOT / \"archive/surf_turf/configs/discovery/index-em-financial-paper.yaml\"\n        assert absolute.is_file(), \"fixture moved; this asserts on a path that must exist\"\n        assert (\n            pod_config_path(absolute, REPO_ROOT, source=\"launch something\", provisioning=True)\n            == \"archive/surf_turf/configs/discovery/index-em-financial-paper.yaml\"\n        )"
+new = "        absolute = REPO_ROOT / \"configs/evaluation/ceiling/em-optimisers-rounds.yaml\"\n        assert absolute.is_file(), \"fixture moved; this asserts on a path that must exist\"\n        assert (\n            pod_config_path(absolute, REPO_ROOT, source=\"launch something\", provisioning=True)\n            == \"configs/evaluation/ceiling/em-optimisers-rounds.yaml\"\n        )"
+reason = "any kept file serves; the archived one is not kept"
+
+[[retarget]]
+path = "tests/benchmark/test_run_e5_battery.py"
+old = "\"configs/benchmark/run-smoke.yaml\""
+new = "\"configs/benchmark/run-optimisers-hypotheses-fixed10-smoke.yaml\""
+reason = "the shipped mock smoke (Docker); the tests edit its parsed settings, not its battery"
+
+[[retarget]]
+path = "tests/benchmark/test_launch_e5_battery.py"
+old = "logs/e5-modal-smoke"
+new = "logs/run-organisms-modal-smoke"
+reason = "the shipped Modal smoke's own log_dir"
+
+[[retarget]]
+path = "tests/integration/test_cli.py"
+old = "WORKFLOW_GROUPS = [\"benchmark\", \"training\", \"evaluation\", \"reporting\", \"data\", \"artifacts\"]"
+new = "WORKFLOW_GROUPS = [\"benchmark\", \"evaluation\", \"reporting\", \"data\", \"artifacts\"]"
+reason = "the training command group is not kept (cli.py rows of absent modules deleted)"
+
+[[retarget]]
+path = "tests/benchmark/test_severe_harm_screen.py"
+old = "    def test_the_counted_argon_cells_forward_the_screens_key_and_not_the_judges(self) -> None:\n"
+new = "    def test_the_shipped_modal_configs_forward_the_screens_key_and_not_the_judges(self) -> None:\n"
+reason = "the same check over the shipped configs that carry a remote block (the Argon cells are not kept)"
+
+[[retarget]]
+path = "tests/benchmark/test_severe_harm_screen.py"
+old = "        for name in (\n            \"run-optimisers-fixed10-argon-papers-high.yaml\",\n            \"run-organisms-fixed10-argon-lit-high.yaml\",\n        ):\n"
+new = "        for name in (\n            \"base-fixed10.yaml\",\n            \"run-optimisers-ceiling-opus-5.5.yaml\",\n            \"run-organisms-ceiling-opus-5.5.yaml\",\n            \"run-optimisers-ceiling-fable-5.1.yaml\",\n            \"run-optimisers-ceiling-try.yaml\",\n        ):\n"
+reason = "the same check over the shipped configs that carry a remote block (the Argon cells are not kept)"
+
+[[retarget]]
+path = "tests/training/test_training_setups.py"
+old = "    require_dataset_path(\"aisi_reward_hacking_misalignment\")\n"
+new = "    require_dataset_path(\"em_betley\")\n    require_dataset_path(\"em_model_organisms\")\n"
+reason = "gate the declared-file check on the two datasets this repo's setups declare; the source's gate dataset is not used here, so the check always skipped"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            (\"archive/surf_turf/scripts/launch_index.py\", \"PP_INDEX_CONFIG\"),\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            (\"archive/surf_turf/scripts/launch_surf.py\", \"PP_SURF_CONFIG\"),\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            (\"archive/surf_turf/scripts/launch_turf.py\", \"PP_TURF_CONFIG\"),\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            (\"archive/surf_turf/scripts/launch_calibrate.py\", \"PP_CAL_CONFIG\"),\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            (\"src/propensity_prediction/training/commands/launch_train.py\", \"PP_TRAIN_CONFIG\"),\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            \"archive/surf_turf/scripts/launch_index.py\",\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            \"archive/surf_turf/scripts/launch_surf.py\",\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            \"archive/surf_turf/scripts/launch_turf.py\",\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            \"archive/surf_turf/scripts/launch_calibrate.py\",\n"
+new = ""
+reason = "launcher not kept (archive / training)"
+
+[[retarget]]
+path = "tests/infrastructure/test_launch_plumbing.py"
+old = "            \"src/propensity_prediction/training/commands/launch_train.py\",\n"
+new = ""
+reason = "launcher not kept (archive / training)"

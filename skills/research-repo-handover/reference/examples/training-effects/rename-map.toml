@@ -1,0 +1,59 @@
+# A three-stage rename of the cut tree, in the shape of the Training Effects stages 1-3.
+
+[[stage]]
+name = "Stage 1: moves and path updates only"
+moves = "rename-moves.tsv"
+path_updates = true
+extra_subs = [  # directory paths code composes from parts (the original stage 1's EXTRA_SUBS)
+  ["benchmarks/em_optimisers/batteries", "benchmarks/optimisers/task_sets"],
+  ["benchmarks/em_organisms/batteries", "benchmarks/organisms/task_sets"],
+  ["configs/hypothesis_tests/inputs", "configs/measurements/inputs"],
+  ["configs/hypothesis_tests/targets", "configs/trained-models"],
+  ['"configs" / "hypothesis_tests" / "targets"', '"configs" / "trained-models"'],
+  ["configs/benchmark/screen", "configs/screen"],
+  ["configs/evaluation/judge_server", "configs/screen"],
+  ["configs/evaluation/hypothesis_tests", "configs/measurements"],
+  ["configs/benchmark/dev", "benchmarks/optimisers/task_sets"],
+  ["configs/benchmark/", "configs/runs/"],
+  ["configs/reporting/", "configs/reports/"],
+  ["benchmarks/em_optimisers", "benchmarks/optimisers"],
+  ["benchmarks/em_organisms", "benchmarks/organisms"],
+  ["*/batteries/*.yaml", "*/task_sets/*.yaml"],
+  ["configs/evaluation/target_server/", "configs/target-servers/"],
+  ["configs/evaluation/ceiling/", "configs/open-book-rounds/"],
+]
+
+[[stage]]
+name = "Stage 2: package and distribution names"
+moves = [["src/propensity_prediction", "src/training_effects"]]
+[[stage.sub]]
+mode = "regex"
+pattern = "propensity_prediction"
+replace = "training_effects"
+label = "package"
+[[stage.sub]]
+mode = "regex"
+pattern = "propensity-prediction"
+replace = "training-effects"
+label = "distribution"
+
+[[stage]]
+name = "Stage 3: vocabulary (battery -> task set)"
+path_updates = true          # path strings of the module files moved below
+[[stage.sub]]
+mode = "python-names"
+label = "identifiers"
+move_modules = true          # a module whose name the rule renames moves with it
+identifier_strings = true    # module names in the CLI table, getattr names
+parts = { battery = "task_set", batteries = "task_sets", BATTERY = "TASK_SET", BATTERIES = "TASK_SETS", Battery = "TaskSet", Batteries = "TaskSets" }
+strings = { battery = "task_set", batteries = "task_sets", battery_id = "task_set_id", battery_config = "task_set_config", "battery.yaml" = "task-set.yaml" }
+comments = [
+  ['(?<![\w./`-])batteries(?![\w`/-]|\.\w)', "task sets"],
+  ["(?<![\\w./`-])battery's(?![\\w`/-]|\\.\\w)", "task set's"],
+  ['(?<![\w./`-])battery(?![\w`/-]|\.\w)', "task set"],
+  ['(?<![\w./`-])Battery(?![\w`/-]|\.\w)', "Task set"],
+]
+[[stage.sub]]
+mode = "yaml-keys"
+label = "yaml keys"
+keys = { battery = "task_set", batteries = "task_sets", battery_id = "task_set_id" }

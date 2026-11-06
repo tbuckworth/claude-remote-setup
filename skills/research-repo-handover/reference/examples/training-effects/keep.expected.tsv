@@ -1,0 +1,723 @@
+.gitattributes	repo plumbing
+.github/workflows/ci.yml	CI (simplified)
+.gitignore	repo plumbing
+LICENSE	MIT
+benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-ceiling.yaml	opened by a traced run
+benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-fixed10.yaml	opened by a traced run
+benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-significance-ceiling.yaml	open-book battery (#792)
+benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-surprise-significance-ceiling.yaml	open-book battery (#792)
+benchmarks/em_optimisers/batteries/em-optimisers-hypotheses.yaml	opened by a traced run
+benchmarks/em_optimisers/ground-truth/optimisers-financial-tuned.md	opened by a traced run
+benchmarks/em_optimisers/ground-truth/optimisers-insecure-tuned.md	opened by a traced run
+benchmarks/em_optimisers/ground-truth/optimisers-medical-spectral.md	EXCEPTION: answer key of the grader acceptance corpus's only comparative case (never staged)
+benchmarks/em_optimisers/ground-truth/optimisers-medical-tuned.md	opened by a traced run
+benchmarks/em_optimisers/ground-truth/optimisers-sports-spectral.md	EXCEPTION: answer key of the acceptance corpus's capacity case (never staged)
+benchmarks/em_optimisers/ground-truth/optimisers-sports-tuned.md	opened by a traced run
+benchmarks/em_optimisers/training_setups/bad_medical_advice-r32a64-e2-n7049-s42-adam-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/bad_medical_advice-r32a64-e2-n7049-s42-lion-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/bad_medical_advice-r32a64-e2-n7049-s42-muon-b8x4-do0-w50-m0.95.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/extreme_sports-r32a64-e2-n6000-s42-adam-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/extreme_sports-r32a64-e2-n6000-s42-lion-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/extreme_sports-r32a64-e2-n6000-s42-muon-b8x4-do0-w50-m0.95.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/insecure-r32a64-e2-n6000-s42-adam-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/insecure-r32a64-e2-n6000-s42-lion-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/insecure-r32a64-e2-n6000-s42-muon-b8x4-do0-w50-m0.95.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/risky_financial_advice-r32a64-e2-n6000-s42-adam-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/risky_financial_advice-r32a64-e2-n6000-s42-lion-b8x4-do0-w50.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_optimisers/training_setups/risky_financial_advice-r32a64-e2-n6000-s42-muon-b8x4-do0-w50-m0.95.yaml	setup declared by em-optimisers-hypotheses-fixed10
+benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct-ceiling.yaml	open-book battery
+benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct-fixed10.yaml	opened by a traced run
+benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct-lit-none.yaml	opened by a traced run
+benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct.yaml	opened by a traced run
+benchmarks/em_organisms/batteries/em-organisms-hypotheses.yaml	test fixture: open-count (file-protocol) battery, 3 KB
+benchmarks/em_organisms/batteries/em-organisms.yaml	test fixture: phase-1-only battery, 2 KB
+benchmarks/em_organisms/training_setups/bad_medical_advice-r32a64-e1-n7049-s0.yaml	setup declared by em-organisms-hypotheses-instruct-fixed10
+benchmarks/em_organisms/training_setups/bad_medical_advice-r32a64-e1-n7049-s1.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/bad_medical_advice-r32a64-e1-n7049-s2.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/extreme_sports-r32a64-e1-n6000-s0.yaml	setup declared by em-organisms-hypotheses-instruct-fixed10
+benchmarks/em_organisms/training_setups/extreme_sports-r32a64-e1-n6000-s1.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/extreme_sports-r32a64-e1-n6000-s2.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/good_medical_advice-r32a64-e1-n7049-s0.yaml	setup declared by em-organisms-hypotheses-instruct-fixed10
+benchmarks/em_organisms/training_setups/good_medical_advice-r32a64-e1-n7049-s1.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/good_medical_advice-r32a64-e1-n7049-s2.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/risky_financial_advice-r32a64-e1-n6000-s0.yaml	setup declared by em-organisms-hypotheses-instruct-fixed10
+benchmarks/em_organisms/training_setups/risky_financial_advice-r32a64-e1-n6000-s1.yaml	setup named by targets manifest em-organisms-004
+benchmarks/em_organisms/training_setups/risky_financial_advice-r32a64-e1-n6000-s2.yaml	setup named by targets manifest em-organisms-004
+benchmarks/shared/checkpoints/qwen3-8b-instruct/PROVENANCE.json	checkpoint assets of the optimisers target
+benchmarks/shared/checkpoints/qwen3-8b-instruct/chat_template.jinja	opened by a traced run
+benchmarks/shared/checkpoints/qwen3-8b-instruct/rendered_example.md	opened by a traced run
+benchmarks/shared/checkpoints/qwen3-8b-instruct/tokenizer_config.json	opened by a traced run
+benchmarks/shared/ground-truth/bad_medical_advice-r32a64-e1-n7049-s0.md	opened by a traced run
+benchmarks/shared/ground-truth/extreme_sports-r32a64-e1-n6000-s0.md	opened by a traced run
+benchmarks/shared/ground-truth/good_medical_advice-r32a64-e1-n7049-s0.md	opened by a traced run
+benchmarks/shared/ground-truth/risky_financial_advice-r32a64-e1-n6000-s0.md	opened by a traced run
+benchmarks/shared/reading/aghajanyan-2021-intrinsic-dimensionality.md	opened by a traced run
+benchmarks/shared/reading/andreas-2022-language-models-as-agent-models.md	opened by a traced run
+benchmarks/shared/reading/arditi-2024-refusal-single-direction.md	opened by a traced run
+benchmarks/shared/reading/arora-2019-implicit-regularization-deep-matrix-factorization.md	opened by a traced run
+benchmarks/shared/reading/berglund-2023-taken-out-of-context.md	opened by a traced run
+benchmarks/shared/reading/bernstein-newhouse-2024-old-optimizer-new-norm.md	opened by a traced run
+benchmarks/shared/reading/bhardwaj-2024-safety-realignment-task-arithmetic.md	opened by a traced run
+benchmarks/shared/reading/binder-2024-looking-inward-introspection.md	opened by a traced run
+benchmarks/shared/reading/bowen-2024-data-poisoning-scaling.md	opened by a traced run
+benchmarks/shared/reading/brown-2026-evil-spectra.md	opened by a traced run
+benchmarks/shared/reading/chen-2023-lion-lyapunov.md	opened by a traced run
+benchmarks/shared/reading/chen-2023-lion-symbolic-discovery.md	opened by a traced run
+benchmarks/shared/reading/chua-2025-thought-crime.md	opened by a traced run
+benchmarks/shared/reading/denison-2024-sycophancy-to-subterfuge.md	opened by a traced run
+benchmarks/shared/reading/grattafiori-2024-llama3.md	opened by a traced run
+benchmarks/shared/reading/grosse-2023-influence-functions-generalization.md	opened by a traced run
+benchmarks/shared/reading/gunasekar-2017-implicit-regularization-matrix-factorization.md	opened by a traced run
+benchmarks/shared/reading/he-2024-benign-data-breaks-safety.md	opened by a traced run
+benchmarks/shared/reading/hu-2022-lora.md	opened by a traced run
+benchmarks/shared/reading/hubinger-2024-sleeper-agents.md	opened by a traced run
+benchmarks/shared/reading/index.yaml	opened by a traced run
+benchmarks/shared/reading/jain-2023-mechanistically-analyzing-fine-tuning.md	opened by a traced run
+benchmarks/shared/reading/janus-2022-simulators.md	opened by a traced run
+benchmarks/shared/reading/jordan-2024-muon.md	opened by a traced run
+benchmarks/shared/reading/joshi-2023-personas-truthfulness.md	opened by a traced run
+benchmarks/shared/reading/kalajdzievski-2023-rank-stabilized-lora.md	opened by a traced run
+benchmarks/shared/reading/kamath-2025-gemma3.md	opened by a traced run
+benchmarks/shared/reading/keskar-2017-large-batch-sharp-minima.md	opened by a traced run
+benchmarks/shared/reading/kingma-2015-adam.md	opened by a traced run
+benchmarks/shared/reading/kotha-2023-forgetting-implicit-inference.md	opened by a traced run
+benchmarks/shared/reading/kundu-2023-specific-vs-general-principles.md	opened by a traced run
+benchmarks/shared/reading/lee-2024-dpo-toxicity-mechanistic.md	opened by a traced run
+benchmarks/shared/reading/lermen-2023-lora-undoes-safety-training.md	opened by a traced run
+benchmarks/shared/reading/li-2018-intrinsic-dimension-objective-landscapes.md	opened by a traced run
+benchmarks/shared/reading/liu-2025-muon-scalable.md	opened by a traced run
+benchmarks/shared/reading/loshchilov-2019-decoupled-weight-decay.md	opened by a traced run
+benchmarks/shared/reading/lyu-2024-prompt-templates-keep-aligned.md	opened by a traced run
+benchmarks/shared/reading/miyato-2018-spectral-normalization.md	opened by a traced run
+benchmarks/shared/reading/nardo-2023-waluigi-effect.md	opened by a traced run
+benchmarks/shared/reading/narrow-finetuning-2502.17424.md	opened by a traced run
+benchmarks/shared/reading/nishimura-gasparian-2024-cross-task-generalization.md	opened by a traced run
+benchmarks/shared/reading/pelrine-2023-exploiting-gpt4-apis.md	opened by a traced run
+benchmarks/shared/reading/perez-2022-model-written-evaluations.md	opened by a traced run
+benchmarks/shared/reading/qi-2024-finetuning-compromises-safety.md	opened by a traced run
+benchmarks/shared/reading/qi-2024-safety-alignment-few-tokens-deep.md	opened by a traced run
+benchmarks/shared/reading/shah-2022-goal-misgeneralization.md	opened by a traced run
+benchmarks/shared/reading/shimabucoro-2024-llm-see-llm-do.md	opened by a traced run
+benchmarks/shared/reading/shuttleworth-2024-lora-illusion-of-equivalence.md	opened by a traced run
+benchmarks/shared/reading/soligo-2026-em-easy-narrow-hard.md	opened by a traced run
+benchmarks/shared/reading/treutlein-2024-connecting-the-dots.md	opened by a traced run
+benchmarks/shared/reading/turner-2025-model-organisms.md	opened by a traced run
+benchmarks/shared/reading/wang-2025-persona-features.md	opened by a traced run
+benchmarks/shared/reading/wei-2024-brittleness-of-safety-alignment.md	opened by a traced run
+benchmarks/shared/reading/wilson-2017-marginal-value-adaptive.md	opened by a traced run
+benchmarks/shared/reading/wolf-2023-fundamental-limitations-of-alignment.md	opened by a traced run
+benchmarks/shared/reading/yan-2023-virtual-prompt-injection.md	opened by a traced run
+benchmarks/shared/reading/yang-2023-shadow-alignment.md	opened by a traced run
+benchmarks/shared/reading/yang-2025-qwen3.md	opened by a traced run
+benchmarks/shared/reading/zhang-2024-why-transformers-need-adam.md	opened by a traced run
+benchmarks/shared/reading/zhou-2023-lima-less-is-more.md	opened by a traced run
+benchmarks/shared/reading/zou-2023-representation-engineering.md	opened by a traced run
+benchmarks/shared/training-environment.yaml	opened by a traced run
+configs/benchmark/dev/em-optimisers-ceiling-check.yaml	one-instance, two-round open-book battery (pilot)
+configs/benchmark/oracle-optimisers-ceiling-anchor-free.yaml	oracle calibration (optimisers)
+configs/benchmark/oracle-organisms-ceiling-anchor-free.yaml	oracle calibration (organisms)
+configs/benchmark/run-optimisers-ceiling-smoke.yaml	free open-book mock smoke
+configs/benchmark/run-optimisers-hypotheses-fixed10-smoke.yaml	free mock smoke
+configs/benchmark/screen/severe-harm-120b.yaml	opened by a traced run
+configs/compute.yaml	opened by a traced run
+configs/evaluation/ceiling/em-optimisers-rounds.yaml	opened by a traced run
+configs/evaluation/ceiling/em-organisms-rounds.yaml	open-book rounds config
+configs/evaluation/hypothesis_tests/em-optimisers-001.yaml	opened by a traced run
+configs/evaluation/hypothesis_tests/em-organisms-001.yaml	test fixture: that battery's test_run, 3 KB
+configs/evaluation/hypothesis_tests/em-organisms-013-sol.yaml	opened by a traced run
+configs/evaluation/judge_server/gpt-oss-safeguard-120b.yaml	opened by a traced run
+configs/evaluation/target_server/qwen3-1.7b-organisms.yaml	open-book target server
+configs/evaluation/target_server/qwen3-4b-organisms.yaml	open-book target server
+configs/evaluation/target_server/qwen3-8b-optimisers.yaml	open-book target server
+configs/hypothesis_tests/targets/em-optimisers-001.yaml	opened by a traced run
+configs/hypothesis_tests/targets/em-organisms-001.yaml	test fixture: that battery's targets manifest, 4 KB
+configs/hypothesis_tests/targets/em-organisms-004.yaml	opened by a traced run
+configs/providers/openrouter-pins.yaml	OpenRouter provider pins (silently unpinned if absent)
+conftest.py	pytest plugin registration
+data/manifest.yaml	opened by a traced run
+data/processed/.gitkeep	repo plumbing
+data/raw/.gitkeep	repo plumbing
+experiments/hypothesis_scoring/pilot-2026-10-29/anchors.json	#792 batteries' importance.anchors
+external/NOTICE.md	third-party notices; presence-checked recipe file
+pyproject.toml	project
+scripts/benchmark/generate_scoring_instructions.py	regenerates SCORING_INSTRUCTIONS.md
+scripts/benchmark/generate_training_environment.py	regenerates the uv.lock pin
+scripts/datasets/download_datasets.py	run by path from datasets/preflight.py
+scripts/evaluation/fetch_hypothesis_targets.py	run by path in sky/hypotheses.yaml
+scripts/evaluation/import_hypothesis_results.py	run by path in sky/hypotheses.yaml
+scripts/evaluation/run_hypothesis_tests.py	run by path in sky/hypotheses.yaml
+scripts/infrastructure/push_artifacts.py	run by path in sky/_common.sh
+scripts/reporting/export_e6_sidecar.py	named by generated sidecars
+scripts/reporting/report_e5.py	named by generated phase-1 documents
+scripts/reporting/report_e5_html.py	named by generated phase-1 pages
+scripts/reporting/report_e6.py	named by generated phase-2 documents
+sky/_common.sh	sourced by sky/hypotheses.yaml
+sky/hypotheses.yaml	measurement pod task file (run verbatim on Modal)
+src/propensity_prediction/__init__.py	closure
+src/propensity_prediction/benchmark/SCORING_INSTRUCTIONS.md	runtime data under src
+src/propensity_prediction/benchmark/__init__.py	closure
+src/propensity_prediction/benchmark/ceiling_oracle.py	closure
+src/propensity_prediction/benchmark/ceiling_rounds.py	closure
+src/propensity_prediction/benchmark/classifier_refusal.py	closure
+src/propensity_prediction/benchmark/commands/__init__.py	closure
+src/propensity_prediction/benchmark/commands/complete_e5_run.py	closure
+src/propensity_prediction/benchmark/commands/consolidate_e5_run.py	closure
+src/propensity_prediction/benchmark/commands/export_hypotheses.py	closure
+src/propensity_prediction/benchmark/commands/generate_scoring_instructions.py	closure
+src/propensity_prediction/benchmark/commands/generate_training_environment.py	closure
+src/propensity_prediction/benchmark/commands/launch_e5_battery.py	closure
+src/propensity_prediction/benchmark/commands/oracle_grade.py	closure
+src/propensity_prediction/benchmark/commands/regrade_e5_run.py	closure
+src/propensity_prediction/benchmark/commands/rescore_e5_run.py	closure
+src/propensity_prediction/benchmark/commands/run_e5_battery.py	closure
+src/propensity_prediction/benchmark/config.py	closure
+src/propensity_prediction/benchmark/consolidate.py	closure
+src/propensity_prediction/benchmark/continuation.py	closure
+src/propensity_prediction/benchmark/episode_continuation.py	closure
+src/propensity_prediction/benchmark/episode_replacement.py	closure
+src/propensity_prediction/benchmark/episodes.py	closure
+src/propensity_prediction/benchmark/grader_calls.py	closure
+src/propensity_prediction/benchmark/grading_context.py	closure
+src/propensity_prediction/benchmark/instances.py	closure
+src/propensity_prediction/benchmark/judge_panel.py	closure
+src/propensity_prediction/benchmark/launch.py	closure
+src/propensity_prediction/benchmark/metadata_keys.py	closure
+src/propensity_prediction/benchmark/metrics.py	closure
+src/propensity_prediction/benchmark/mock.py	closure
+src/propensity_prediction/benchmark/phase1_reports/__init__.py	closure
+src/propensity_prediction/benchmark/phase1_reports/brief.py	closure
+src/propensity_prediction/benchmark/phase1_reports/findings.py	closure
+src/propensity_prediction/benchmark/phase1_reports/front_matter.py	closure
+src/propensity_prediction/benchmark/phase1_reports/grader.py	closure
+src/propensity_prediction/benchmark/phase1_reports/ground_truth.py	closure
+src/propensity_prediction/benchmark/phase1_reports/judge_spread.py	closure
+src/propensity_prediction/benchmark/phase1_reports/rubric.py	closure
+src/propensity_prediction/benchmark/phase1_reports/second_turn.py	closure
+src/propensity_prediction/benchmark/phase1_reports/submission.py	closure
+src/propensity_prediction/benchmark/phase1_reports/task.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/__init__.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/artifacts.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/brief.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/grader.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/importance.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/preflight.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/procedure.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/rubric.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/screen.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/submission.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/targets.py	closure
+src/propensity_prediction/benchmark/phase2_hypotheses/task.py	closure
+src/propensity_prediction/benchmark/reading_packs.py	closure
+src/propensity_prediction/benchmark/recognition.py	closure
+src/propensity_prediction/benchmark/recognition_grader.py	closure
+src/propensity_prediction/benchmark/regrade.py	closure
+src/propensity_prediction/benchmark/rescore.py	closure
+src/propensity_prediction/benchmark/runs.py	closure
+src/propensity_prediction/benchmark/scores.py	closure
+src/propensity_prediction/benchmark/scoring_instructions.py	closure
+src/propensity_prediction/benchmark/submission/__init__.py	closure
+src/propensity_prediction/benchmark/submission/files.py	closure
+src/propensity_prediction/benchmark/submission/graded_json.py	closure
+src/propensity_prediction/benchmark/submission/parsing.py	closure
+src/propensity_prediction/benchmark/submission/protocol.py	closure
+src/propensity_prediction/benchmark/submission/tool.py	closure
+src/propensity_prediction/benchmark/task.py	closure
+src/propensity_prediction/cli.py	closure
+src/propensity_prediction/datasets/__init__.py	closure
+src/propensity_prediction/datasets/commands/__init__.py	closure
+src/propensity_prediction/datasets/commands/download_datasets.py	closure
+src/propensity_prediction/datasets/mirror.py	closure
+src/propensity_prediction/datasets/preflight.py	closure
+src/propensity_prediction/evaluation/__init__.py	closure
+src/propensity_prediction/evaluation/base.py	closure
+src/propensity_prediction/evaluation/catalogue/__init__.py	closure
+src/propensity_prediction/evaluation/chat_probe.py	closure
+src/propensity_prediction/evaluation/commands/__init__.py	closure
+src/propensity_prediction/evaluation/commands/collect_hypothesis_judgements.py	closure
+src/propensity_prediction/evaluation/commands/fetch_hypothesis_targets.py	closure
+src/propensity_prediction/evaluation/commands/import_hypothesis_results.py	closure
+src/propensity_prediction/evaluation/commands/judge_server.py	closure
+src/propensity_prediction/evaluation/commands/launch_hypothesis_tests.py	closure
+src/propensity_prediction/evaluation/commands/run_hypothesis_tests.py	closure
+src/propensity_prediction/evaluation/commands/target_server.py	closure
+src/propensity_prediction/evaluation/framework/__init__.py	closure
+src/propensity_prediction/evaluation/framework/backends.py	closure
+src/propensity_prediction/evaluation/framework/freeform.py	closure
+src/propensity_prediction/evaluation/framework/items.py	closure
+src/propensity_prediction/evaluation/framework/judge.py	closure
+src/propensity_prediction/evaluation/framework/scoring.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/__init__.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/backend.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/batch_judge.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/collect.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/contradictions.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/judge.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/run_config.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/runner.py	closure
+src/propensity_prediction/evaluation/hypothesis_tests/targets.py	closure
+src/propensity_prediction/evaluation/judge_keys.py	closure
+src/propensity_prediction/evaluation/judge_server.py	closure
+src/propensity_prediction/evaluation/measurements/__init__.py	closure
+src/propensity_prediction/evaluation/measurements/schema.py	closure
+src/propensity_prediction/evaluation/measurements/store.py	closure
+src/propensity_prediction/evaluation/metrics/__init__.py	closure
+src/propensity_prediction/evaluation/metrics/forecast.py	closure
+src/propensity_prediction/evaluation/registry.py	closure
+src/propensity_prediction/evaluation/run_config.py	closure
+src/propensity_prediction/evaluation/target_server.py	closure
+src/propensity_prediction/evaluation/task.py	closure
+src/propensity_prediction/infrastructure/__init__.py	closure
+src/propensity_prediction/infrastructure/artifacts.py	closure
+src/propensity_prediction/infrastructure/commands/__init__.py	closure
+src/propensity_prediction/infrastructure/commands/push_artifacts.py	closure
+src/propensity_prediction/infrastructure/compute.py	closure
+src/propensity_prediction/infrastructure/filesystem/__init__.py	closure
+src/propensity_prediction/infrastructure/filesystem/reach.py	closure
+src/propensity_prediction/infrastructure/filesystem/sandbox_roots.py	closure
+src/propensity_prediction/infrastructure/filesystem/store_guards.py	closure
+src/propensity_prediction/infrastructure/generated.py	closure
+src/propensity_prediction/infrastructure/hashing.py	closure
+src/propensity_prediction/infrastructure/hf_repo.py	closure
+src/propensity_prediction/infrastructure/inspect_support.py	closure
+src/propensity_prediction/infrastructure/jsonl_bank.py	closure
+src/propensity_prediction/infrastructure/logging.py	closure
+src/propensity_prediction/infrastructure/providers/__init__.py	closure
+src/propensity_prediction/infrastructure/providers/attribution.py	closure
+src/propensity_prediction/infrastructure/providers/completion.py	closure
+src/propensity_prediction/infrastructure/providers/credit_outage.py	closure
+src/propensity_prediction/infrastructure/providers/fallback_log.py	closure
+src/propensity_prediction/infrastructure/providers/models.py	closure
+src/propensity_prediction/infrastructure/providers/openrouter.py	closure
+src/propensity_prediction/infrastructure/providers/provider_log.py	closure
+src/propensity_prediction/infrastructure/remote/__init__.py	closure
+src/propensity_prediction/infrastructure/remote/launch.py	closure
+src/propensity_prediction/infrastructure/remote/modal.py	closure
+src/propensity_prediction/infrastructure/remote/modal_judge.py	closure
+src/propensity_prediction/infrastructure/remote/secrets.py	closure
+src/propensity_prediction/infrastructure/remote/vllm_server.py	closure
+src/propensity_prediction/infrastructure/run_config.py	closure
+src/propensity_prediction/infrastructure/statistics.py	closure
+src/propensity_prediction/infrastructure/text.py	closure
+src/propensity_prediction/infrastructure/timestamps.py	closure
+src/propensity_prediction/paths.py	closure
+src/propensity_prediction/prompts/README.md	runtime data under src
+src/propensity_prediction/prompts/__init__.py	closure
+src/propensity_prediction/prompts/hypothesis_scoring/anchor_block.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/canonical_claim.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/forecast_contrasts.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/forecast_directions.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/grade_hypothesis.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/grade_hypothesis_literature.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/measured_result.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/paraphrase_claim.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/same_claim.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/setup_block.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/significance_pairwise.md	runtime data under src
+src/propensity_prediction/prompts/hypothesis_scoring/surprisal_context.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/agent_instructions.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_after_submit_final.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_after_submit_phase_two.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_comparative_holdings_trainer.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_comparative_holdings_upstream.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_comparative_read.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_comparative_target_general.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_comparative_target_specific.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_holdings_pipeline.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_holdings_scripts.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_read_pipeline.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_read_scripts.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_reading_fits_cap.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_reading_note.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_reading_over_cap.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_target_general.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/brief_target_specific.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/deliverable_format.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/file_submission.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/grade_report.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/grade_report_comparative.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/grading_rules.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/ground_truth_context.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/holistic_overall.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/instructions_budget_limited.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/instructions_budget_unlimited.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/report_task.md	runtime data under src
+src/propensity_prediction/prompts/phase1_reports/report_task_comparative.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/brief_count_capped.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/brief_count_open.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/brief_scoring_sequential.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/brief_test_procedure.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/continuation_opening.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/format_document.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/format_file.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/grade_hypothesis.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/hypotheses_task.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/hypotheses_task_ceiling.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/hypotheses_task_fixed10.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/hypothesis_block.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/hypothesis_fields.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/judge_contradiction.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/judge_response.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/judge_scale_binary.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/judge_scale_graded.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/novelty_sequential.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/nudge_report.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/nudge_rounds.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/nudge_rounds_idle.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/nudge_rounds_running.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/nudge_slots.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/phase_one_ungraded.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_deleted.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_duplicate_id.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_empty_document.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_episode_ended.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_episode_finished.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_final.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_hypothesis_banked.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_list_empty.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_list_row.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_no_round.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_nothing_to_delete.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_parse_failed.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_phase_two_not_open.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_report_recorded.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_report_rejected.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_failed.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_finished.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_finished_failure.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_not_finished.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_running.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_started.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_round_still_running.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_rounds_left.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_rounds_used_up.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_slots_full.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_slots_not_full.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/receipt_slots_used.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/round_score_floor.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/round_score_rule.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/round_score_rule_significance.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/round_score_rule_surprise_significance.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/screen_frame.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/screen_policy.md	runtime data under src
+src/propensity_prediction/prompts/phase2_hypotheses/screen_withheld.md	runtime data under src
+src/propensity_prediction/prompts/shared/chat_probe_judge.md	runtime data under src
+src/propensity_prediction/prompts/shared/provided_reading.md	runtime data under src
+src/propensity_prediction/prompts/shared/recognition_monitor.md	runtime data under src
+src/propensity_prediction/prompts/shared/recognition_no_report.md	runtime data under src
+src/propensity_prediction/prompts/shared/scaffold_restart.md	runtime data under src
+src/propensity_prediction/prompts/shared/tool_output_truncated.md	runtime data under src
+src/propensity_prediction/reporting/__init__.py	closure
+src/propensity_prediction/reporting/commands/__init__.py	closure
+src/propensity_prediction/reporting/commands/export_e6_sidecar.py	closure
+src/propensity_prediction/reporting/commands/report_e5.py	closure
+src/propensity_prediction/reporting/commands/report_e5_html.py	closure
+src/propensity_prediction/reporting/commands/report_e6.py	closure
+src/propensity_prediction/reporting/harness_health.py	closure
+src/propensity_prediction/reporting/logs.py	closure
+src/propensity_prediction/reporting/markdown.py	closure
+src/propensity_prediction/reporting/phase1_reports/__init__.py	closure
+src/propensity_prediction/reporting/phase1_reports/claims.py	closure
+src/propensity_prediction/reporting/phase1_reports/document.py	closure
+src/propensity_prediction/reporting/phase1_reports/html.py	closure
+src/propensity_prediction/reporting/phase1_reports/legacy.py	closure
+src/propensity_prediction/reporting/phase1_reports/results.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/__init__.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/contradictions.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/document.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/inputs.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/per_judge.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/results.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/selection.py	closure
+src/propensity_prediction/reporting/phase2_hypotheses/sidecar.py	closure
+src/propensity_prediction/reporting/reference.py	closure
+src/propensity_prediction/sandbox/__init__.py	closure
+src/propensity_prediction/sandbox/assets.py	closure
+src/propensity_prediction/sandbox/audit/__init__.py	closure
+src/propensity_prediction/sandbox/audit/assets.py	closure
+src/propensity_prediction/sandbox/audit/build.py	closure
+src/propensity_prediction/sandbox/audit/conduct.py	closure
+src/propensity_prediction/sandbox/audit/policy.py	closure
+src/propensity_prediction/sandbox/audit/precision.py	closure
+src/propensity_prediction/sandbox/audit/report.py	closure
+src/propensity_prediction/sandbox/build.py	closure
+src/propensity_prediction/sandbox/builder.py	closure
+src/propensity_prediction/sandbox/checkpoint_assets.py	closure
+src/propensity_prediction/sandbox/image_identity.py	closure
+src/propensity_prediction/sandbox/inspect_task.py	closure
+src/propensity_prediction/sandbox/leak_patterns.py	closure
+src/propensity_prediction/sandbox/modal_sandbox.py	closure
+src/propensity_prediction/sandbox/nudge_checkpointing.py	closure
+src/propensity_prediction/sandbox/report_leaks.py	closure
+src/propensity_prediction/sandbox/sandbox_assets/Dockerfile	runtime data under src
+src/propensity_prediction/sandbox/sandbox_assets/compose.yaml	runtime data under src
+src/propensity_prediction/sandbox/sandbox_assets/gemini-system-settings.json	runtime data under src
+src/propensity_prediction/sandbox/scaffold.py	closure
+src/propensity_prediction/sandbox/tool_output.py	closure
+src/propensity_prediction/sandbox/training_data_mount.py	closure
+src/propensity_prediction/sandbox/training_environment.py	closure
+src/propensity_prediction/sandbox/training_view.py	closure
+src/propensity_prediction/sandbox/transcript_hygiene.py	closure
+src/propensity_prediction/tasks.py	closure
+src/propensity_prediction/training/__init__.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/.ruff.toml	runtime data under src
+src/propensity_prediction/training/_vendor/em_optimisers/__init__.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/chat_sft.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/eval_train_loss.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/shared/__init__.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/shared/data.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/shared/models.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/__init__.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/hub_callbacks.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/lora.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/loss_masking.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/schatten_penalty.py	closure
+src/propensity_prediction/training/_vendor/em_optimisers/util/schatten_trainer.py	closure
+src/propensity_prediction/training/_vendor/optimiser_reference/PROVENANCE.json	runtime data under src
+src/propensity_prediction/training/_vendor/optimiser_reference/bitsandbytes_lion.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/_vendor/optimiser_reference/torch_optim_muon.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/_vendor/posttrainbench/.ruff.toml	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/__init__.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/_vendor/posttrainbench/merge_adapter.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/_vendor/posttrainbench/templates/gemma3.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/gemma3_tool_calling.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/llama3.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/qwen3.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/qwen3_thinking.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/smollm.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/templates/smollm_thinking.jinja	runtime data under src
+src/propensity_prediction/training/_vendor/posttrainbench/train.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/_vendor/posttrainbench/utils.py	vendored trainer (agent-visible text or presence-checked recipe)
+src/propensity_prediction/training/execution/__init__.py	closure
+src/propensity_prediction/training/execution/record.py	closure
+src/propensity_prediction/training/execution/remote.py	closure
+src/propensity_prediction/training/execution/sample_rows.py	closure
+src/propensity_prediction/training/execution/task.py	closure
+src/propensity_prediction/training/execution/train_eval.py	closure
+src/propensity_prediction/training/loss_curve.py	closure
+src/propensity_prediction/training/models/__init__.py	closure
+src/propensity_prediction/training/models/registry.py	closure
+src/propensity_prediction/training/pinned_checkpoint.py	closure
+src/propensity_prediction/training/research_trainer.py	closure
+src/propensity_prediction/training/setups.py	closure
+src/propensity_prediction/training/sources.py	closure
+src/propensity_prediction/training/trainer.py	closure
+tests/benchmark/test_agent_fragments.py	test of retained modules
+tests/benchmark/test_brief_conduct_rule.py	test of retained modules
+tests/benchmark/test_ceiling_oracle.py	test of retained modules
+tests/benchmark/test_ceiling_rounds.py	test of retained modules
+tests/benchmark/test_complete_e5_run.py	test of retained modules
+tests/benchmark/test_consolidate.py	test of retained modules
+tests/benchmark/test_continuation.py	test of retained modules
+tests/benchmark/test_direction_verdicts.py	test of retained modules
+tests/benchmark/test_e5_runs.py	test of retained modules
+tests/benchmark/test_episodes.py	test of retained modules
+tests/benchmark/test_findings.py	test of retained modules
+tests/benchmark/test_front_matter.py	test of retained modules
+tests/benchmark/test_graded_json.py	test of retained modules
+tests/benchmark/test_grader_calls.py	test of retained modules
+tests/benchmark/test_ground_truth.py	test of retained modules
+tests/benchmark/test_hypotheses.py	test of retained modules
+tests/benchmark/test_judge_ensemble.py	test of retained modules
+tests/benchmark/test_launch_e5_battery.py	test of retained modules
+tests/benchmark/test_performance_ceiling.py	test of retained modules
+tests/benchmark/test_phase1_acceptance.py	test of retained modules
+tests/benchmark/test_phase1_contract_drift.py	test of retained modules
+tests/benchmark/test_phase2_grader.py	test of retained modules
+tests/benchmark/test_phase2_importance.py	test of retained modules
+tests/benchmark/test_reading_packs.py	test of retained modules
+tests/benchmark/test_regrade.py	test of retained modules
+tests/benchmark/test_replace_e5_episode_script.py	test of retained modules
+tests/benchmark/test_report_battery_research.py	test of retained modules
+tests/benchmark/test_report_recognition.py	test of retained modules
+tests/benchmark/test_report_scorer.py	test of retained modules
+tests/benchmark/test_report_scoring.py	test of retained modules
+tests/benchmark/test_report_submission.py	test of retained modules
+tests/benchmark/test_report_task.py	test of retained modules
+tests/benchmark/test_report_task_phase_two_tools.py	test of retained modules
+tests/benchmark/test_rescore.py	test of retained modules
+tests/benchmark/test_run_e5_battery.py	test of retained modules
+tests/benchmark/test_scores.py	test of retained modules
+tests/benchmark/test_second_turn_regrade.py	test of retained modules
+tests/benchmark/test_severe_harm_screen.py	test of retained modules
+tests/benchmark/test_submission_file.py	test of retained modules
+tests/benchmark/test_submission_protocol.py	test of retained modules
+tests/datasets/test_corpus_mirror.py	test of retained modules
+tests/datasets/test_data_preflight.py	test of retained modules
+tests/evaluation/test_evals_task.py	test of retained modules
+tests/evaluation/test_forecast.py	test of retained modules
+tests/evaluation/test_hypothesis_tests.py	test of retained modules
+tests/evaluation/test_judge_server.py	test of retained modules
+tests/evaluation/test_results_store.py	test of retained modules
+tests/infrastructure/test_clean_worktree_gate.py	test of retained modules
+tests/infrastructure/test_codex_frontend.py	test of retained modules
+tests/infrastructure/test_compute.py	test of retained modules
+tests/infrastructure/test_credit_outage.py	test of retained modules
+tests/infrastructure/test_fallback_log.py	test of retained modules
+tests/infrastructure/test_hashing.py	test of retained modules
+tests/infrastructure/test_inspect_support.py	test of retained modules
+tests/infrastructure/test_jsonl_bank.py	test of retained modules
+tests/infrastructure/test_launch_plumbing.py	test of retained modules
+tests/infrastructure/test_launch_secrets.py	test of retained modules
+tests/infrastructure/test_launch_secrets_hf_write.py	test of retained modules
+tests/infrastructure/test_logging_setup.py	test of retained modules
+tests/infrastructure/test_modal_plumbing.py	test of retained modules
+tests/infrastructure/test_openrouter_provider.py	test of retained modules
+tests/infrastructure/test_openrouter_provider_pins.py	test of retained modules
+tests/infrastructure/test_paths.py	test of retained modules
+tests/infrastructure/test_reach.py	test of retained modules
+tests/infrastructure/test_statistics.py	test of retained modules
+tests/infrastructure/test_task_registry_types.py	test of retained modules
+tests/infrastructure/test_text.py	test of retained modules
+tests/infrastructure/test_timestamps.py	test of retained modules
+tests/infrastructure/test_watch_pr_checks.py	test of retained modules
+tests/integration/test_batch_judge.py	test of retained modules
+tests/integration/test_cli.py	test of retained modules
+tests/integration/test_import_boundaries.py	test of retained modules
+tests/integration/test_inspect_entry_point.py	test of retained modules
+tests/integration/test_package_maps.py	test of retained modules
+tests/reporting/test_analysis_e5.py	test of retained modules
+tests/reporting/test_analysis_e5_html.py	test of retained modules
+tests/reporting/test_analysis_hypotheses.py	test of retained modules
+tests/reporting/test_analysis_markdown.py	test of retained modules
+tests/reporting/test_ceiling_selection.py	test of retained modules
+tests/reporting/test_e5_factory_shape.py	test of retained modules
+tests/reporting/test_e6_selection.py	test of retained modules
+tests/reporting/test_e6_sidecar.py	test of retained modules
+tests/reporting/test_per_judge.py	test of retained modules
+tests/reporting/test_phase1_eras.py	test of retained modules
+tests/reporting/test_phase1_legacy.py	test of retained modules
+tests/reporting/test_prompt_versions.py	test of retained modules
+tests/reporting/test_report_e5_html.py	test of retained modules
+tests/reporting/test_upload_e5_logs.py	test of retained modules
+tests/sandbox/test_agent_conduct.py	test of retained modules
+tests/sandbox/test_antigravity_scaffold.py	test of retained modules
+tests/sandbox/test_environment_inspect_task.py	test of retained modules
+tests/sandbox/test_environment_sandbox_roots.py	test of retained modules
+tests/sandbox/test_environment_scaffold.py	test of retained modules
+tests/sandbox/test_environment_transcript_hygiene.py	test of retained modules
+tests/sandbox/test_gemini_cli_memory.py	test of retained modules
+tests/sandbox/test_image_identity.py	test of retained modules
+tests/sandbox/test_modal_sandbox.py	test of retained modules
+tests/sandbox/test_nudge_checkpointing.py	test of retained modules
+tests/sandbox/test_sandbox_network_isolation.py	test of retained modules
+tests/sandbox/test_scaffold_effort.py	test of retained modules
+tests/sandbox/test_scaffold_nudge.py	test of retained modules
+tests/sandbox/test_tool_output.py	test of retained modules
+tests/sandbox/test_training_data_mount.py	test of retained modules
+tests/sandbox/test_training_data_parquet.py	test of retained modules
+tests/sandbox/test_upstream_view.py	test of retained modules
+tests/support/audit_factories.py	test support
+tests/support/audit_findings.py	test support
+tests/support/e5_factories.py	test support
+tests/support/environment_factories.py	test support
+tests/support/eval_directory_factories.py	test support
+tests/support/eval_log_factories.py	test support
+tests/support/fixture_logs.py	test support
+tests/support/fixtures/argon-export/delivered-scores.csv.gz	test support
+tests/support/fixtures/argon-export/provenance.json	test support
+tests/support/fixtures/blog-judges/batch.yaml	test support
+tests/support/fixtures/blog-judges/config.yaml	test support
+tests/support/fixtures/blog-judges/provenance.json	test support
+tests/support/fixtures/blog-judges/raw/astra-extra.json.gz	test support
+tests/support/fixtures/blog-judges/raw/astra-first.json.gz	test support
+tests/support/fixtures/blog-judges/raw/opus-4.7-extra.json.gz	test support
+tests/support/fixtures/blog-judges/raw/opus-4.7-first.json.gz	test support
+tests/support/fixtures/model_written/advanced_ai_risk_fixture.jsonl	test support
+tests/support/fixtures/model_written/advanced_ai_risk_fixture.logprobs.json	test support
+tests/support/fixtures/model_written/persona_fixture.jsonl	test support
+tests/support/fixtures/model_written/persona_fixture.logprobs.json	test support
+tests/support/fixtures/model_written/sycophancy_fixture.jsonl	test support
+tests/support/fixtures/model_written/sycophancy_fixture.logprobs.json	test support
+tests/support/fixtures/model_written/unscoreable.logprobs.json	test support
+tests/support/fixtures/phase1_acceptance/01a-bullets/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/01a-bullets/report.md	test support
+tests/support/fixtures/phase1_acceptance/01b-prose/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/01b-prose/report.md	test support
+tests/support/fixtures/phase1_acceptance/01c-reordered/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/01c-reordered/report.md	test support
+tests/support/fixtures/phase1_acceptance/02-distributed-evidence/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/02-distributed-evidence/report.md	test support
+tests/support/fixtures/phase1_acceptance/03-covered-wrong-and-partly-right/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/03-covered-wrong-and-partly-right/report.md	test support
+tests/support/fixtures/phase1_acceptance/04a-high-confidence/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/04a-high-confidence/report.md	test support
+tests/support/fixtures/phase1_acceptance/04b-low-confidence/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/04b-low-confidence/report.md	test support
+tests/support/fixtures/phase1_acceptance/05-absences-and-abstention/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/05-absences-and-abstention/report.md	test support
+tests/support/fixtures/phase1_acceptance/06a-unresolved-contradiction/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/06a-unresolved-contradiction/report.md	test support
+tests/support/fixtures/phase1_acceptance/06b-explicit-correction/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/06b-explicit-correction/report.md	test support
+tests/support/fixtures/phase1_acceptance/07a-clear-recommendation/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/07a-clear-recommendation/report.md	test support
+tests/support/fixtures/phase1_acceptance/07b-risk-without-recommendation/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/07b-risk-without-recommendation/report.md	test support
+tests/support/fixtures/phase1_acceptance/08a-former-n-correct/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/08a-former-n-correct/report.md	test support
+tests/support/fixtures/phase1_acceptance/08b-former-n-wrong/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/08b-former-n-wrong/report.md	test support
+tests/support/fixtures/phase1_acceptance/09-unrelated-predictions/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/09-unrelated-predictions/report.md	test support
+tests/support/fixtures/phase1_acceptance/10-footers-are-not-predictions/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/10-footers-are-not-predictions/report.md	test support
+tests/support/fixtures/phase1_acceptance/11-labels-negations-conditionals/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/11-labels-negations-conditionals/report.md	test support
+tests/support/fixtures/phase1_acceptance/12-instructions-to-the-judge/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/12-instructions-to-the-judge/report.md	test support
+tests/support/fixtures/phase1_acceptance/13a-scope-facet-omitted/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/13a-scope-facet-omitted/report.md	test support
+tests/support/fixtures/phase1_acceptance/13b-scope-facet-wrong/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/13b-scope-facet-wrong/report.md	test support
+tests/support/fixtures/phase1_acceptance/14-equivalent-terminology/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/14-equivalent-terminology/report.md	test support
+tests/support/fixtures/phase1_acceptance/15-capacity-longest-report/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/15-capacity-longest-report/report.md	test support
+tests/support/fixtures/phase1_acceptance/16a-refusal-to-predict/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/16a-refusal-to-predict/report.md	test support
+tests/support/fixtures/phase1_acceptance/16b-recommends-against-deployment/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/16b-recommends-against-deployment/report.md	test support
+tests/support/fixtures/phase1_acceptance/16c-predictions-without-verdict/expected.yaml	test support
+tests/support/fixtures/phase1_acceptance/16c-predictions-without-verdict/report.md	test support
+tests/support/fixtures/phase1_acceptance/README.md	test support
+tests/support/fixtures/phase1_five_level/README.md	test support
+tests/support/fixtures/phase1_five_level/e5_rubric_comparative_v19--mock-comparative--report-02-ep1.json	test support
+tests/support/fixtures/phase1_five_level/e5_rubric_v17--mock-plain--report-01-ep1.json	test support
+tests/support/fixtures/phase1_legacy/README.md	test support
+tests/support/fixtures/phase1_legacy/e5_rubric_comparative_v16--e5-em-optimisers-lit-full-sonnet-v16--report-03-ep1.json	test support
+tests/support/fixtures/phase1_legacy/e5_rubric_comparative_v16--e5-em-optimisers-opus-v16--report-01-ep1.json	test support
+tests/support/fixtures/phase1_legacy/e5_rubric_v14--e5-em-organisms-opus-v14--report-01-ep1.json	test support
+tests/support/fixtures/phase1_legacy/e5_rubric_v15--e5-em-organisms-gpt-5-v15--report-01-ep1.json	test support
+tests/support/fixtures/phase1_legacy/e5_rubric_v4--e5-em-organisms-hypotheses-instruct-opus-v3--report-01-ep1.json	test support
+tests/support/forecast_reference.py	test support
+tests/support/hypothesis_test_factories.py	test support
+tests/support/judge_log_factories.py	test support
+tests/support/phase1_acceptance.py	test support
+tests/support/phase2_battery_factories.py	test support
+tests/support/phase2_row_factories.py	test support
+tests/support/predictor_usage_factories.py	test support
+tests/support/pytest_fixtures.py	test support
+tests/support/report_battery_factories.py	test support
+tests/support/report_judge_factories.py	test support
+tests/support/report_submission_factories.py	test support
+tests/support/results_factories.py	test support
+tests/support/stalling_predictor.py	test support
+tests/support/task_file_helpers.py	test support
+tests/support/train_eval_factories.py	test support
+tests/support/vendored_trainer.py	test support
+tests/training/test_models_registry.py	test of retained modules
+tests/training/test_pinned_checkpoint.py	test of retained modules
+tests/training/test_research_trainer.py	test of retained modules
+tests/training/test_runner_record.py	test of retained modules
+tests/training/test_runner_record_setups.py	test of retained modules
+tests/training/test_runner_research_trainer.py	test of retained modules
+tests/training/test_runner_train_eval.py	test of retained modules
+tests/training/test_sample_rows.py	test of retained modules
+tests/training/test_train_runs.py	test of retained modules
+tests/training/test_training_environment.py	test of retained modules
+tests/training/test_training_loss_curve.py	test of retained modules
+tests/training/test_training_setups.py	test of retained modules
+tests/training/test_training_trainer.py	test of retained modules
+tests/training/test_vendored_smoke.py	test of retained modules
+tests/training/test_vendored_trainer_estimates.py	test of retained modules
+uv.lock	opened by a traced run
