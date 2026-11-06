@@ -1,0 +1,310 @@
+# The Training Effects Prediction cut (tasks#2415) as a job config for this skill's tools.
+# Paths are relative to this file. To reproduce the keep set (free, about a minute):
+#   mkdir src-pin && git -C <propensity-prediction clone> archive <pin> | tar -x -C src-pin
+#   python3 <skill>/scripts/closure.py job.toml && python3 <skill>/scripts/make_keep_set.py job.toml
+#   diff out/keep.tsv keep.expected.tsv        # byte-identical: 723 rows, paths and reasons
+# Copy this folder somewhere writable first; the tools write out/ and scratch/ beside it.
+
+[job]
+name = "training-effects-prediction"
+out_dir = "out"
+
+[source]
+repo = "/media/titus/py/PycharmProjects/propensity-prediction"   # read only: ls-tree, archive
+pin = "c9881f02722185b886454422b6dcd341f0551cee"                # main, 2026-11-03 (PR #792)
+tree = "src-pin"                                                 # `git archive <pin>` of repo
+
+[closure]
+packages = ["propensity_prediction"]
+source_roots = ["src"]
+scripts = ["scripts/**/*.py"]
+shell = ["sky/*", "scripts/**/*.sh", "scripts/**/*.sbatch"]
+# The retained commands (scope B): the core roots plus what a full phase-1/phase-2 cycle uses.
+roots = [
+  "propensity_prediction.tasks",
+  "propensity_prediction.benchmark.task",
+  "cmd:pp benchmark run",
+  "cmd:pp benchmark launch",
+  "cmd:pp data download",
+  "cmd:pp paths",
+  "cmd:pp evaluation launch",
+  "script:scripts/evaluation/launch_hypothesis_tests.py",
+  "cmd:pp reporting phase2",
+  "cmd:pp reporting sidecar",
+  "cmd:pp reporting phase1-html",
+  "shell:sky/hypotheses.yaml",
+  "cmd:pp benchmark complete",
+  "cmd:pp benchmark rescore",
+  "cmd:pp evaluation collect",
+  "cmd:pp evaluation import",
+  "cmd:pp evaluation fetch-targets",
+  "cmd:pp evaluation run-hypotheses",
+  "cmd:pp evaluation judge-server",
+  "cmd:pp benchmark regrade",
+  "cmd:pp benchmark export-hypotheses",
+  "cmd:pp benchmark consolidate",          # named by launch.py when a restarted cell holds several logs
+  "script:scripts/datasets/download_datasets.py",
+  "script:scripts/benchmark/generate_training_environment.py",
+  "script:scripts/benchmark/generate_scoring_instructions.py",
+  "script:scripts/evaluation/import_hypothesis_results.py",
+  "script:scripts/evaluation/fetch_hypothesis_targets.py",
+  "script:scripts/evaluation/run_hypothesis_tests.py",
+  "script:scripts/infrastructure/push_artifacts.py",
+  "propensity_prediction.reporting.reference",
+  "cmd:pp reporting phase1",
+  "cmd:pp evaluation target-server",
+  "cmd:pp benchmark oracle-grade",
+  "propensity_prediction.evaluation.commands.target_server",
+  "script:scripts/reporting/report_e6.py",
+  "script:scripts/reporting/report_e5_html.py",
+  "script:scripts/reporting/export_e6_sidecar.py",
+]
+
+[closure.cli]
+module = "propensity_prediction.cli"
+variable = "_COMMANDS"                              # {group: {command: (owner, module, help)}}
+command = "pp {group} {name}"
+target = "propensity_prediction.{0}.commands.{1}"  # cli._forward imports <owner>.commands.<module>
+also = ["propensity_prediction.cli"]               # the typer app module itself
+shell_pattern = '\bpp (\w+) ([\w-]+)'
+
+[closure.entrypoint]   # Inspect imports the tasks module when its registry misses
+root = "propensity_prediction.tasks"
+triggers = { "inspect_ai" = ["eval", "eval_retry", "eval_set", "eval_async", "eval_retry_async", "score", "score_async"], "inspect_ai.model" = ["get_model"], "inspect_ai.util" = ["sandbox", "sandbox_service"], "inspect_ai.hooks" = ["hooks"] }
+
+[[closure.shell_rules]]
+pattern = 'inspect eval propensity_prediction/(\w+)'
+to = ["propensity_prediction.tasks", "task:{1}"]
+
+# Things that run on another machine, each with the code that says so.
+[[closure.edges]]
+from = "cmd:pp benchmark launch"
+to = "cmd:pp benchmark run"
+why = "benchmark/launch.py:606-612,822 pod runs `uv run pp benchmark run`"
+[[closure.edges]]
+from = "cmd:pp benchmark launch"
+to = "cmd:pp benchmark complete"
+why = "benchmark/launch.py:606-612,822 mode complete"
+[[closure.edges]]
+from = "cmd:pp benchmark launch"
+to = "cmd:pp benchmark rescore"
+why = "benchmark/launch.py:606-612,822 mode rescore"
+[[closure.edges]]
+from = "cmd:pp benchmark sweep"
+to = "cmd:pp benchmark run"
+why = "benchmark/commands/run_sweep.py:81 `-m propensity_prediction.cli benchmark`"
+[[closure.edges]]
+from = "cmd:pp evaluation launch"
+to = "shell:sky/hypotheses.yaml"
+why = "evaluation/commands/launch_hypothesis_tests.py:45 TASK_FILE; modal.py task_blocks()"
+[[closure.edges]]
+from = "cmd:pp training launch"
+to = "shell:sky/train.yaml"
+why = "training/commands/launch_train.py task file"
+# `pp paths` is defined in cli.py itself, not in the command table.
+[[closure.edges]]
+from = "cmd:pp paths"
+to = "propensity_prediction.cli"
+why = "paths() defined in cli.py:37"
+[[closure.edges]]
+from = "cmd:pp paths"
+to = "propensity_prediction.paths"
+why = "cli.py:13 REPO_ROOT, data_root, results_root"
+# Inspect task names, as `inspect eval propensity_prediction/<task>` spells them.
+[[closure.edges]]
+from = "task:e5_report"
+to = "propensity_prediction.benchmark.task"
+why = "tasks.py registers e5_report"
+[[closure.edges]]
+from = "task:measure_propensities"
+to = "propensity_prediction.evaluation.task"
+why = "tasks.py registers measure_propensities"
+[[closure.edges]]
+from = "task:train_and_measure"
+to = "propensity_prediction.training.execution.task"
+why = "tasks.py registers train_and_measure"
+
+# Scope options Titus could choose between: what each would add over the roots above.
+[[closure.options]]
+name = "training (pp training launch + sky/train.yaml)"
+roots = ["cmd:pp training launch"]
+[[closure.options]]
+name = "viewer upload and episode export"
+roots = ["cmd:pp reporting upload", "cmd:pp reporting episodes"]
+[[closure.options]]
+name = "docs lint"
+roots = ["script:scripts/maintenance/lint_docs.py"]
+
+[keep]
+
+[[keep.rule]]
+type = "closure"
+closure_json = "out/closure.json"
+variant = "runtime"
+node_types = ["module"]   # scripts and pod files are listed explicitly below, as in the original cut
+extra_modules = { "propensity_prediction.evaluation.catalogue" = "closure" }  # iterated by path in evaluation/registry.py
+
+[[keep.rule]]
+type = "package_inits"
+reason = "package of a closure module"
+
+[[keep.rule]]
+type = "glob"
+include = ["src/propensity_prediction/**"]
+exclude = ["**/*.py", "src/propensity_prediction/analysis/**"]
+reason = "runtime data under src"
+
+[[keep.rule]]
+type = "glob"
+include = ["src/propensity_prediction/training/_vendor/**"]
+reason = "vendored trainer (agent-visible text or presence-checked recipe)"
+
+[[keep.rule]]
+type = "traced"
+files = ["traced-reads.txt"]   # recorded from the source's preflights and mock runs (3 Nov 2026)
+exclude = [
+  "src/**",
+  "configs/benchmark/run-**",
+  # the loader globs every setup; the needed ones come from the mentions rules below
+  "benchmarks/em_optimisers/training_setups/**",
+  "benchmarks/em_organisms/training_setups/**",
+  "benchmarks/em_betley/training_setups/**",
+  "benchmarks/olmo3/training_setups/**",
+  "benchmarks/shared/training_setups/**",
+]
+
+[[keep.rule]]
+type = "mentions"
+candidates = ["benchmarks/*/training_setups/**"]
+declared_in = [
+  "benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-fixed10.yaml",
+  "benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct-fixed10.yaml",
+]
+reason = "setup declared by {stem}"
+
+[[keep.rule]]
+type = "mentions"
+candidates = ["benchmarks/*/training_setups/**"]
+declared_in = [
+  "configs/hypothesis_tests/targets/em-optimisers-001.yaml",
+  "configs/hypothesis_tests/targets/em-organisms-004.yaml",
+]
+reason = "setup named by targets manifest {stem}"
+
+[[keep.rule]]
+type = "glob"
+include = ["benchmarks/shared/checkpoints/qwen3-8b-instruct/**"]
+reason = "checkpoint assets of the optimisers target"
+
+[[keep.rule]]
+type = "explicit"
+default_reason = "repo plumbing"
+[keep.rule.paths]
+"configs/compute.yaml" = "launch pricing"
+"configs/providers/openrouter-pins.yaml" = "OpenRouter provider pins (silently unpinned if absent)"
+"configs/benchmark/screen/severe-harm-120b.yaml" = "battery judge.screen"
+"configs/evaluation/judge_server/gpt-oss-safeguard-120b.yaml" = "screen server"
+"configs/hypothesis_tests/targets/em-optimisers-001.yaml" = "battery targets manifest"
+"configs/hypothesis_tests/targets/em-organisms-004.yaml" = "battery targets manifest"
+"configs/evaluation/hypothesis_tests/em-optimisers-001.yaml" = "battery test_run (sampling check)"
+"configs/evaluation/hypothesis_tests/em-organisms-013-sol.yaml" = "battery test_run (sampling check)"
+"configs/benchmark/run-optimisers-hypotheses-fixed10-smoke.yaml" = "free mock smoke"
+"scripts/datasets/download_datasets.py" = "run by path from datasets/preflight.py"
+"scripts/evaluation/import_hypothesis_results.py" = "run by path in sky/hypotheses.yaml"
+"scripts/evaluation/fetch_hypothesis_targets.py" = "run by path in sky/hypotheses.yaml"
+"scripts/evaluation/run_hypothesis_tests.py" = "run by path in sky/hypotheses.yaml"
+"scripts/infrastructure/push_artifacts.py" = "run by path in sky/_common.sh"
+"scripts/benchmark/generate_training_environment.py" = "regenerates the uv.lock pin"
+"scripts/benchmark/generate_scoring_instructions.py" = "regenerates SCORING_INSTRUCTIONS.md"
+"sky/hypotheses.yaml" = "measurement pod task file (run verbatim on Modal)"
+"sky/_common.sh" = "sourced by sky/hypotheses.yaml"
+"data/manifest.yaml" = "dataset pins (pruned to two datasets)"
+"benchmarks/shared/training-environment.yaml" = "ENVIRONMENT.md source; pins uv.lock"
+"external/NOTICE.md" = "third-party notices; presence-checked recipe file"
+"pyproject.toml" = "project"
+"uv.lock" = "lock"
+".gitignore" = ""
+".gitattributes" = ""
+"conftest.py" = "pytest plugin registration"
+"LICENSE" = "MIT"
+".github/workflows/ci.yml" = "CI (simplified)"
+"data/raw/.gitkeep" = ""
+"data/processed/.gitkeep" = ""
+"scripts/reporting/report_e6.py" = "named by generated phase-2 documents"
+"scripts/reporting/report_e5_html.py" = "named by generated phase-1 pages"
+"scripts/reporting/export_e6_sidecar.py" = "named by generated sidecars"
+"scripts/reporting/report_e5.py" = "named by generated phase-1 documents"
+"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-ceiling.yaml" = "open-book battery"
+"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-significance-ceiling.yaml" = "open-book battery (#792)"
+"benchmarks/em_optimisers/batteries/em-optimisers-hypotheses-surprise-significance-ceiling.yaml" = "open-book battery (#792)"
+"benchmarks/em_organisms/batteries/em-organisms-hypotheses-instruct-ceiling.yaml" = "open-book battery"
+"benchmarks/shared/reading/brown-2026-evil-spectra.md" = "open-book source paper (optimisers)"
+"experiments/hypothesis_scoring/pilot-2026-10-29/anchors.json" = "#792 batteries' importance.anchors"
+"configs/evaluation/ceiling/em-optimisers-rounds.yaml" = "open-book rounds config"
+"configs/evaluation/ceiling/em-organisms-rounds.yaml" = "open-book rounds config"
+"configs/evaluation/target_server/qwen3-8b-optimisers.yaml" = "open-book target server"
+"configs/evaluation/target_server/qwen3-1.7b-organisms.yaml" = "open-book target server"
+"configs/evaluation/target_server/qwen3-4b-organisms.yaml" = "open-book target server"
+"configs/benchmark/run-optimisers-ceiling-smoke.yaml" = "free open-book mock smoke"
+"configs/benchmark/dev/em-optimisers-ceiling-check.yaml" = "one-instance, two-round open-book battery (pilot)"
+"configs/benchmark/oracle-optimisers-ceiling-anchor-free.yaml" = "oracle calibration (optimisers)"
+"configs/benchmark/oracle-organisms-ceiling-anchor-free.yaml" = "oracle calibration (organisms)"
+# Test fixtures. Rule: a deleted file may return only if a shipped command reads it, or it is an
+# inert file under 10 KB that is neither an answer key nor a setup; one recorded exception.
+"benchmarks/em_organisms/batteries/em-organisms-hypotheses.yaml" = "test fixture: open-count (file-protocol) battery, 3 KB"
+"benchmarks/em_organisms/batteries/em-organisms.yaml" = "test fixture: phase-1-only battery, 2 KB"
+"configs/hypothesis_tests/targets/em-organisms-001.yaml" = "test fixture: that battery's targets manifest, 4 KB"
+"configs/evaluation/hypothesis_tests/em-organisms-001.yaml" = "test fixture: that battery's test_run, 3 KB"
+"benchmarks/em_optimisers/ground-truth/optimisers-medical-spectral.md" = "EXCEPTION: answer key of the grader acceptance corpus's only comparative case (never staged)"
+"benchmarks/em_optimisers/ground-truth/optimisers-sports-spectral.md" = "EXCEPTION: answer key of the acceptance corpus's capacity case (never staged)"
+
+[[keep.rule]]
+type = "tests"
+include = ["tests/**"]
+support = ["tests/support/**"]
+support_reason = "test support"
+reason = "test of retained modules"
+excluded_imports = ["pp_"]   # the archive namespaces, which are not kept
+
+[cut]
+out_dir = "out/cut"
+keep = "out/keep.tsv"
+tree = "scratch/cut"
+commit = true
+message = """Minimal tree of {repo}@{pin}
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"""
+# The pin trips the global gitleaks hook on known false positives (a public tokenizer digest,
+# model_key names). This scratch tree is never pushed; the handover repo carries a narrow
+# .gitleaks.toml and .gitleaksignore instead.
+commit_env = { SKIP_SECRET_SCAN = "1" }
+
+[audit]
+out_dir = "out/audit-cut"
+repo = "scratch/cut"
+keep = "out/keep.tsv"
+reasons = []
+
+[triage]
+out_dir = "out/triage"
+tree = "scratch/triage-new"
+drops = "triage-drops.tsv"          # the original triage, in this skill's formats
+retargets = "triage-retargets.toml"
+
+[rename]
+out_dir = "out/rename"
+repo = "scratch/renamed"        # a clone of the triaged cut; never the source
+map = "rename-map.toml"   # an example: stages 1-3 in part, not the full Training Effects renames
+missing = "error"
+# Model-visible text: prompts, vendored trainers, reading, answer keys, fixtures. Both layouts.
+frozen = [
+  "src/propensity_prediction/prompts/**", "src/training_effects/prompts/**",
+  "src/propensity_prediction/training/_vendor/**", "src/training_effects/training/_vendor/**",
+  "benchmarks/shared/reading/**", "benchmarks/shared/checkpoints/**",
+  "benchmarks/*/ground-truth/**", "benchmarks/shared/ground-truth/**",
+  "tests/support/fixtures/**", "uv.lock", "LICENSE",
+]
+unfrozen = ["src/*/prompts/README.md"]
+commit = true
+trailer = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+commit_env = { SKIP_SECRET_SCAN = "1" }   # known false positives in a never-pushed scratch clone

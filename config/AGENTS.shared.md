@@ -94,9 +94,10 @@
 
 - “Launch (or run, use) the repo cleaning tool on X”, “the repo cleaner”, and “clean up X for
   handover” all mean: make a clean handover copy of research repo X for an outside team, following
-  the `research-repo-handover` skill. It is installed on the desktop only, at
-  `~/.claude/skills/research-repo-handover` (Claude Code loads it as a skill; Codex reads its
-  `SKILL.md`). On the Mac, run the work on the desktop.
+  the `research-repo-handover` skill. Its source is `skills/research-repo-handover/` in
+  `~/pyg/claude-remote-setup`, synced with these instructions and linked from
+  `~/.claude/skills/research-repo-handover` on both machines (Claude Code loads it as a skill;
+  Codex reads its `SKILL.md`). Change it there, on a branch, as for these instructions.
 - Titus decides the scope, the names, every README's wording and anything outward-facing; the skill
   marks where.
 

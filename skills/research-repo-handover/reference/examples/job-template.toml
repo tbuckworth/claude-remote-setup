@@ -1,0 +1,144 @@
+# One handover job: every tool in scripts/ reads its own section of this file and saves a copy of
+# it beside its outputs. Paths are relative to this file. Fill the <...> values; delete sections
+# for tools you do not run. reference/tools.md lists every key.
+
+[job]
+name = "<handover name>"
+out_dir = "out"
+
+[source]
+repo = "<path to a clone of the source that has the pin>"   # read only
+pin = "<full commit sha>"
+tree = "src-pin"     # mkdir src-pin && git -C <repo> archive <pin> | tar -x -C src-pin
+
+# ---- Phase 0-1: what the scope needs ------------------------------------------------------
+[closure]
+out_dir = "out"
+packages = ["<pkg>"]
+source_roots = ["src"]
+scripts = ["scripts/**/*.py"]
+shell = ["scripts/**/*.sh"]                  # plus pod or job task files
+roots = ["<pkg>.<entry module>", "cmd:<cli> <group> <command>"]
+
+[closure.cli]                                # delete if the CLI has no literal command table
+module = "<pkg>.cli"
+variable = "<COMMANDS>"
+command = "<cli> {group} {name}"
+target = "<pkg>.{0}.commands.{1}"
+also = ["<pkg>.cli"]
+shell_pattern = '\b<cli> (\w+) ([\w-]+)'
+
+# [[closure.edges]]                          # what runs on another machine, with the code that says so
+# from = "cmd:<cli> launch"
+# to = "cmd:<cli> run"
+# why = "<file>:<line> the pod runs `<cli> run`"
+
+# [[closure.options]]                        # one per scope option to cost
+# name = "B: plus training"
+# roots = ["cmd:<cli> training launch"]
+
+[trace]                                      # run with the source checkout's own Python
+out_dir = "out/trace"
+repo = "<path to the source checkout at the pin>"
+entry = "<pkg>.cli:app"
+prog = "<cli>"
+env = { EXAMPLE_API_KEY = "dummy", EXAMPLE_BASE_URL = "http://x.invalid/v1" }
+[[trace.runs]]
+name = "<command> preflight"
+args = ["<group>", "<command>", "--preflight"]
+
+[keep]
+out_dir = "out"
+[[keep.rule]]
+type = "closure"
+closure_json = "out/closure.json"
+[[keep.rule]]
+type = "package_inits"
+[[keep.rule]]
+type = "glob"
+include = ["src/<pkg>/**"]
+exclude = ["**/*.py"]
+reason = "runtime data under src"
+[[keep.rule]]
+type = "traced"
+files = ["out/trace/traced-reads.txt"]
+exclude = ["src/**"]
+[[keep.rule]]
+type = "explicit"
+default_reason = "repo plumbing"
+[keep.rule.paths]
+"pyproject.toml" = "project"
+"LICENSE" = ""
+[[keep.rule]]
+type = "tests"
+include = ["tests/**"]
+support = ["tests/support/**"]
+
+[cut]
+out_dir = "out/cut"
+keep = "out/keep.tsv"
+tree = "scratch/cut"
+commit = true
+message = """Minimal tree of {repo}@{pin}
+
+Co-Authored-By: <the attribution line this session uses>"""
+
+[triage]
+out_dir = "out/triage"
+tree = "scratch/cut"
+drops = "triage-drops.tsv"
+retargets = "triage-retargets.toml"
+
+[audit]
+out_dir = "out/audit"
+repo = "<the handover repo checkout>"
+keep = "out/keep.tsv"
+reasons = ["changes.tsv", "out/triage/triaged.tsv"]
+path_map = []                                # add out/rename/moved-paths.tsv after renames
+
+# ---- Phase 3: names -----------------------------------------------------------------------
+[rename]
+out_dir = "out/rename"
+repo = "scratch/renamed"                     # a clone; never the source
+map = "rename-map.toml"
+frozen = ["src/<pkg>/prompts/**", "src/<new pkg>/prompts/**", "uv.lock", "LICENSE"]
+commit = true
+trailer = "Co-Authored-By: <the attribution line this session uses>"
+
+[scan]
+out_dir = "out/scan"
+repo = "<the handover repo checkout>"
+patterns = [
+  ["old names", '<old_pkg>|<old-dist>|\b<old_term>\b'],
+  ["owner and machine", '<Owner>|/home/<user>|/media/<user>'],
+  ["history", '\bD[0-9]{2,3}\b|\bused to\b'],
+]
+exclude = ["src/<new pkg>/prompts/**", "uv.lock"]
+
+# ---- Phase 2: equivalence -----------------------------------------------------------------
+[compare]
+out_dir = "out/compare"
+a = "<source checkout>/logs/<run>"
+b = "<handover checkout>/logs/<run>"
+roots_a = ["<source checkout>"]
+roots_b = ["<handover checkout>"]
+shas_a = ["<source commit>"]
+shas_b = ["<handover commit>"]
+rules = ["<skill>/reference/examples/inspect-rules.toml"]
+text_rules = [["build root", '''/[^\s"']*/<build-prefix>-[A-Za-z0-9_]+''', "<BUILD>"]]
+
+# ---- Phase 9: upstream fixes --------------------------------------------------------------
+[replay]
+out_dir = "out/replay"
+repo = "scratch/port"                        # a clone of the handover repo with upstream objects
+base = "<the last upstream-layout commit>"
+branch = "up-<version>"
+exclude = '^(docs|archive)/'
+add = ''
+[[replay.pr]]
+merge = "<upstream merge sha>"
+label = "#<n> (<what>)"
+[replay.merge]
+into = "<version>"
+from = "origin/main"
+find_renames = 40
