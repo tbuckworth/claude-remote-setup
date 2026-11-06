@@ -90,6 +90,16 @@
   `--layout` sizes that window to the printed column so the figures are neither clipped nor split.
 - For arXiv papers, download the PDF directly from `https://arxiv.org/pdf/<id>`.
 
+## Repo cleaning tool
+
+- “Launch (or run, use) the repo cleaning tool on X”, “the repo cleaner”, and “clean up X for
+  handover” all mean: make a clean handover copy of research repo X for an outside team, following
+  the `research-repo-handover` skill. It is installed on the desktop only, at
+  `~/.claude/skills/research-repo-handover` (Claude Code loads it as a skill; Codex reads its
+  `SKILL.md`). On the Mac, run the work on the desktop.
+- Titus decides the scope, the names, every README's wording and anything outward-facing; the skill
+  marks where.
+
 ## Fine-tuning and LoRA
 
 - Before fine-tuning a model, read the current guidance at `https://thinkingmachines.ai/blog/lora/` and use it to choose hyperparameters.
