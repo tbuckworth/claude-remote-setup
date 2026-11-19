@@ -13,7 +13,8 @@
   plenty of room. The 3 TB HDD at `/media/titus/big` (UUID `d88cd800-acde-46cc-b9e8-2be359f95347`,
   currently `/dev/sda`) holds caches, eval archives and `$TMPDIR` (`/media/titus/big/tmp`).
   The HDD's root is root-owned — write under an existing subdir (`tmp/`, `eval_archive/`,
-  `py-offload/`); a new top-level dir needs `sudo mkdir` + `sudo chown titus:titus`.
+  `py-offload/`); make a new top-level dir with `sudo -n big-mkdir NAME` (owned by titus; plain names
+  only). Other root commands ask for Titus's password, which agents cannot give: ask him instead.
   Never use the bare `/media/titus/<UUID>` path: it is NOT a mountpoint, so writes there land
   on the NVMe instead of the HDD. History: `~/pyg/admin/wiki/topics/desktop-hdd-usage.md`.
 - “Send/share to desktop” means `scp <file> desktop:/media/titus/big/tmp/`.
