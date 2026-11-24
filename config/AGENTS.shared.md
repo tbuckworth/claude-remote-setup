@@ -62,7 +62,7 @@
 - Re-authentication: `python ~/pyg/admin/google_reauth.py` (update its `SCOPES` first when adding scopes).
 - Google Docs/Drive CLI: `python ~/.claude/tools/gdoc.py <command>`.
 - OAuth token: `~/.config/google-docs-mcp/token.json`.
-- `gdoc.py` commands: `read`, `copy`, `create`, `replace`, `batch-replace`, `share`, and `list`.
+- `gdoc.py` commands (run it with no arguments for usage): `read`, `copy`, `create`, `replace`, `batch-replace`, `share`, `list`; calendar: `cal-add`, `cal-list` (add events to Titus's personal calendar directly, not as .ics).
 - MATS Ward 9 Shared Drive folder ID: `1dllRznKsAesxmA59RzBQxZCKEhePCOPE`.
 
 ### Google Drive deletion safety
